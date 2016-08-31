@@ -1,16 +1,15 @@
 {
   "name": "nodemda",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "UML to Source code generation engine",
   "main": "./lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
-	    "type": "git",
-	    "url": "git+https://github.com/joelkoz/NodeMDA.git"
-	  },
-  
+    "type": "git",
+    "url": "git+https://github.com/joelkoz/NodeMDA.git"
+  },
   "keywords": [
     "uml",
     "mda",
