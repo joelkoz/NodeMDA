@@ -22,8 +22,8 @@ THE SOFTWARE.
 
 "use strict";
 
-var NodeMDA = require('../../nodemda-core.js');
-var MetaModel = require('../../meta/meta-model.js');
+var NodeMDA = require('nodemda');
+var MetaModel = NodeMDA.Meta;
 var Reader = Reader || {};
 
 var fs = require('fs');
@@ -491,6 +491,9 @@ var winston = require('winston');
 	 * into a NodeMDA meta model.
 	 */
 	Reader.getMeta = function(fileName) {
+		
+		winston.info("Loading StarUML meta model from " + fileName);
+		
 		var json = JSON.parse(fs.readFileSync(fileName, 'utf8'));
 		
 		var projectName = json.name;

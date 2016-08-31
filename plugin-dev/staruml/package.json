@@ -1,0 +1,15 @@
+{
+  "name": "nodemda-staruml",
+  "version": "1.0.0",
+  "description": "NodeMDA meta model reader for StarUML",
+  "main": "staruml-reader.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "nodemda",
+    "staruml"
+  ],
+  "author": "Joel Kozikowski",
+  "license": "MIT"
+}
