@@ -6,10 +6,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
+  "repository": {
+	    "type": "git",
+	    "url": "git+https://github.com/joelkoz/NodeMDA.git"
+	  },
+  
   "keywords": [
     "uml",
     "mda",
-    "javascript"
+    "javascript",
+    "staruml"
   ],
   "bin": {
     "nodemda": "./bin/nodemda"
