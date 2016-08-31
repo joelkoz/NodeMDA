@@ -1,6 +1,6 @@
 {
   "name": "nodemda-javascript-es6",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "NodeMDA templates to generate Javascript using ES6 standard",
   "main": "index.js",
   "scripts": {
@@ -11,6 +11,9 @@
     "plugin",
     "javascript"
   ],
+  "dependencies": {
+    "nodemda": "^0.2.0"
+  },
   "author": "Joel Kozikowski",
   "license": "MIT"
 }
