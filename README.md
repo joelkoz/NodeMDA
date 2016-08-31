@@ -45,12 +45,21 @@ NodeMDA's JSON based meta model.  If one can not be
 found, you will need to write one.  The current version of NodeMDA includes
 a reader for [StarUML](http://staruml.io/).
 
-***Command line***
+**_Command line_**
 ```
-node_modules/nodemda/bin/nodemda -p javascript-es6 addressBook.mdj
+mkdir test
+
+cd test
+
+npm install nodemda-javascript-es6
+
+cp node_modules/nodemda/addressBook.mdj .
+
+node_modules/nodemda/bin/nodemda addressBook.mdj
 ```
 
 
+**_Javascript_**
 ```javascript
 var NodeMDA = require('nodemda');
 
