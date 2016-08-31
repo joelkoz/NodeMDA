@@ -529,7 +529,7 @@ plugin that generates Javascript objects directly. It placed in the platfor dire
 ```javascript
 "use strict";
 
-var NodeMDA = require("../../nodemda-meta.js");
+var NodeMDA = require("nodemda");
 
 /*
  * Utility functions to make template generation much easier.
