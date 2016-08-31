@@ -3,13 +3,16 @@
 
 var program = require('commander');
 var NodeMDA = require('nodemda');
-var starUMLReader = require('nodemda/lib/nodemda/readers/staruml/staruml-reader.js');
-NodeMDA.Meta.Reader = starUMLReader;
+
+
+// var winston = require('winston');
+// winston.level = 'debug';
+
 
 program
    .version('0.1.0')
-   .command("generate <fileName>")
-   .usage("This is the usage")
+   .arguments("<fileName>")
+   .usage("nodemda [options] <modelFileName>")
    .alias("gen")
    .description("Generate code from the specified model file")
    .option('-o, --output <outputDirectory>','The output directory')
@@ -29,7 +32,9 @@ program
 				}
 				
 				if (program.reader) {
-					NodeMDA.Meta.Reader = require(program.reader);			
+				}
+				else {
+					NodeMDA.Meta.Reader = require('nodemda-staruml');			
 				}
 				
     			NodeMDA.gen(fileName);

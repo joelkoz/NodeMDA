@@ -45,18 +45,23 @@ NodeMDA's JSON based meta model.  If one can not be
 found, you will need to write one.  The current version of NodeMDA includes
 a reader for [StarUML](http://staruml.io/).
 
+***Command line***
+```
+node_modules/nodemda/bin/nodemda -p javascript-es6 addressBook.mdj
+```
+
+
 ```javascript
 var NodeMDA = require('nodemda');
 
 // Specify the code that can read our model and return a NodeMDA Meta Model JSON structure: 
-var StarUMLReader = require('nodemda-staruml');
-NodeMDA.Meta.Reader = StarUMLReader;
+NodeMDA.Meta.Reader = require('nodemda-staruml'); 
 
 // Specify which platform we want to generate code for:
 NodeMDA.Options.platform = "javascript-es6";
 
 // Generate code!
-NodeMDA.gen('nodemda-metamodel-staruml.mdj');
+NodeMDA.gen('addressBook.mdj');
 ```
 
 
@@ -163,21 +168,25 @@ that can be used to simplify template development.
 Plugin Conventions
 ------------------
 
-1. All plugins are located in directories that are children of the directory specified by the
-value of `NodeMDA.Options.plugins` (the default value being the "plugins" directory of the 
-project).
-
-2. Plugins are organized by *platform*.  A *platform* is a particular software stack that the 
+1. Plugins are organized by *platform*.  A *platform* is a particular software stack that the 
 plugins are designed to generate code for. A plugin platform may be as generic as
 "Javascript and SQL" or as specific as "LoopBack with MongoDB".
 
-3. Underneath the platform directory lies zero or more "Stereotype" directories.  These directories
+1.  A plugin is an npm package that has the name "nodemda-<platformId>" where platformId is
+a platform identifier that makes a valid module name.  The plugin package is expected to have a directory
+named "plugins" that contains all of the templates and helper scripts.
+
+2. By default, all plugins are located in the same node_modules directory that the "handlebars" module is
+located in. The can be overridden by setting the value of `NodeMDA.Options.plugins` 
+
+
+3. Inside the platform module's "plugins" directory lies zero or more "Stereotype" directories.  These directories
 can contain zero or more Javascript files (which *must* end in `.js`) that are executed to aid in code generation, 
 as well as zero or more Handlebar template files (which *must* end in `.hbs`). The directory name must 
 match the name of the actual stereotype in both spelling and case.
 
 4. Generated code will be placed in the directory specified by the property
-`NodeMDA.Options.output` (default value is "output"). Unless otherwise specified, generated
+`NodeMDA.Options.output` (default value is "./output"). Unless otherwise specified, generated
 code will be placed in a sub-directory that matches the "UML package name" of the class, and
 it will have a file name that is the "UML name" of the class.  The extension used for the
 generated file will be the same as the template file, minus the ".hbs" extension.
@@ -196,9 +205,11 @@ A typical NodeMDA project directory structure thus may look like this:
  | |
  | +-MyProject.uml
  |
- +-plugins
+ +node_modules
+  |
+  +nodemda-javascript_sql
    |
-   +-javascript_sql
+   +-plugins
      |
      +-readme.txt.hbs
      |
@@ -217,7 +228,7 @@ A typical NodeMDA project directory structure thus may look like this:
 ```
 
 Given the above, only a single platform is available for code generation (`javascript_sql`).  
-There are plugins for that platform to
+There are template and scripts for that platform to
 generate code for database classes marked with the `<<Entity>>` stereotype, as well as
 generic Javascript objects marked with the `<<POJO>>` stereotype.
 
@@ -381,9 +392,15 @@ a single file and then "include" the contents via a *partial*.  For example:
 ```
 +MyProject
  |
- +-plugins
+ +-model
+ | |
+ | +-MyProject.uml
+ |
+ +node_modules
+  |
+  +nodemda-javascript_sql
    |
-   +-javascript_sql
+   +-plugins
      |
      +-_partials
      | |
