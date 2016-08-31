@@ -1,0 +1,211 @@
+{
+	"_type": "UMLProfile",
+	"_id": "AAAAAAFWqpKl7ILdzso=",
+	"_parent": {
+		"$ref": "AAAAAAFF+h6SjaM2Hec="
+	},
+	"name": "NodeMDA Common",
+	"ownedElements": [
+		{
+			"_type": "UMLDataType",
+			"_id": "AAAAAAFWqpKl7ILRe4o=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "String",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false
+		},
+		{
+			"_type": "UMLDataType",
+			"_id": "AAAAAAFWqpKl7ILSFxM=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "Integer",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false
+		},
+		{
+			"_type": "UMLDataType",
+			"_id": "AAAAAAFWqpKl7ILTJaU=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "Date",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false
+		},
+		{
+			"_type": "UMLDataType",
+			"_id": "AAAAAAFWqpKl7ILUDPQ=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "Boolean",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false
+		},
+		{
+			"_type": "UMLStereotype",
+			"_id": "AAAAAAFWqpKl7ILWoq8=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "Entity",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false,
+			"isActive": false,
+			"icon": {
+				"_type": "UMLImage",
+				"_id": "AAAAAAFWqpKl7ILVnvM=",
+				"_parent": {
+					"$ref": "AAAAAAFWqpKl7ILWoq8="
+				},
+				"visibility": "public",
+				"width": 40,
+				"height": 40
+			}
+		},
+		{
+			"_type": "UMLStereotype",
+			"_id": "AAAAAAFWqpKl7ILYgvw=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "Service",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false,
+			"isActive": false,
+			"icon": {
+				"_type": "UMLImage",
+				"_id": "AAAAAAFWqpKl7ILXWaA=",
+				"_parent": {
+					"$ref": "AAAAAAFWqpKl7ILYgvw="
+				},
+				"visibility": "public",
+				"width": 40,
+				"height": 40
+			}
+		},
+		{
+			"_type": "UMLStereotype",
+			"_id": "AAAAAAFWqpKl7ILav14=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "ValueObject",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false,
+			"isActive": false,
+			"icon": {
+				"_type": "UMLImage",
+				"_id": "AAAAAAFWqpKl7ILZnnk=",
+				"_parent": {
+					"$ref": "AAAAAAFWqpKl7ILav14="
+				},
+				"visibility": "public",
+				"width": 40,
+				"height": 40
+			}
+		},
+		{
+			"_type": "UMLStereotype",
+			"_id": "AAAAAAFWqpKl7ILcHgg=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "POJO",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false,
+			"isActive": false,
+			"icon": {
+				"_type": "UMLImage",
+				"_id": "AAAAAAFWqpKl7ILbwM0=",
+				"_parent": {
+					"$ref": "AAAAAAFWqpKl7ILcHgg="
+				},
+				"visibility": "public",
+				"width": 40,
+				"height": 40
+			}
+		},
+		{
+			"_type": "UMLDataType",
+			"_id": "AAAAAAFWsqIihA1ia9g=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "JSON",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false
+		},
+		{
+			"_type": "UMLDataType",
+			"_id": "AAAAAAFWssR3Pw1nxNc=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "Decimal",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false
+		},
+		{
+			"_type": "UMLDataType",
+			"_id": "AAAAAAFWssSi7Q1r1Dw=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "Currency",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false
+		},
+		{
+			"_type": "UMLDataType",
+			"_id": "AAAAAAFWx/2y/4KzBX8=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "DateTime",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false
+		},
+		{
+			"_type": "UMLDataType",
+			"_id": "AAAAAAFWx/1XHIKmDn8=",
+			"_parent": {
+				"$ref": "AAAAAAFWqpKl7ILdzso="
+			},
+			"name": "Time",
+			"visibility": "public",
+			"isAbstract": false,
+			"isFinalSpecialization": false,
+			"isLeaf": false
+		}
+	],
+	"visibility": "public"
+}

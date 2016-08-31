@@ -1,0 +1,38 @@
+#!/usr/bin/env node
+'use strict';
+
+var program = require('commander');
+var NodeMDA = require('nodemda');
+var starUMLReader = require('nodemda/lib/nodemda/readers/staruml/staruml-reader.js');
+NodeMDA.Meta.Reader = starUMLReader;
+
+program
+   .version('0.1.0')
+   .command("generate <fileName>")
+   .usage("This is the usage")
+   .alias("gen")
+   .description("Generate code from the specified model file")
+   .option('-o, --output <outputDirectory>','The output directory')
+   .option('-r, --reader <readerModuleName>','Name of a module that will act as the NodeMDA.Reader')
+   .option('-p, --platform <platformName>','Name of the platform plugin to use')
+   .action(function(fileName) {
+
+                if (program.platform) {
+                    NodeMDA.Options.platform = program.platform; 
+				}
+				else {
+				    NodeMDA.Options.platform = "javascript-es6";
+				}
+				
+				if (program.output) {
+					NodeMDA.Options.output = program.output;				
+				}
+				
+				if (program.reader) {
+					NodeMDA.Meta.Reader = require(program.reader);			
+				}
+				
+    			NodeMDA.gen(fileName);
+			});
+
+program.parse(process.argv);
