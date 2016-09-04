@@ -179,7 +179,7 @@ Plugin Conventions
 
 1. Plugins are organized by *platform*.  A *platform* is a particular software stack that the 
 plugins are designed to generate code for. A plugin platform may be as generic as
-"Javascript and SQL" or as specific as "LoopBack with MongoDB".
+"Javascript and SQL" or as specific as "Meteor with React and Bootstrap".
 
 1.  A plugin is an npm package that has the name "nodemda-<platformId>" where platformId is
 a platform identifier that makes a valid module name.  The plugin package is expected to have a directory
