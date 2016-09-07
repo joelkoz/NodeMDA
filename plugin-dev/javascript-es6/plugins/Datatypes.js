@@ -86,8 +86,7 @@ var Datatypes = Datatypes || {};
 	 * such datatype is found, null is returned.
 	 */
 	Datatypes.getTypeInfo = function(metaDatatype) {
-
-		if (NodeMDA.Meta.getMetaclassTypeName(metaDatatype) === "Datatype") {
+		if (metaDatatype.elementName === "Datatype") {
 			for (var i = 0; i < JavascriptDatatypes.length; i++) {
 				var jsdt = JavascriptDatatypes[i];
 	    	    if (jsdt.metaTypeName === metaDatatype.name) {

@@ -85,7 +85,7 @@ var TemplateSugar = TemplateSugar || {};
 	     * broken down into individual lines that are no longer than (approx) maxCharsPerLine
 	     * long.
 	     */
-	    NodeMDA.Meta.MetaObject.prototype.jsCommentsFormatted = function() {
+	    NodeMDA.Meta.MetaElement.prototype.jsCommentsFormatted = function() {
 	    	var maxCharsPerLine = 80;
 	    	var lineList = [];
 	    	
