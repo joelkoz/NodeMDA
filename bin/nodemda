@@ -46,8 +46,16 @@ program
 
 program
 	.command('init')
+    .description("Initialize current directory for project development")
+    .option('-p, --platform <platformName>','Name of the platform plugin to use')
 	.action(function() {
 		console.log('TODO: Initialize the project by creating a model dir and copying model from the platform');
-	})
+	});
+
 
 program.parse(process.argv);
+
+
+if (!process.argv.slice(2).length) {
+   program.outputHelp();
+}
