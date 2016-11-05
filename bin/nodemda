@@ -8,12 +8,15 @@ var NodeMDA = require('nodemda');
 // var winston = require('winston');
 // winston.level = 'debug';
 
+program
+   .version('1.0.0');
+
+
 
 program
-   .version('0.1.0')
-   .arguments("<fileName>")
-   .usage("nodemda [options] <modelFileName>")
+   .command('generate <modelFileName>')
    .alias("gen")
+   .usage("nodemda generate [options] <modelFileName>")
    .description("Generate code from the specified model file")
    .option('-o, --output <outputDirectory>','The output directory')
    .option('-r, --reader <readerModuleName>','Name of a module that will act as the NodeMDA.Reader')
@@ -32,6 +35,7 @@ program
 				}
 				
 				if (program.reader) {
+					NodeMDA.Meta.Reader = require(program.reader);			
 				}
 				else {
 					NodeMDA.Meta.Reader = require('nodemda-staruml');			
@@ -39,5 +43,11 @@ program
 				
     			NodeMDA.gen(fileName);
 			});
+
+program
+	.command('init')
+	.action(function() {
+		console.log('TODO: Initialize the project by creating a model dir and copying model from the platform');
+	})
 
 program.parse(process.argv);
