@@ -37,16 +37,25 @@ const winston = require('winston');
 (function(mda){
 
 	var getFileList = function (baseDir, stereotype, ext) {
-		var pattern = baseDir;
+		let dirPath = baseDir;
 		if (stereotype !== null) {
 			if (typeof(stereotype) === "object") {
-				pattern += '/' + stereotype.getName();
+				dirPath += '/' + stereotype.getName();
 			}
 			else {
-		       pattern += '/' + stereotype;
+		       dirPath += '/' + stereotype;
 			}
 		}
-        pattern += '/*' + ext;
+
+		// Check to see if we have an alias file...
+		let aliasFileName = dirPath + '/alias.json';
+		if (fsx.existsSync(aliasFileName)) {
+			aliasPath = fsx.readJsonSync(aliasFileName);
+			dirPath = NodeMDA.getPlatformDir() + '/' + aliasPath;
+			winston.debug(`Using alias directory ${dirPath} for stereotype ${stereotype}`);
+		}
+
+        let pattern = dirPath + '/*' + ext;
 
 		var files = glob.sync(pattern);
 		return files;
