@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 'use strict';
 
-var program = require('commander');
-var NodeMDA = require('nodemda');
+const program = require('commander');
+const NodeMDA = require('nodemda');
+const path = require('path');
 
+const DEFAULT_PLATFORM = "javascript-es6";
 
 // var winston = require('winston');
 // winston.level = 'debug';
@@ -27,7 +29,7 @@ program
                     NodeMDA.Options.platform = program.platform; 
 				}
 				else {
-				    NodeMDA.Options.platform = "javascript-es6";
+				    NodeMDA.Options.platform = DEFAULT_PLATFORM;
 				}
 				
 				if (program.output) {
@@ -50,6 +52,33 @@ program
     .option('-p, --platform <platformName>','Name of the platform plugin to use')
 	.action(function() {
 		console.log('TODO: Initialize the project by creating a model dir and copying model from the platform');
+	});
+
+
+program
+	.command('dirs')
+    .description("Shows the absolute paths to the directories that NodeMDA will use when generating code.")
+    .option('-p, --platform <platformName>','Name of the platform plugin to use')
+	.action(function() {
+
+        if (program.platform) {
+            NodeMDA.Options.platform = program.platform; 
+		}
+		else {
+		    NodeMDA.Options.platform = DEFAULT_PLATFORM;
+		}
+
+		console.log(`Current working directory is ${process.cwd()}`);
+		console.log(`This nodemda CLI is running from ${__dirname}`);
+		console.log(`NodeMDA is running from ${NodeMDA.getNodeMDADir()}`);
+		try {
+		   console.log(`The platform ${NodeMDA.Options.platform} is located at ${NodeMDA.getPlatformDir()}`);
+		}
+		catch (error) {
+			console.log(`\n\n**ERROR** - can not use platform plugin ${NodeMDA.Options.platform}: ${error.message}\n\n`);
+		}
+		console.log(`Output will be written to ${path.resolve(NodeMDA.Options.output)}`);
+
 	});
 
 

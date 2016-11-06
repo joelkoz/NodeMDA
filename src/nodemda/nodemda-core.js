@@ -1,24 +1,22 @@
 
-var path = require('path');
+const path = require('path');
+const fs = require('fs');
 
-var NodeMDA = exports;
+let NodeMDA = {};
 
 NodeMDA.Options = NodeMDA.Options || {};
 
 NodeMDA.Options.plugins = null;
 
-NodeMDA.Options.platform = "nodejs";
+NodeMDA.Options.platform = "javascript-es6";
 
-NodeMDA.Options.output = "./output";
+NodeMDA.Options.output = "./src";
 
 NodeMDA.Options.packageDelimeter = ":";
 
-(function() {
+let nodemdaDir;
+let platformDir;
 
-    var nodeModDir;
-    var nodemdaDir;
-
-    
 NodeMDA.getPlatform = function() {
 	return NodeMDA.Options.platform;
 };
@@ -28,7 +26,7 @@ NodeMDA.getPlatform = function() {
 NodeMDA.getNodeMDADir = function() {
 
 	if (typeof nodemdaDir === "undefined") {
-		var hModDir = require.resolve('nodemda');
+		let hModDir = require.resolve('nodemda');
 		nodemdaDir = path.dirname(require.resolve('nodemda'));
 	}
 	
@@ -37,31 +35,24 @@ NodeMDA.getNodeMDADir = function() {
 
 
 
-NodeMDA.getModuleDir = function(moduleName) {
-
-	var prefix;
-	if (NodeMDA.Options.plugins !== null) {
-	    prefix = NodeMDA.Options.plugins;
-	}
-	else {
-		if (typeof(nodeModDir) === "undefined") {
-			var hModDir = require.resolve('handlebars');
-			var ndx = hModDir.indexOf("node_modules");
-			nodeModDir = hModDir.substr(0, ndx+"node_modules".length);
-		}
-		prefix = nodeModDir;
-	}
-	
-    return prefix + "/" + "nodemda-" + moduleName + "/plugins";
-	
-};
-
-
-
 NodeMDA.getPlatformDir = function() {
-	return NodeMDA.getModuleDir(NodeMDA.getPlatform());
+
+	if (typeof(platformDir) === 'undefined') {
+
+		let pluginName = 'nodemda-' + NodeMDA.getPlatform();
+
+		// First, see if we have a 'node_modules' dir in the cwd...
+		let pluginPath = process.cwd() + '/node_modules/' + pluginName;
+		if (!fs.existsSync(pluginPath)) {
+			// Its not there. Now try to resolve it using the normal
+			// search algorithm.
+		    pluginPath = require.resolve(pluginName);
+		}
+		platformDir = pluginPath + '/plugins';
+	}
+
+	return platformDir;
 };
 
 
-})();
-
+module.exports = NodeMDA;
