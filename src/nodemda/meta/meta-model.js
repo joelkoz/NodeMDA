@@ -22,9 +22,10 @@ THE SOFTWARE.
 
 "use strict";
 
-var NodeMDA = require("../nodemda-core.js");
+const NodeMDA = require("../nodemda-core.js");
+const _ = require('lodash');
 
-var MetaModel = exports;
+let MetaModel = {}
 
 (function(meta){
 
@@ -43,7 +44,7 @@ var MetaModel = exports;
 	/**
 	 * All meta objects in the NodeMDA system inherit from MetaElement.
 	 */
-	meta.MetaElement = class {
+	meta.MetaElement = class MetaElement {
 
 		constructor(elementName) {
 			this.elementName = elementName;
@@ -100,7 +101,7 @@ var MetaModel = exports;
 	/**
 	 * Package is the container or namespace objects belong to
 	 */
-	meta.Package = class extends meta.MetaElement { 
+	meta.Package = class Package extends meta.MetaElement { 
 		constructor(name) {
 			super("Package");
 			this._name = name;
@@ -141,7 +142,7 @@ var MetaModel = exports;
 	/**
 	 * Data types available to the mda engine
 	 */
-	meta.Datatype = class extends meta.MetaElement { 
+	meta.Datatype = class Datatype extends meta.MetaElement { 
 		constructor(name, options) {
 			super("Datatype");
 			this._name = name;
@@ -163,11 +164,21 @@ var MetaModel = exports;
 		get isObject() {
 	    	return (this.type.name === "Object");
 		}
-		
+
+		/**
+		 * Merges the specified properties in with the pre-existing properties
+		 * of this data type. If the property already exists, it is overwritten
+		 * with the new value.
+		 */		
+		mergeProps(props) {
+			if (props) {
+			    Object.assign(this, props);
+			}
+		}
 	};
 	
 	
-	meta.ObjectDatatype = class extends meta.Datatype {
+	meta.ObjectDatatype = class ObjectDatatype extends meta.Datatype {
 
 		constructor(packageName, className) {
 			super("Object");
@@ -203,13 +214,13 @@ var MetaModel = exports;
 	};
 
 	
-	meta.Datatype.VoidType = new meta.Datatype("Void");
+	meta.Datatype.Void = new meta.Datatype("Void");
 	
 
 	/**
 	 * Stereotypes available to the mda engine
 	 */
-    meta.Stereotype = class extends meta.MetaElement {
+    meta.Stereotype = class Stereotype extends meta.MetaElement {
 
     	constructor(name, options) {
 			super("Stereotype");
@@ -233,7 +244,7 @@ var MetaModel = exports;
     /**
      * Variables have name, types, a multiplicity, and an optional default value
      */
-    meta.AbstractVariable = class extends meta.MetaElement {
+    meta.AbstractVariable = class AbstractVariable extends meta.MetaElement {
     	constructor(classTypeName, name, type) {
     		super(classTypeName);
 			this._name = name;
@@ -306,7 +317,7 @@ var MetaModel = exports;
 	/**
 	 * Attributes of classes 
 	 */
-	meta.Attribute = class extends meta.AbstractVariable {
+	meta.Attribute = class Attribute extends meta.AbstractVariable {
 		constructor(name, type) {
 			super("Attribute", name, type);
 			this._static = false;
@@ -328,7 +339,7 @@ var MetaModel = exports;
 	/**
 	 * Parameters of operations 
 	 */
-	meta.Parameter = class extends meta.AbstractVariable { 
+	meta.Parameter = class Parameter extends meta.AbstractVariable { 
 		constructor(name, type) {
 			super("Parameter", name, type);
 		}
@@ -338,13 +349,13 @@ var MetaModel = exports;
 	/**
 	 * Methods, functions, and other static operations
 	 */
-	meta.Operation = class extends meta.MetaElement { 
+	meta.Operation = class Operation extends meta.MetaElement { 
 		constructor(name, returnType) {
 			super("Operation");
 		    this._name = name;
 		    this.parameters = [];
 		    if (returnType === undefined) {
-		       this._returnType = MetaModel.Datatype.VoidType;
+		       this._returnType = MetaModel.Datatype.Void;
 		    } 
 		    else {
 		       this._returnType = returnType;
@@ -387,7 +398,7 @@ var MetaModel = exports;
 	 * When a class is a generalization (i.e. inherits from) another class, it holds
 	 * this reference to the base class object.
 	 */
-	meta.Generalization = class extends meta.MetaElement {
+	meta.Generalization = class Generalization extends meta.MetaElement {
 		constructor(baseObjectDatatype) {
 			super("Generalization");
 			this._baseObjectDatatype = baseObjectDatatype;
@@ -400,7 +411,7 @@ var MetaModel = exports;
 	 * When a class depends on another object, it holds this reference to the
 	 * other object.
 	 */
-	meta.Dependency = class extends meta.MetaElement {
+	meta.Dependency = class Dependency extends meta.MetaElement {
 		constructor(otherObjectDatatype) {
 			super("Dependency");
 			this._otherObjectDatatype = otherObjectDatatype;
@@ -413,7 +424,7 @@ var MetaModel = exports;
 	 * Associations between two objects have an "end" at each endpoint
 	 * that describes the details of the relationship.
 	 */
-    meta.AssociationEnd = class extends meta.MetaElement {
+    meta.AssociationEnd = class AssociationEnd extends meta.MetaElement {
         constructor() {
 			super("AssociationEnd");
         	this._name = null;
@@ -451,7 +462,7 @@ var MetaModel = exports;
     /**
      * Assocations between two objects
      */
-    meta.Association = class extends meta.MetaElement {
+    meta.Association = class Association extends meta.MetaElement {
     	constructor(myEnd, otherEnd) {
 			super("Association");
     		this.myEnd = myEnd;
@@ -464,7 +475,7 @@ var MetaModel = exports;
 	/**
 	 * Class definitions
 	 */
-	meta.Class = class extends meta.MetaElement {
+	meta.Class = class Class extends meta.MetaElement {
 		constructor(name) {
 			super("Class");
 			this._name = name;
@@ -706,38 +717,255 @@ var MetaModel = exports;
 	};
 
 	
-	meta.Model = class {
+	meta.Model = class Model {
 
 		constructor(projectName, datatypes, stereotypes, classes) {
 			this.name = projectName;
 			this.datatypes = datatypes;
 			this.stereotypes = stereotypes;
 			this.classes = classes;
-		}
-		
-	};
 
+			let self = this;
+			this.Types = {};
+			datatypes.forEach(function (datatype) {
+				self.Types[datatype.name] = datatype;
+			});
+
+			this.Stereotypes = {};
+			stereotypes.forEach(function (stereotype) {
+				self.Stereotypes[stereotype.name] = stereotype;
+			});
+		}
+
+
+		/**
+		 * The class version of Model.findClass(), this allows
+		 * it to be called without the need for the runtime model
+		 * to be set.
+		 */
+		getMetaClass(packageName, className) {
+			return Model.findClass(packageName, className, this);
+		}
+
+
+		/**
+		 * Attempts to locate the Meta.Class object that has the specified
+		 * package and class name, returning it.  If no such class can be
+		 * found in the model, null is returned.
+		 */
+		static findClass(packageName, className, model) {
+
+			if (typeof(model) === 'undefined') {
+			    model = NodeMDA.runtime.model;
+			}
+
+			if (typeof(model) === "undefined") {
+				throw new Error("NodeMDA.runtime.model is undefined. Model.findClass() is only available during code generation.");
+			}
+			
+	        for (var i = 0; i < model.classes.length; i++) {
+				var metaClass = model.classes[i];
+				if (metaClass.name === className && metaClass.packageName === packageName) {
+					return metaClass;
+				}
+			}
+			return null;
+		};
 	
-	/**
-	 * Attempts to locate the Meta.Class object that has the specified
-	 * package and class name, returning it.  If no such class can be
-	 * found in the model, null is returned.
-	 */
-	meta.Model.findClass = function(packageName, className) {
 
-		var model = NodeMDA.runtime.model;
-		if (typeof(model) === "undefined") {
-			throw new Error("NodeMDA.runtime.model is undefined. Model.findClass() is only available during code generation.");
+		/**
+		 * Defines a new data type with the specified name, or merges the specified
+		 * props in with a pre-existing data type of the same name.
+		 * @param name {string} The name of the data type to add or update
+		 * @param props {object} The properties to attach (or add) to the data type
+		 * @param baseType Another data type that serves as the base data type. The
+		 *   new data type will inherit behaviors from this baseType if a particular
+		 *   plugin does not explicity define behaviors for the data type.
+		 */
+		defineDataType(name, props, baseType) {
+
+			let dataType;
+			if (this.Types[name]) {
+			   // Update an existing type definition...
+			   dataType = this.Types[name];
+			}
+			else {
+			   // Define a new type definition...
+			   let dataType = new meta.Datatype(name);
+			   this.Types[name] = dataType;
+			}
+			
+		    dataType.mergeProps(props);
+
+		    if (baseType) {
+				Object.setPrototypeOf(dataType, baseType);
+				dataType.className = baseType.name;
+		    }
 		}
-		
-        for (var i = 0; i < model.classes.length; i++) {
-			var metaClass = model.classes[i];
-			if (metaClass.name === className && metaClass.packageName === packageName) {
-				return metaClass;
+
+
+		/**
+		 * A a helper function for mixin() that is used
+		 * to determine if a specific data type matches the "match specification".
+		 * A match specification can be:
+		 * 1. An object - each property of the object must be present in the data type and the values must match
+		 * 2. A string - the specified string is a path to a property that must exist in the data type (indenpendent)
+		 *      of its value.
+		 * 3. A function - a function that takes a single parameter (the data type), and returns TRUE if the
+		 *      data type matches
+		 * 4. An array consisting of one or more of the above 3 types.  ALL entries must match for the data type
+		 *      to be considered a match (i.e. joined with "logical And").
+		 * 5. An object with a single member property named "$or", "$and", or $not. These are expected to have a value
+		 *      that is an array of two or more of the above entries. The entries will be joined with logical
+		 *      "or", "and", or "not" (i.e. negated truth)
+		 */
+		static DataTypeMatches(dataType, matchSpec) {
+
+			if (typeof matchSpec === 'undefined') {
+				return (dataType instanceof meta.Datatype);
+			}
+			else if (typeof matchSpec === 'function') {
+				return matchSpec(dataType);
+			}
+			else if (typeof matchSpec === 'string') {
+				return _.get(dataType, matchSpec);
+			}
+			else if (Array.isArray(matchSpec)) {
+				for (let i = 0; i < matchSpec.length; i++) {
+					let subSpec = matchSpec[i];
+					if (!meta.Model.DataTypeMatches(dataType, subSpec)) {
+						return false;
+					}
+				} // for
+				return true;
+			}
+			else if (typeof matchSpec === 'object') {
+
+				if (matchSpec.hasOwnProperty('$or') && Array.isArray(matchSpec['$or'])) {
+					let orList = matchSpec['$or'];
+					for (let i = 0; i < orList.length; i++) {
+						let subSpec = orList[i];
+						if (meta.Model.DataTypeMatches(dataType, subSpec)) {
+							return true;
+						}
+					} // for
+					return false;
+				}
+
+				if (matchSpec.hasOwnProperty('$and') && Array.isArray(matchSpec['$and'])) {
+					// Using $and is a long hand for the already specified array processing above
+					return meta.Model.DataTypeMatches(dataType, matchSpec['$and']);
+				}
+
+				if (matchSpec.hasOwnProperty('$not')) {
+					// Return a logical "not" of the specification.
+					return !meta.Model.DataTypeMatches(dataType, matchSpec['$not']);
+				}
+
+			}
+
+			return _.isMatch(dataType, matchSpec);
+		}
+
+
+
+
+		/**
+		 * Applies the mixin specification mixinSpec
+		 *//
+		static ApplyMixin(obj, mixinSpec) {
+
+			if (_.has(mixinSpec, 'matches')) {
+				// This is a conditional mixinSpec - see if it matches first...
+				if (!meta.Model.DataTypeMatches(obj, mixinSpec.matches)) {
+					// It does not match, so do not apply the mixinSpec...
+					return;
+				}
+			}
+
+
+			if (_.has(mixinSpec, 'get')) {
+				let name = mixinSpec.get.name;
+				Object.defineProperty(obj, name, { get: mixinSpec.get });
+			}
+
+			if (_.has(mixinSpec, 'set')) {
+				let name = mixinSpec.set.name;
+				Object.defineProperty(obj, name, { set: mixinSpec.set });
+			}
+
+			if (_.has(mixinSpec, 'func')) {
+				let name = mixinSpec.func.name;
+				obj[name] = mixinSpec.func;
 			}
 		}
-		return null;
+
+
+
+		/**
+		 * mixin() is the primary means for plugins to extend the functionality of
+		 * NodeMDA.  It is used to decorate the various base classes of the meta model
+		 * or its data types with additional getters, setters, and/or methods.  See
+		 * the readme.me file for specifics on the mixin specification.
+		 * @param spec {object} The mixin specification that adheres to the NodeMDA
+		 *   plugin mixin specification
+		 */
+		mixin(spec) {
+
+			// Make sure obj is an array so we can iterate over it if there
+			// is more than one.
+			function castArray(obj) {
+				if (_.isArray(obj)) {
+					return obj;
+				}
+				else {
+					return [obj];
+				}
+			}
+
+			let self = this;
+
+			if (_.has(spec, 'onClass')) {
+				castArray(spec.onClass).forEach(function (subSpec) {
+					meta.Model.ApplyMixin(meta.Class.prototype, subSpec);
+				});
+			}
+
+			if (_.has(spec, 'onAttribute')) {
+				castArray(spec.onAttribute).forEach(function (subSpec) {
+					meta.Model.ApplyMixin(meta.Attribute.prototype, subSpec);
+				});
+			}
+
+			if (_.has(spec, 'onOperation')) {
+				castArray(spec.onOperation).forEach(function (subSpec) {
+					meta.Model.ApplyMixin(meta.Operation.prototype, subSpec);
+				});
+			}
+
+
+			if (_.has(spec, 'onType')) {
+				castArray(spec.onType).forEach(function (subSpec) {
+					_.forEach(self.Types, function(type, key, obj) {
+						meta.Model.ApplyMixin(type, subSpec);
+					});
+				});
+			}
+
+
+			if (_.has(spec, 'onStereotype')) {
+				castArray(spec.onStereotype).forEach(function (subSpec) {
+					_.forEach(self.Stereotypes, function(stereotype, key, obj) {
+						meta.Model.ApplyMixin(stereotype, subSpec);
+					});
+				});
+			}
+		}
 	};
+
 	
 	
 })(MetaModel);
+
+module.exports = MetaModel;
+
