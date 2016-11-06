@@ -123,13 +123,18 @@ program
 			console.log(`\n\n**ERROR** - can not use platform plugin ${NodeMDA.Options.platform}: ${error.message}\n\n`);
 		}
 
-		let modelPath = path.resolve(NodeMDA.Options.modelFileName);
-		if (fsx.existsSync(modelPath)) {
-			console.log(`UML model is located at ${modelPath}`);
-	    }
-	    else {
-			console.log(`\n\n**ERROR** - the UML model location does not exist! Not found at ${modelPath}`);
-	    }
+		if (NodeMDA.Options.modelFileName) {
+			let modelPath = path.resolve(NodeMDA.Options.modelFileName);
+			if (fsx.existsSync(modelPath)) {
+				console.log(`UML model is located at ${modelPath}`);
+		    }
+		    else {
+				console.log(`\n\n**ERROR** - the UML model location does not exist! Not found at ${modelPath}`);
+		    }
+		}
+		else {
+			console.log('\n\n**ERROR** - no UML model file name specified.');
+		}
 
 	    let outputPath = path.resolve(NodeMDA.Options.output);
 		if (fsx.existsSync(outputPath)) {
