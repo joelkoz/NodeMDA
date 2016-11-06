@@ -744,7 +744,7 @@ let MetaModel = {}
 		 * to be set.
 		 */
 		getMetaClass(packageName, className) {
-			return Model.findClass(packageName, className, this);
+			return meta.Model.findClass(packageName, className, this);
 		}
 
 
@@ -791,10 +791,10 @@ let MetaModel = {}
 			}
 			else {
 			   // Define a new type definition...
-			   let dataType = new meta.Datatype(name);
+			   dataType = new meta.Datatype(name);
 			   this.Types[name] = dataType;
 			}
-			
+
 		    dataType.mergeProps(props);
 
 		    if (baseType) {
