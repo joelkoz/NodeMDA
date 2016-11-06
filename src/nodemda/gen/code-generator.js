@@ -22,15 +22,16 @@ THE SOFTWARE.
 
 "use strict";
 
-var NodeMDA = require('../nodemda-core.js');
-var MetaModel = require('../meta/meta-model.js');
+const NodeMDA = require('../nodemda-core.js');
+const MetaModel = require('../meta/meta-model.js');
 require('../meta/meta-validator.js');
 
-var fs = require('fs');
-var path = require('path');
-var Handlebars = require('handlebars');
-var glob = require('glob');
-var winston = require('winston');
+const fs = require('fs');
+const fsx = require('fs-extra');
+const path = require('path');
+const Handlebars = require('handlebars');
+const glob = require('glob');
+const winston = require('winston');
 
 
 (function(mda){
