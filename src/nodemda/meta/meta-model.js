@@ -25,7 +25,7 @@ THE SOFTWARE.
 const NodeMDA = require("../nodemda-core.js");
 const _ = require('lodash');
 
-let MetaModel = {}
+let MetaModel = {};
 
 (function(meta){
 
@@ -872,7 +872,7 @@ let MetaModel = {}
 
 		/**
 		 * Applies the mixin specification mixinSpec
-		 *//
+		 */
 		static ApplyMixin(obj, mixinSpec) {
 
 			if (_.has(mixinSpec, 'matches')) {
