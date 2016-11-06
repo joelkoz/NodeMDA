@@ -1,18 +1,23 @@
 
 const path = require('path');
-const fs = require('fs');
+const fsx = require('fs-extra');
 
 let NodeMDA = {};
 
 NodeMDA.Options = NodeMDA.Options || {};
 
-NodeMDA.Options.plugins = null;
-
 NodeMDA.Options.platform = "javascript-es6";
 
 NodeMDA.Options.output = "./src";
 
+NodeMDA.Options.forceOverwrite = false;
+
+NodeMDA.Options.readerName = 'nodemda-staruml';
+
 NodeMDA.Options.packageDelimeter = ":";
+
+NodeMDA.Options.modelFileName = null;
+
 
 let nodemdaDir;
 let platformDir;
@@ -43,7 +48,7 @@ NodeMDA.getPlatformDir = function() {
 
 		// First, see if we have a 'node_modules' dir in the cwd...
 		let pluginPath = process.cwd() + '/node_modules/' + pluginName;
-		if (!fs.existsSync(pluginPath)) {
+		if (!fsx.existsSync(pluginPath)) {
 			// Its not there. Now try to resolve it using the normal
 			// search algorithm.
 		    pluginPath = require.resolve(pluginName);
@@ -54,5 +59,21 @@ NodeMDA.getPlatformDir = function() {
 	return platformDir;
 };
 
+const OPTION_PACKAGE = './nodemda.json';
+
+// Writes the current options out to nodemda.json in the cwd..
+NodeMDA.writeOptions = function() {
+	fsx.writeJson(OPTION_PACKAGE, NodeMDA.Options);
+}
+
+
+// Loads the current options out of nodemda.json in the cwd, IF
+// it exists.
+NodeMDA.loadOptions = function() {
+	if (fsx.existsSync(OPTION_PACKAGE)) {
+		let options = fsx.readJsonSync(OPTION_PACKAGE, { throws: false });
+		Object.assign(NodeMDA.Options, options);
+	}
+}
 
 module.exports = NodeMDA;

@@ -4,53 +4,87 @@
 const program = require('commander');
 const NodeMDA = require('nodemda');
 const path = require('path');
+const fsx = require('fs-extra');
+const winston = require('winston');
 
-const DEFAULT_PLATFORM = "javascript-es6";
-
-// var winston = require('winston');
-// winston.level = 'debug';
 
 program
    .version('1.0.0');
 
 
-
 program
-   .command('generate <modelFileName>')
+   .command('generate')
    .alias("gen")
-   .usage("nodemda generate [options] <modelFileName>")
+   .usage("nodemda generate [options]")
    .description("Generate code from the specified model file")
+   .option('-p, --platform <platformName>','Name of the platform plugin to use')
    .option('-o, --output <outputDirectory>','The output directory')
    .option('-r, --reader <readerModuleName>','Name of a module that will act as the NodeMDA.Reader')
-   .option('-p, --platform <platformName>','Name of the platform plugin to use')
-   .action(function(fileName) {
+   .option('-m, --model <modelFileName>', 'The name of the UML model to process')
+   .option('-l, --log <logLevel>', 'The name of the Winston log level to display during code generation')
+   .option('--forceOverwrite','Causes NodeMDA to overwrite ALL files as if the project were new')
+   .action(function(cmd) {
 
-                if (program.platform) {
-                    NodeMDA.Options.platform = program.platform; 
-				}
-				else {
-				    NodeMDA.Options.platform = DEFAULT_PLATFORM;
-				}
-				
-				if (program.output) {
-					NodeMDA.Options.output = program.output;				
+   				NodeMDA.loadOptions();
+
+                if (cmd.platform) {
+                    NodeMDA.Options.platform = cmd.platform; 
 				}
 				
-				if (program.reader) {
-					NodeMDA.Meta.Reader = require(program.reader);			
+				if (cmd.output) {
+					NodeMDA.Options.output = cmd.output;				
 				}
-				else {
-					NodeMDA.Meta.Reader = require('nodemda-staruml');			
+
+				if (cmd.reader) {
+					NodeMDA.Options.readerName = cmd.reader;
 				}
+
+				if (cmd.model) {
+					NodeMDA.Options.modelFileName = cmd.model;
+				}
+
+				if (cmd.forceOverwrite) {
+					NodeMDA.Options.forceOverwrite = true;				
+				}
+
+				if (cmd.logLevel) {
+					winston.level = cmd.logLevel;				
+				}
+
+				NodeMDA.Meta.Reader = require(NodeMDA.Options.readerName);			
 				
-    			NodeMDA.gen(fileName);
+    			NodeMDA.gen(NodeMDA.Options.modelFileName);
 			});
 
 program
 	.command('init')
     .description("Initialize current directory for project development")
     .option('-p, --platform <platformName>','Name of the platform plugin to use')
-	.action(function() {
+    .option('-o, --output <outputDirectory>','The output directory')
+    .option('-r, --reader <readerModuleName>','Name of a module that will act as the NodeMDA.Reader')
+    .option('-m, --model <modelFileName>')
+	.action(function(cmd) {
+
+        if (cmd.platform) {
+            NodeMDA.Options.platform = cmd.platform; 
+		}
+		
+		if (cmd.output) {
+			NodeMDA.Options.output = cmd.output;				
+		}
+
+		if (cmd.reader) {
+			NodeMDA.Options.readerName = cmd.reader;
+		}
+
+		if (cmd.model) {
+			NodeMDA.Options.modelFileName = cmd.model;
+		}
+
+
+		NodeMDA.writeOptions();
+		console.log('Options saved to nodemda.json');
+
 		console.log('TODO: Initialize the project by creating a model dir and copying model from the platform');
 	});
 
@@ -59,25 +93,51 @@ program
 	.command('dirs')
     .description("Shows the absolute paths to the directories that NodeMDA will use when generating code.")
     .option('-p, --platform <platformName>','Name of the platform plugin to use')
-	.action(function() {
+    .option('-o, --output <outputDirectory>','The output directory')
+    .option('-m, --model <modelFileName>')
+	.action(function(cmd) {
 
-        if (program.platform) {
-            NodeMDA.Options.platform = program.platform; 
+		NodeMDA.loadOptions();
+
+        if (cmd.platform) {
+            NodeMDA.Options.platform = cmd.platform; 
 		}
-		else {
-		    NodeMDA.Options.platform = DEFAULT_PLATFORM;
+
+		if (cmd.output) {
+			NodeMDA.Options.output = cmd.output;				
 		}
+
+		if (cmd.model) {
+			NodeMDA.Options.modelFileName = cmd.model;
+		}
+
 
 		console.log(`Current working directory is ${process.cwd()}`);
 		console.log(`This nodemda CLI is running from ${__dirname}`);
 		console.log(`NodeMDA is running from ${NodeMDA.getNodeMDADir()}`);
+
 		try {
 		   console.log(`The platform ${NodeMDA.Options.platform} is located at ${NodeMDA.getPlatformDir()}`);
 		}
 		catch (error) {
 			console.log(`\n\n**ERROR** - can not use platform plugin ${NodeMDA.Options.platform}: ${error.message}\n\n`);
 		}
-		console.log(`Output will be written to ${path.resolve(NodeMDA.Options.output)}`);
+
+		let modelPath = path.resolve(NodeMDA.Options.modelFileName);
+		if (fsx.existsSync(modelPath)) {
+			console.log(`UML model is located at ${modelPath}`);
+	    }
+	    else {
+			console.log(`\n\n**ERROR** - the UML model location does not exist! Not found at ${modelPath}`);
+	    }
+
+	    let outputPath = path.resolve(NodeMDA.Options.output);
+		if (fsx.existsSync(outputPath)) {
+			console.log(`Output will be written to ${outputPath}`);
+		}
+		else {
+			console.log(`\n\n**ERROR** - the output directory does not exist! Not found at ${outputPath}`);
+		}
 
 	});
 
