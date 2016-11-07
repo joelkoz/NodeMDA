@@ -26,7 +26,6 @@ const NodeMDA = require('../nodemda-core.js');
 const MetaModel = require('../meta/meta-model.js');
 require('../meta/meta-validator.js');
 
-const fs = require('fs');
 const fsx = require('fs-extra');
 const path = require('path');
 const Handlebars = require('handlebars');
@@ -112,13 +111,105 @@ const winston = require('winston');
 	    	
 	    	for (var i = startNdx; i < path.length-1; i++) {
 	    	   currentPath = currentPath + "/" + path[i];
-	    	   if (!fs.existsSync(currentPath)) {
-	    		   fs.mkdirSync(currentPath);
+	    	   if (!fsx.existsSync(currentPath)) {
+	    		   fsx.mkdirSync(currentPath);
 	    	   }
 	    	} // for
 	    }
 	};
 	
+
+
+// CopySync() borrowed from fs-extra then modified-----------------------
+
+
+	function copySync (src, dest, options) {
+
+	  let BUF_LENGTH = 64 * 1024;
+	  let _buff = new Buffer(BUF_LENGTH);
+
+	  function copyFileSync (srcFile, destFile, options) {
+
+		  let clobber = options.clobber
+		  let preserveTimestamps = options.preserveTimestamps
+
+		  if (fsx.existsSync(destFile)) {
+		    if (clobber) {
+		      fsx.chmodSync(destFile, parseInt('777', 8))
+		      fsx.unlinkSync(destFile)
+		    } 
+		    else {
+		      winston.debug(`   File ${destFile} already exists`);
+		      return;
+		    }
+		  }
+
+	      winston.info(`   Copying boilerplate to ${destFile}`);
+
+		  let fdr = fsx.openSync(srcFile, 'r');
+		  let stat = fsx.fstatSync(fdr);
+		  let fdw = fsx.openSync(destFile, 'w', stat.mode);
+		  let bytesRead = 1;
+		  let pos = 0;
+
+		  while (bytesRead > 0) {
+		    bytesRead = fsx.readSync(fdr, _buff, 0, BUF_LENGTH, pos)
+		    fsx.writeSync(fdw, _buff, 0, bytesRead)
+		    pos += bytesRead
+		  }
+
+		  if (preserveTimestamps) {
+		    fsx.futimesSync(fdw, stat.atime, stat.mtime)
+		  }
+
+		  fsx.closeSync(fdr)
+		  fsx.closeSync(fdw)
+	  }	
+
+
+	  if (typeof options === 'function' || options instanceof RegExp) {
+	    options = {filter: options}
+	  }
+
+	  options = options || {}
+	  options.recursive = !!options.recursive
+
+	  // default to true for now
+	  options.clobber = 'clobber' in options ? !!options.clobber : true
+	  options.dereference = 'dereference' in options ? !!options.dereference : false
+	  options.preserveTimestamps = 'preserveTimestamps' in options ? !!options.preserveTimestamps : false
+
+	  options.filter = options.filter || function () { return true }
+
+	  let stats = (options.recursive && !options.dereference) ? fsx.lstatSync(src) : fsx.statSync(src);
+	  let destFolder = path.dirname(dest);
+	  let destFolderExists = fsx.existsSync(destFolder);
+	  let performCopy = false;
+
+	  if (stats.isFile()) {
+	    if (options.filter instanceof RegExp) performCopy = options.filter.test(src)
+	    else if (typeof options.filter === 'function') performCopy = options.filter(src)
+
+	    if (performCopy) {
+	      if (!destFolderExists) fsx.mkdirsSync(destFolder)
+	      copyFileSync(src, dest, {clobber: options.clobber, preserveTimestamps: options.preserveTimestamps})
+	    }
+	  } else if (stats.isDirectory()) {
+	    if (!fsx.existsSync(dest)) fsx.mkdirsSync(dest)
+	    let contents = fsx.readdirSync(src)
+	    contents.forEach(function (content) {
+	      let opts = options
+	      opts.recursive = true
+	      copySync(path.join(src, content), path.join(dest, content), opts)
+	    })
+	  } else if (options.recursive && stats.isSymbolicLink()) {
+	    let srcPath = fsx.readlinkSync(src)
+	    fsx.symlinkSync(srcPath, dest)
+	  }
+	}
+
+// end borrowed fs-extra code--------------------------------------
+
 	
 	var aggFileList = [];
 	
@@ -132,7 +223,7 @@ const winston = require('winston');
 		} // for
 		
 		// If we get here, no file is open yet...
-		var fd = fs.openSync(outputFileName, "w");
+		var fd = fsx.openSync(outputFileName, "w");
 		aggFileList.push({ "fileName" : outputFileName, "fd" : fd});
 		
 		return fd;
@@ -142,7 +233,7 @@ const winston = require('winston');
 	var writeToAggregateFile = function(outputFileName, result) {
 
 		var fd = getAggregateFd(outputFileName);
-		fs.writeSync(fd, result);
+		fsx.writeSync(fd, result);
 		
 	};
 
@@ -150,7 +241,7 @@ const winston = require('winston');
 	var closeAllAggregateFiles = function() {
 
 		for (var a = 0; a < aggFileList.length; a++) {
-			fs.closeSync(aggFileList[a].fd);
+			fsx.closeSync(aggFileList[a].fd);
 		} // for
 		
 		aggFileList = [];
@@ -174,7 +265,7 @@ const winston = require('winston');
 	
 	
 	var processTemplateFile = function(metaClass, templateFile, context) {
-    	var templateData = fs.readFileSync(templateFile, "utf8");
+    	var templateData = fsx.readFileSync(templateFile, "utf8");
 
     	context["class"] = metaClass ;
     	context.output = mda.Options.output;
@@ -219,12 +310,12 @@ const winston = require('winston');
     	winston.info("Generating code with output mode " + outputMode + " to " + outputFileName);
     	if (outputMode.toLowerCase() === "overwrite") {
         	checkDirectories(outputFileName);
-        	fs.writeFileSync(outputFileName, result);
+        	fsx.writeFileSync(outputFileName, result);
     	}
     	else if (outputMode.toLowerCase() === "preserve") {
-    	   if (!fs.existsSync(outputFileName)) {
+    	   if (!fsx.existsSync(outputFileName)) {
     		   checkDirectories(outputFileName);
-    		   fs.writeFileSync(outputFileName, result);
+    		   fsx.writeFileSync(outputFileName, result);
     	   }
     	}
     	else if (outputMode.toLowerCase() === "aggregate") {
@@ -295,7 +386,7 @@ const winston = require('winston');
 		templateList.forEach(function(templateFile) {
 			var parts = path.parse(templateFile);
 			var partialName = parts.name;
-			var templateData = fs.readFileSync(templateFile, "utf8");			
+			var templateData = fsx.readFileSync(templateFile, "utf8");			
 			var partial = Handlebars.compile(templateData);
 			Handlebars.registerPartial(partialName, partial);
 		});
@@ -371,6 +462,13 @@ const winston = require('winston');
 		winston.debug("Loading partials for platform " + mda.Options.platform + "...");
 		loadPartials(mda.getPlatformDir());
 		
+		// Does the plugin contain boilerplate?
+		let boilerplateSource = NodeMDA.getPlatformDir() + "/_boilerplate";
+		if (fsx.existsSync(boilerplateSource)) {
+			// It does, copy it...
+			winston.info('Copying boilerplate code from plugin...')
+			copySync(boilerplateSource, NodeMDA.Options.output, { clobber: false, preserveTimestamps: true });
+		}
 		
 		// Process each class...
 		metaModel.classes.forEach(function(metaClass) {
