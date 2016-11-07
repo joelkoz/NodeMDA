@@ -200,26 +200,39 @@ var winston = require('winston');
 	};
 	
 	
-	
+	var readStereotypes = function(umlParentElement) {
+		let stList = getOwnedElementsOfType(umlParentElement, "UMLStereotype");
+		stList.forEach(function (umlStereotype) {
+			metaStereotypes[umlStereotype._id] = new MetaModel.Stereotype(umlStereotype.name);
+		});
+	}
+
+
+	var readDatatypes = function(umlParentElement) {
+		let dtList = getOwnedElementsOfType(umlParentElement, "UMLDataType");
+		dtList.forEach(function (umlDatatype) {
+			metaDatatypes[umlDatatype._id] = new MetaModel.Datatype(umlDatatype.name);
+		});
+	}
+
+
 	/**
 	 * Processes the specified umlProfile element and extracts stereotypes and
 	 * data types, creating the NodeMDA Meta versions of them.
 	 */
-	var readProfile = function(umlProfile) {
+	var readProfile = function(umlParentElement) {
 
-		// First, find all of the stereotypes and data types...
-		metaStereotypes = {};
-		var stList = getOwnedElementsOfType(umlProfile, "UMLStereotype");
-		stList.forEach(function (umlStereotype) {
-			metaStereotypes[umlStereotype._id] = new MetaModel.Stereotype(umlStereotype.name);
+		// First, find all of the stereotypes in this element...
+		readStereotypes(umlParentElement);
+		readDatatypes(umlParentElement);
+
+		// Now, if there are any packages, search each of those for stereotypes and 
+		// data types...
+		let packageList = getOwnedElementsOfType(umlParentElement, "UMLPackage");
+		packageList.forEach(function (umlPackage) {
+			readProfile(umlPackage);
 		});
-		
-		
-		metaDatatypes = {};
-		var dtList = getOwnedElementsOfType(umlProfile, "UMLDataType");
-		dtList.forEach(function (umlDatatype) {
-			metaDatatypes[umlDatatype._id] = new MetaModel.Datatype(umlDatatype.name);
-		});
+
 	};
 	
 	
