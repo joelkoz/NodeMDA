@@ -6,7 +6,7 @@ const NodeMDA = require('nodemda');
 const path = require('path');
 const fsx = require('fs-extra');
 const winston = require('winston');
-
+const glob = require('glob');
 
 program
    .version('1.0.0');
@@ -77,15 +77,31 @@ program
 			NodeMDA.Options.readerName = cmd.reader;
 		}
 
-		if (cmd.model) {
-			NodeMDA.Options.modelFileName = cmd.model;
+		// Make sure the platform is valid...
+		try {
+		   NodeMDA.getPlatformDir();
+		}
+		catch (error) {
+			console.log(`\n\n**Init failed** - can not use platform plugin ${NodeMDA.Options.platform}: ${error.message}\n\n`);
+			return;
 		}
 
+		// See if a model file exists...
+		let modelTemplateDir = NodeMDA.getPlatformDir() + '/_model';
+		if (fsx.existsSync(modelTemplateDir)) {
+			// Copy to the project directory...
+			let modelProjectDir = './model';
+			fsx.ensureDirSync(modelProjectDir);
+			fsx.copySync(modelTemplateDir, modelProjectDir);
+			let fileList = glob.sync(modelProjectDir + '/*');
+			NodeMDA.Options.modelFileName = fileList[0];
+		}
 
 		NodeMDA.writeOptions();
 		console.log('Options saved to nodemda.json');
-
-		console.log('TODO: Initialize the project by creating a model dir and copying model from the platform');
+		if (NodeMDA.Options.modelFileName !== null) {
+		    console.log('UML model file was created at ' + NodeMDA.Options.modelFileName);
+		}
 	});
 
 

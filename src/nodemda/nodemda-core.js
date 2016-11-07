@@ -51,7 +51,7 @@ NodeMDA.getPlatformDir = function() {
 		if (!fsx.existsSync(pluginPath)) {
 			// Its not there. Now try to resolve it using the normal
 			// search algorithm.
-		    pluginPath = require.resolve(pluginName);
+		    pluginPath = path.dirname(require.resolve(pluginName));
 		}
 		platformDir = pluginPath + '/plugins';
 	}
