@@ -912,6 +912,11 @@ let MetaModel = {};
 		 */
 		mixin(spec) {
 
+			if (typeof spec !== 'object') {
+				throw new Error('Mixin specification must be an object.');
+			}
+
+
 			// Make sure obj is an array so we can iterate over it if there
 			// is more than one.
 			function castArray(obj) {
@@ -925,40 +930,41 @@ let MetaModel = {};
 
 			let self = this;
 
-			if (_.has(spec, 'onClass')) {
-				castArray(spec.onClass).forEach(function (subSpec) {
-					meta.Model.ApplyMixin(meta.Class.prototype, subSpec);
-				});
-			}
-
-			if (_.has(spec, 'onAttribute')) {
-				castArray(spec.onAttribute).forEach(function (subSpec) {
-					meta.Model.ApplyMixin(meta.Attribute.prototype, subSpec);
-				});
-			}
-
-			if (_.has(spec, 'onOperation')) {
-				castArray(spec.onOperation).forEach(function (subSpec) {
-					meta.Model.ApplyMixin(meta.Operation.prototype, subSpec);
-				});
-			}
-
-
-			if (_.has(spec, 'onType')) {
-				castArray(spec.onType).forEach(function (subSpec) {
-					_.forEach(self.Types, function(type, key, obj) {
-						meta.Model.ApplyMixin(type, subSpec);
-					});
-				});
-			}
-
-
-			if (_.has(spec, 'onStereotype')) {
-				castArray(spec.onStereotype).forEach(function (subSpec) {
-					_.forEach(self.Stereotypes, function(stereotype, key, obj) {
-						meta.Model.ApplyMixin(stereotype, subSpec);
-					});
-				});
+			for (let propName in spec) {
+				if (propName.startsWith('on')) {
+					if (propName === 'onType') {
+						// Apply the spec to each data type that has been defined...
+						castArray(spec.onType).forEach(function (subSpec) {
+							_.forEach(self.Types, function(type, key, obj) {
+								meta.Model.ApplyMixin(type, subSpec);
+							});
+						});
+					}
+					else if (propName === 'onStereotype') {
+						// Apply the spec to each stereotype that has been defined...
+						castArray(spec.onStereotype).forEach(function (subSpec) {
+							_.forEach(self.Stereotypes, function(stereotype, key, obj) {
+								meta.Model.ApplyMixin(stereotype, subSpec);
+							});
+						});
+					}
+					else {
+						// Apply the spec to the prototype of all other meta elements...
+						let elementName = propName.slice(2);
+						let metaObject = meta[elementName];
+						if (typeof metaObject !== 'undefined') {
+							castArray(spec[propName]).forEach(function (subSpec) {
+								meta.Model.ApplyMixin(metaObject.prototype, subSpec);
+							});
+						}
+						else {
+							throw new Error('Unknown meta element in mixin specification: ' + elementName);
+						}
+					}
+				}
+				else {
+					throw new Error('Invalid property name for mixin specification: ' + propName);
+				}
 			}
 		}
 	};
