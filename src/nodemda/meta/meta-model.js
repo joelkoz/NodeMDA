@@ -83,12 +83,32 @@ let MetaModel = {};
 			return (typeof(this.getTagValue(tagName)) !== "undefined");
 		}
 		
+
+		/**
+		 * A special version of tag handling that returns TRUE if
+		 * this element has the specified tag name, AND its value
+		 * is a Javascript TRUTHY.
+		 */
+		isTaggedAs(tagName) {
+			return Boolean(this.getTagValue(tagName));
+		}
+
+
 		get comment() {
 			return this._comment;
 		}
 		
 		get hasComment() {
 			return this._comment !== null;
+		}
+
+		get stereotypeName() {
+			if (this.stereotypes.length > 0) {
+				return this.stereotypes[0].name;
+			}
+			else {
+				return undefined;
+			}
 		}
 
 		addStereotype(stereotype) {
@@ -143,10 +163,9 @@ let MetaModel = {};
 	 * Data types available to the mda engine
 	 */
 	meta.Datatype = class Datatype extends meta.MetaElement { 
-		constructor(name, options) {
+		constructor(name) {
 			super("Datatype");
 			this._name = name;
-			this._options = options;
 		}
 		
 		getName() {
@@ -222,10 +241,9 @@ let MetaModel = {};
 	 */
     meta.Stereotype = class Stereotype extends meta.MetaElement {
 
-    	constructor(name, options) {
+    	constructor(name) {
 			super("Stereotype");
     		this._name = name;
-    		this._options = options;
     	}
   
     	
@@ -310,6 +328,41 @@ let MetaModel = {};
 			return this.getTagValue("default") || this.getTagValue("defaultValue");
 		}
 		
+
+		get hasMinValue() {
+			return this.getTagValue('minVal');
+		}
+
+		/**
+		* Returns the minimum allowed value of this variable, if specified in the model. Otherwise,
+		* <code>undefined</code> is returned.
+		*/
+		get minValue() {
+			if (this.hasTag('minVal')) {
+				return this.getTagValue('minVal');
+			}
+			else {
+				return undefined;
+			}
+		}
+
+
+		get hasMaxValue() {
+			return this.getTagValue('maxVal');
+		}
+		/**
+		* Returns the maximum allowed value of this variable, if specified in the model. Otherwise,
+		* <code>undefined</code> is returned.
+		*/
+		get maxValue() {
+			if (this.hasTag('maxVal')) {
+				return this.getTagValue('maxVal');
+			}
+			else {
+				return undefined;
+			}
+		}
+
     };
     
 
@@ -885,18 +938,45 @@ let MetaModel = {};
 
 
 			if (_.has(mixinSpec, 'get')) {
-				let name = mixinSpec.get.name;
-				Object.defineProperty(obj, name, { get: mixinSpec.get });
+				let mixinValue = mixinSpec.get;
+				if (typeof mixinValue === 'function') {
+					let name = mixinValue.name;
+					Object.defineProperty(obj, name, { get: mixinValue });
+				}
+				else if (Array.isArray(mixinValue)) {
+					mixinValue.forEach(function (subVal) {
+						let name = subVal.name;
+						Object.defineProperty(obj, name, { get: subVal });
+					});
+				}
 			}
 
 			if (_.has(mixinSpec, 'set')) {
-				let name = mixinSpec.set.name;
-				Object.defineProperty(obj, name, { set: mixinSpec.set });
+				let mixinValue = mixinSpec.set;
+				if (typeof mixinValue === 'function') {
+					let name = mixinValue.name;
+					Object.defineProperty(obj, name, { set: mixinValue });
+				}
+				else if (Array.isArray(mixinValue)) {
+					mixinValue.forEach(function (subVal) {
+						let name = subVal.name;
+						Object.defineProperty(obj, name, { set: subVal });
+					});
+				}
 			}
 
 			if (_.has(mixinSpec, 'func')) {
-				let name = mixinSpec.func.name;
-				obj[name] = mixinSpec.func;
+				let mixinValue = mixinSpec.func;
+				if (typeof mixinValue === 'function') {
+					let name = mixinValue.name;
+					obj[name] = mixinValue;
+				}
+				else if (Array.isArray(mixinValue)) {
+					mixinValue.forEach(function (subVal) {
+						let name = subVal.name;
+						obj[name] = subVal;
+					});
+				}
 			}
 		}
 
@@ -935,17 +1015,55 @@ let MetaModel = {};
 					if (propName === 'onType') {
 						// Apply the spec to each data type that has been defined...
 						castArray(spec.onType).forEach(function (subSpec) {
-							_.forEach(self.Types, function(type, key, obj) {
-								meta.Model.ApplyMixin(type, subSpec);
-							});
+							if (_.has(subSpec, 'matches')) {
+								// We have a "matches" specification, so this spec
+								// is applicable to only a certain number of types.
+								// Apply to each of them...
+								_.forEach(self.Types, function(type, key, obj) {
+									meta.Model.ApplyMixin(type, subSpec);
+								});
+							}
+							else {
+								// This spec applies to ALL of them, so apply it to
+								// the prototype...
+								meta.Model.ApplyMixin(meta.Datatype.prototype, subSpec);
+							}
 						});
 					}
 					else if (propName === 'onStereotype') {
 						// Apply the spec to each stereotype that has been defined...
 						castArray(spec.onStereotype).forEach(function (subSpec) {
-							_.forEach(self.Stereotypes, function(stereotype, key, obj) {
-								meta.Model.ApplyMixin(stereotype, subSpec);
-							});
+							if (_.has(subSpec, 'matches')) {
+								// We have a "matches" specification, so this spec
+								// is applicable to only a certain number of stereotypes.
+								// Apply to each of them...
+								_.forEach(self.Stereotypes, function(stereotype, key, obj) {
+									meta.Model.ApplyMixin(stereotype, subSpec);
+								});
+							}
+							else {
+								// This spec applies to ALL of them, so apply it to
+								// the prototype...
+								meta.Model.ApplyMixin(meta.Stereotype.prototype, subSpec);
+							}
+						});
+					}
+					else if (propName === 'onClass') {
+						// Apply the spec to each stereotype that has been defined...
+						castArray(spec.onClass).forEach(function (subSpec) {
+							if (_.has(subSpec, 'matches')) {
+								// We have a "matches" specification, so this spec
+								// is applicable to only a certain number of classes.
+								// Apply to each of them...
+								self.classes.forEach(function(clazz) {
+									meta.Model.ApplyMixin(clazz, subSpec);
+								});
+							}
+							else {
+								// This spec applies to ALL of them, so apply it to
+								// the prototype...
+								meta.Model.ApplyMixin(meta.Class.prototype, subSpec);
+							}
 						});
 					}
 					else {
