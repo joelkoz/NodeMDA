@@ -193,7 +193,17 @@ var winston = require('winston');
 	var checkForTags = function(umlElement, metaElement) {
 	    if ("tags" in umlElement) {
 	    	umlElement.tags.forEach(function(tag) {
-	    	   var metaTag = new MetaModel.Tag(tag.name, tag.value);
+	    	   let tagVal;
+	    	   if (tag.kind === 'boolean') {
+	    	   	 tagVal = tag.checked;
+	    	   }
+	    	   else if (tag.kind === 'number') {
+	    	   	 tagVal = tag.number;
+	    	   }
+	    	   else {
+	    	   	 tagVal = tag.value;
+	    	   }
+	    	   var metaTag = new MetaModel.Tag(tag.name, tagVal);
 	    	   metaElement.addTag(metaTag);
 	    	});
 	    }	
