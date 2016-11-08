@@ -1,0 +1,23 @@
+##output preserve {{@root.output}}/src/services/{{class.packageDirName}}/{{class.name}}/hooks/index.js
+'use strict';
+
+const globalHooks = require('src/hooks');
+const hooks = require('feathers-hooks');
+const auth = require('feathers-authentication').hooks;
+
+exports.before = {
+  all: [
+    globalHooks.serviceCallLogger({serviceName: '{{class.name}}', logLevel: 'debug' }),
+    globalHooks.verifyTokenIfPresent(),
+    auth.populateUser(),
+    auth.restrictToAuthenticated()
+  ],
+  get: [],
+  create: [ globalHooks.socketServiceThunkAdapter() ],
+};
+
+exports.after = {
+  all: [],
+  get: [],
+  create: [],
+};

@@ -1,0 +1,9 @@
+##output preserve {{@root.output}}/src/services/{{class.packageDirName}}/{{class.name}}/{{class.name}}-model.js
+'use strict';
+
+const mongoose = require('mongoose');
+const {{class.name}}Schema = require('common/{{class.name}}Schema');
+
+const {{class.name}}Model = mongoose.model('{{class.name}}', {{class.name}}Schema.getMongooseSchema());
+
+module.exports = {{class.name}}Model;

@@ -1,0 +1,28 @@
+##output preserve {{@root.output}}/client/fapp.js
+import feathers from 'feathers-client';
+import io from 'socket.io-client';
+import apiFacade from './apiFacade';
+
+import OmniSchema from 'omni-schema';
+import OmniReact from 'omni-schema/lib/plugins/ui-react-formsy-materialui';
+
+OmniReact.plugin();
+
+// Establish a Socket.io connection
+const socket = io();
+
+// Initialize our Feathers client application through Socket.io
+// with hooks and authentication.
+const app = feathers()
+  .configure(feathers.socketio(socket))
+  .configure(feathers.hooks())
+  // Use localStorage to store our login token
+  .configure(feathers.authentication({
+    storage: window.localStorage
+  }));
+
+apiFacade(app);
+
+app.set('appName', '{{model.name}}');
+
+export default app;

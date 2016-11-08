@@ -1,0 +1,69 @@
+##output preserve {{@root.output}}/src/services/{{class.packageDirName}}/{{class.name}}/hooks/index.js
+'use strict';
+
+const globalHooks = require('src/hooks');
+const hooks = require('feathers-hooks');
+const auth = require('feathers-authentication').hooks;
+// const customHooks = require('./custom-hooks');
+
+{{#if class.isUserOwned}}
+const restrictQueryToUser = auth.queryWithCurrentUser({ idField: '_id', as: 'ownerUserId' });
+const restrictToOwner = auth.restrictToOwner({ ownerField: 'ownerUserId' });
+const setOwnerToUser = auth.associateCurrentUser({ idField: '_id', as: 'ownerUserId' });
+
+{{/if}}
+exports.before = {
+  all: [
+    globalHooks.serviceCallLogger({serviceName: '{{class.name}}', logLevel: 'debug' }),
+{{#if class.allowExternalAccess}}
+    globalHooks.verifyTokenIfPresent(),
+    auth.populateUser(),
+    auth.restrictToAuthenticated(),
+{{else}}    
+    hooks.disable('external')    
+{{/if}}
+/* customHooks.hook1() */    
+  ],
+  find: [
+{{#if class.isUserOwned}}
+    restrictQueryToUser,
+{{/if}}
+  ],
+  get: [
+{{#if class.isUserOwned}}
+    restrictToOwner,
+{{/if}}
+  ],
+  create: [
+{{#if class.isUserOwned}}
+    setOwnerToUser,
+{{/if}}
+  ],
+  update: [
+{{#if class.isUserOwned}}
+    restrictToOwner,
+    setOwnerToUser,
+{{/if}}
+  ],
+  patch: [
+{{#if class.isUserOwned}}
+    restrictToOwner,
+    setOwnerToUser,
+{{/if}}
+  ],
+  remove: [
+{{#if class.isUserOwned}}
+    restrictToOwner,
+{{/if}}
+  ]
+};
+
+exports.after = {
+  all: [],
+  find: [],
+  get: [],
+  create: [],
+  update: [],
+  patch: [],
+  remove: []
+};

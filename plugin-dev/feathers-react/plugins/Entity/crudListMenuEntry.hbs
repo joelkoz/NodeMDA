@@ -1,0 +1,9 @@
+##output {{#if class.doCrud}}property{{else}}ignore{{/if}} crudListMenuEntries
+
+  	{ onEnter: redirectAnonToLogin,
+  	  path: '/{{class.name}}List',
+  	  component: {{class.name}}List,
+  	  _menuLabel: '{{class.name}} list',
+  	  _displayOnMenu: () => isAuthenticated(),
+  	  _menuKey: '{{class.name}}'
+  	},

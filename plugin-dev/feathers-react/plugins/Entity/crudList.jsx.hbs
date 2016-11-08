@@ -1,0 +1,23 @@
+##output {{#if class.doCrud}}preserve{{else}}ignore{{/if}} {{@root.output}}/client/containers/{{class.packageDirName}}/{{class.name}}CrudList.js
+import React from 'react';
+import FeathersComponent from './FeathersComponent';
+import CrudPage from './crud/CrudPage';
+
+class {{class.name}}CrudList extends FeathersComponent {
+
+  constructor() {
+    super();
+  }
+
+  render() {
+      return (
+          <CrudPage
+            pageTitle={'{{class.name}}} list'}
+            dao={this.api.{{class.jsClassNameWithPath}}}Dao}
+            appComponent={this.appComponent}
+          />
+      );
+  }
+}
+
+export default {{class.name}}CrudList;

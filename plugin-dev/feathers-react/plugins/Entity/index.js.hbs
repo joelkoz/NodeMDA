@@ -1,0 +1,47 @@
+##output preserve {{@root.output}}/src/services/{{class.packageDirName}}/{{class.name}}/index.js
+'use strict';
+
+const service = require('feathers-mongoose');
+const Contact = require('./{{class.name}}-model');
+const hooks = require('./hooks');
+
+module.exports = function() {
+  const app = this;
+
+  const options = {
+    Model: Contact,
+    paginate: {
+      default: 5,
+      max: 25
+    }
+  };
+
+  // Initialize our service with any options it requires
+  app.use('/{{class.packageDirName}}{{class.name}}', service(options));
+
+  // Get our initialize service to that we can bind hooks
+  const {{class.name}}Dao = app.service('/{{class.packageDirName}}{{class.name}}Dao');
+
+  // Set up our before hooks
+  {{class.name}}Dao.before(hooks.before);
+
+  // Set up our after hooks
+  {{class.name}}Dao.after(hooks.after);
+
+  // Filter real time events to only be sent to the entity owner
+  {{class.name}}Dao.filter(function(data, connection, hook) {
+
+      if(!connection.user) {
+        return false;
+      }
+{{#if class.isUserOwned}}
+
+      if (connection.user._id !== data.ownerUserId) {
+        return false;
+      }
+{{/if}}
+
+      return data;
+  });
+
+};

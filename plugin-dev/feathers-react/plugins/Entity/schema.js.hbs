@@ -1,0 +1,23 @@
+##output overwrite {{@root.output}}/common/{{class.packageDirName}}/{{class.name}}Schema.js
+const OmniSchema = require('omni-schema');
+
+const Types = OmniSchema.Types;
+{{#with class as |class|}}
+
+const {{class.name}}Schema = OmniSchema.compile({
+{{#each class.attributes as |attrib|}}
+  {{attrib.name}}: { type: '{{attrib.omniSchemaTypeName}}', validation: { required: {{attrib.isRequired}}
+  {{~#if attrib.hasMinValue}}, min: {{attrib.minValue}}{{/if}} 
+  {{~#if attrib.hasMaxValue}}, max: {{attrib.maxValue}}{{/if}} }
+  {{~#if attrib.uiExclude}}, ui: { exclude: true }{{/if}}
+  {{~#if attrib.hasDefaultValue}}, default: {{attrib.jsDefaultValue}}{{/if~}} 
+  },
+{{/each}}
+{{#if class.isUserOwned}}  
+  ownerUserId: { type: 'String', required: true, ui: { exclude: true } },
+{{/if}}  
+  _id: { type: 'String', ui: { exclude: true } },
+});
+
+module.exports = {{class.name}}Schema;
+{{/with}}

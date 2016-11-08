@@ -1,0 +1,99 @@
+##output preserve {{@root.output}}/client/menuConfig.jsx
+import React from 'react';
+import fapp from './fapp';
+import App from './containers/App';
+import SignIn from './containers/SignIn';
+import Home from './containers/Home';
+{{#each crudListMenuImports as |crudImport|}}
+{{crudImport}}
+{{/each}}
+
+
+// Determine if we have an authenticated user available
+function isAuthenticated() {
+	return Boolean(fapp.get('user'));
+}
+
+
+// A React Router onEnter function to protect entries available only
+// to authenticated users.
+function redirectAnonToLogin(nextState, replace) {
+  if (!isAuthenticated()) {
+    replace('/signIn');
+  }
+}
+
+
+// A React Router onEnter function to re-direct already
+// authenticated users to the home page.
+function redirectKnownUserToHome(nextState, replace) {
+  if (isAuthenticated()) {
+    replace('/');
+  }
+}
+
+
+
+// Build the React Router config as a JSON object to allow
+// meta data for menu display purposes. Note that
+// _menuLabel, _displayOnMenu, and _menuKey are NOT
+// normally part of the React Router config spec. Instead,
+// they are used by the getMenuItems() function below.
+let routerConfig = {
+
+  component: App,
+  path: '/',
+
+  indexRoute: {
+  	onEnter: redirectAnonToLogin,
+  	component: Home,
+    _displayOnMenu: () => isAuthenticated(),
+    _menuLabel: 'Home',
+    _menuKey: 10
+  },
+
+  childRoutes: [
+
+{{#each crudListMenuEntries as |crudEntry|}}
+{{crudEntry}}
+{{/each}}
+
+    { onEnter: redirectKnownUserToHome,
+      path: '/signIn',
+      component: SignIn,
+      _menuLabel: 'Sign in',
+      _displayOnMenu: () => false,
+      _menuKey: 9999
+    },
+
+  ]
+
+}
+
+
+// Build a list of menu items to be used by the App object to build our UI menu.
+let getMenuItems = function() {
+
+   let routeInfo = routerConfig;
+
+   return function() {
+
+		let menuItems = [];
+
+		if (routerConfig.indexRoute._displayOnMenu()) {
+			menuItems.push({ name: routerConfig.indexRoute._menuLabel, path: '/', keyValue: routerConfig.indexRoute._menuKey });			
+		}
+
+		routerConfig.childRoutes.forEach(function (route) {
+			if (!route.hasOwnProperty('_displayOnMenu') || route._displayOnMenu()) {
+				menuItems.push({ name: route._menuLabel, path: route.path, keyValue: route._menuKey });
+			}
+
+		});
+
+		return menuItems;
+	}
+}();
+
+
+export { routerConfig as default, getMenuItems };

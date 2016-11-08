@@ -1,0 +1,72 @@
+##output overwrite {{@root.output}}/{{class.packageDirName}}/{{class.name}}.js
+{{#* inline "methodDeclaration"}}
+/**
+{{#each methodComment as |cmtLine|}}
+ * {{{cmtLine}}}
+{{/each~}}
+   {{~#each varList as |varDef|}}
+ * @param { {{varDef.javascriptTypeName}}{{#if varDef.isArray}}[]{{/if}} } {{varDef.name}}{{#if varDef.hasComment}} - {{{varDef.comment}}}{{/if}}{{#if varDef.isReadOnly}} (read only){{/if}}
+   {{/each}}
+{{#if returnType}}
+ * @returns { {{returnType}} }
+{{/if}} 
+ */
+{{#if isStatic}}static {{/if}}{{methodName}}({{#each varList as |varDef|}}{{#unless @first}}, {{/unless}}{{varDef.name}}{{#if varDef.hasDefaultValue}} = {{{varDef.defaultValue}}}{{/if}}{{/each}}) {
+{{/inline}}
+{{#with class as |class|}}
+
+// This file was generated with NodeMDA. It will be overwritten if generated again.
+// Do not modify this file.
+{{#if class.hasOperations}}
+// Instead, add your customizations to {{name}}-operations.js
+{{/if}}
+{{#if class.isSubClass}}
+{{#with class.parentClassType as |parentRef|}}
+{{#with parentRef.metaClass as |parentClass|}}
+
+var {{parentClass.name}} = require('{{#unless parentClass.inRootPackage}}{{parentClass.packageDirName}}/{{/unless}}{{parentClass.name}}.js');
+{{/with}}
+{{/with}}
+{{/if}}
+
+{{#if class.hasComment}}
+/**
+{{#each class.jsCommentsFormatted as |cmtLine|}}
+* {{{cmtLine}}}
+{{/each}}
+*/
+{{/if}}
+{{class.name}} = class {{#if class.isSubClass}}extends {{parentClassType.className}} {{/if}}{
+
+    {{> methodDeclaration methodName="constructor" varList=class.allRequiredAttributes methodComment="@constructor"}}
+    {{#if class.isSubClass}}
+        super(
+             {{~#each class.inheritedRequiredAttributes as |attrib|}}
+             {{~#unless @first}}, {{/unless}}{{attrib.name~}}
+             {{/each~}}
+            );
+    {{/if}}
+	{{~#each class.attributes as |attrib|}}
+	      {{#if attrib.isRequired}}
+	    this.{{attrib.jsIdentifierName}} = {{attrib.name}};
+	      {{else}}
+	    this.{{attrib.jsIdentifierName}} = {{{attrib.jsDefaultValue}}};
+	      {{/if}}
+	{{/each}}
+	}
+   {{#each class.attributes as |attrib|}}
+      {{#if isReadOnly}}
+
+    get {{attrib.name}}() { return {{attrib.jsIdentifierName}}; }
+      {{/if}}
+   {{/each}}
+   {{#each operations as |fn|}}
+   
+    {{> methodDeclaration methodName=fn.name varList=fn.parameters methodComment=(fn.jsCommentsFormatted) returnType=(fn.jsReturnType)}}
+        throw new Error("Operation {{fn.name}} not yet implemented.");
+    }   
+   {{/each}}
+};
+
+exports = {{class.name}};
+{{/with}}
