@@ -259,6 +259,32 @@ let MetaModel = {};
     };
 
 
+
+	/**
+	 * Stereotypes available to the mda engine
+	 */
+    meta.Actor = class Actor extends meta.MetaElement {
+
+    	constructor(name) {
+			super("Actor");
+    		this._name = name;
+    	}
+  
+    	
+    	getName() {
+    		return this._name;
+    	}
+    	
+    	
+    	get name() {
+    		return this._name;
+    	}
+    	
+    };
+
+
+
+
     /**
      * Variables have name, types, a multiplicity, and an optional default value
      */
@@ -562,7 +588,7 @@ let MetaModel = {};
 		
 		
 		addDependency(dependency) {
-			this.dependency.push(dependency);
+			this.dependencies.push(dependency);
 		}
 		
 		
@@ -772,10 +798,11 @@ let MetaModel = {};
 	
 	meta.Model = class Model {
 
-		constructor(projectName, datatypes, stereotypes, classes) {
+		constructor(projectName, datatypes, stereotypes, actors, classes) {
 			this.name = projectName;
 			this.datatypes = datatypes;
 			this.stereotypes = stereotypes;
+			this.actors = actors;
 			this.classes = classes;
 
 			let self = this;

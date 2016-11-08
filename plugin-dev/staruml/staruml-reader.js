@@ -38,9 +38,16 @@ var winston = require('winston');
 (function(){
 
 	/**
+	 * Map that translates uml actor ids into NodeMDA Actor meta objects.
+	 */
+	var metaActors = {};
+
+
+	/**
 	 * Map that translates uml stereotype ids into NodeMDA stereotype meta objects.
 	 */
 	var metaStereotypes = {};
+
 	
 	/**
 	 * Map that translates uml datatype ids into NodeMDA datatype meta objects.
@@ -120,17 +127,25 @@ var winston = require('winston');
 		// Look for native types first...
 		var dt = metaDatatypes[umlDataTypeId];
 		
-		if (dt === undefined) {
+		if (typeof dt === 'undefined') {
 			// If its not a native type, perhaps its a class from
 			// the uml model?
 			var metaClass = metaClassMap[umlDataTypeId];
-			if (metaClass !== undefined) {
+			if (typeof metaClass !== 'undefined') {
 				// It IS one of our classes.  Create an "Object" data type for this class
 				var metaTypeObject = new MetaModel.ObjectDatatype(metaClass.getPackageName(), metaClass.getName());
 				dt = metaTypeObject;
 				
 				// Cache the id for later use...
 				metaDatatypes[umlDataTypeId] = metaTypeObject;
+			}
+			else {
+				// Is it an Actor?
+				let metaActor = metaActors[umlDataTypeId];
+				if (typeof metaActor !== 'undefined') {
+					// This is an ID of an actor.
+					dt = metaActor;
+				}
 			}
 		}
 		
@@ -210,6 +225,14 @@ var winston = require('winston');
 	};
 	
 	
+	var readActors = function(umlParentElement) {
+		let stList = getOwnedElementsOfType(umlParentElement, "UMLActor");
+		stList.forEach(function (umlActor) {
+			metaActors[umlActor._id] = new MetaModel.Actor(umlActor.name);
+		});
+	}
+
+
 	var readStereotypes = function(umlParentElement) {
 		let stList = getOwnedElementsOfType(umlParentElement, "UMLStereotype");
 		stList.forEach(function (umlStereotype) {
@@ -232,7 +255,8 @@ var winston = require('winston');
 	 */
 	var readProfile = function(umlParentElement) {
 
-		// First, find all of the stereotypes in this element...
+		// First, find all of the profile elements in this parent element...
+		readActors(umlParentElement);
 		readStereotypes(umlParentElement);
 		readDatatypes(umlParentElement);
 
@@ -556,8 +580,13 @@ var winston = require('winston');
         for (prop in metaStereotypes) {
 	       stereotypeArray.push(metaStereotypes[prop]);
         } // for
+
+		var actorArray = [];
+        for (prop in metaActors) {
+	       actorArray.push(metaActors[prop]);
+        } // for
         
-		return new MetaModel.Model(projectName, datatypeArray, stereotypeArray, processedMetaClasses);
+		return new MetaModel.Model(projectName, datatypeArray, stereotypeArray, actorArray, processedMetaClasses);
 	};
 	
 	
