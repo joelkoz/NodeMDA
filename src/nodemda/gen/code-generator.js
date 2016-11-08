@@ -270,10 +270,19 @@ const winston = require('winston');
     	context["class"] = metaClass ;
     	context.output = mda.Options.output;
     	
-    	var render = Handlebars.compile(templateData);
-    	var result = render(context);
-    	
     	winston.debug("Processing " + (metaClass !== null ? metaClass.getName() : "project") + " with template " + templateFile);
+
+    	var render;
+    	var result;
+    	try {
+    	   render = Handlebars.compile(templateData);
+    	   result = render(context);
+    	}
+    	catch (error) {
+    		winston.error(`Render error in template file ${templateFile}:\n--- ${error.message}`);
+    		process.exit(-1);
+    	}
+    	
 
     	var outputFileName = "";
     	var outputMode = "overwrite";
