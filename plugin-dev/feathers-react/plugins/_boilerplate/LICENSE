@@ -1,0 +1,7 @@
+This software uses the following software frameworks, all licensed under the MIT license:
+
+express
+feathers
+react
+formsy
+omni-schema
