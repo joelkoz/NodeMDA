@@ -8,7 +8,7 @@ NodeMDA.Options = NodeMDA.Options || {};
 
 NodeMDA.Options.platform = "javascript-es6";
 
-NodeMDA.Options.output = "./src";
+NodeMDA.Options.output = ".";
 
 NodeMDA.Options.forceOverwrite = false;
 
