@@ -23,7 +23,7 @@ function initDataTypes(model) {
 	// Not that this assumes that the data type and omni-schema type share the EXACT same
 	// name.
 	function defineDataSpec(name, props, baseType) {
-		model.defineDataType(name, Object.assign({ omniSchemaType: OmniTypes[name], fromString }, props), baseType);
+		model.defineDataType(name, Object.assign({ omniSchemaType: OmniTypes[name] }, props), baseType);
 	}
 
 

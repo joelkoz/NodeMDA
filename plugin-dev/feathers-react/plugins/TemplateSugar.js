@@ -72,7 +72,7 @@ var TemplateSugar = {};
 	    	   			return TemplateSugar.jsPathToIdentifier(this.classNameWithPath);
 				   	}
 				],
-			}
+			},
 
 
 			onClass: {

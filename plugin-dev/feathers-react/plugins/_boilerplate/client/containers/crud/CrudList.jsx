@@ -22,8 +22,8 @@ class CrudList extends React.Component {
           let self = this;
           return (
             <ListItem 
-                primaryText={ `${item.lastName}, ${item.firstName}`}
-                secondaryText={item.email}
+                primaryText={self.props.getPrimaryText(item)}
+                secondaryText={self.props.getSecondaryText(item)}
                 key={key}
                 onClick={self.editListItem(index)} 
                 style={style}
@@ -104,14 +104,16 @@ class CrudList extends React.Component {
 }
 
 CrudList.propTypes = {
+  getPrimaryText: React.PropTypes.func.isRequired,
+  getSecondaryText: React.PropTypes.func.isRequired,
   onLoadMoreRows: React.PropTypes.func,
-  onEditRecord: React.PropTypes.func,
-  onAddNewRecord: React.PropTypes.func,
-  onScroll: React.PropTypes.func,
-  recordList: React.PropTypes.array,
-  containerWidth: React.PropTypes.number,
-  containerHeight: React.PropTypes.number,
-  totalRowCount: React.PropTypes.number,
+  onEditRecord: React.PropTypes.func.isRequired,
+  onAddNewRecord: React.PropTypes.func.isRequired,
+  onScroll: React.PropTypes.func.isRequired,
+  recordList: React.PropTypes.array.isRequired,
+  containerWidth: React.PropTypes.number.isRequired,
+  containerHeight: React.PropTypes.number.isRequired,
+  totalRowCount: React.PropTypes.number.isRequired,
   scrollToIndex: React.PropTypes.number,
   scrollTop: React.PropTypes.number,
 };

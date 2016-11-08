@@ -18,7 +18,7 @@ var EntitySupport = {};
 
 		// Build an OmniSchema for this class so we can mock a record...
 		let schemaTemplate = {};
-		this.attributes.forEach(function(attrib) {
+		metaClass.attributes.forEach(function(attrib) {
 			schemaTemplate[attrib.name] = { type: attrib.omniSchemaTypeName };
 		});
 
@@ -35,7 +35,7 @@ var EntitySupport = {};
 		model.mixin({
 
 			onClass: { 
-				match: { stereotypeName: 'Entity' },
+				matches: { stereotypeName: 'Entity' },
 			    get: [ function isUserOwned() {
 								return this.isTaggedAs('userOwned');
 	   					},

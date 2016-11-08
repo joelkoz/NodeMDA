@@ -17,6 +17,9 @@ attribute|parameter
   .javascriptTypeName
   .omniSchemaTypeName
   .jsDefaultValue
+  .isRequired
+  .hasDefaultValue
+  .defaultValue
 
 attribute
   .jsIdentifierName

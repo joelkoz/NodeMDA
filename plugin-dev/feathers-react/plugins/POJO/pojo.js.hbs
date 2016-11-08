@@ -1,4 +1,4 @@
-##output overwrite {{@root.output}}/{{class.packageDirName}}/{{class.name}}.js
+##output overwrite {{@root.output}}/{{#if class.isValueObject}}common/{{else}}src/{{/if}}{{class.packageDirName}}/{{class.name}}.js
 {{#* inline "methodDeclaration"}}
 /**
 {{#each methodComment as |cmtLine|}}

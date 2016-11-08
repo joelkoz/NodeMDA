@@ -305,9 +305,11 @@ class CrudPage extends FeathersComponent {
 
 
 CrudPage.propTypes = {
-  pageTitle: React.PropTypes.string,
-  dao: React.PropTypes.object,
-  appComponent: React.PropTypes.object
+  getPrimaryText: React.PropTypes.func.isRequired,
+  getSecondaryText: React.PropTypes.func.isRequired,
+  pageTitle: React.PropTypes.string.isRequired,
+  dao: React.PropTypes.object.isRequired,
+  appComponent: React.PropTypes.object.isRequired
 }
 
 

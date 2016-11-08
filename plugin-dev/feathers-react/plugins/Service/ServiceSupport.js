@@ -6,7 +6,7 @@ const OmniJoi = require('omni-schema/lib/plugins/validation-joi');
 
 
 /*
- * Support for the Entity stereotype.
+ * Support for the Service stereotype.
  */
 var ServiceSupport = {};
 
@@ -32,7 +32,7 @@ var ServiceSupport = {};
 		model.mixin({
 
 			onClass: { 
-				match: { stereotypeName: 'Service' },
+				matches: { stereotypeName: 'Service' },
 			    get: [ 
 	   					function allowExternalAccess() {
 	   						// By default, services are externally available

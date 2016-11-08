@@ -63,7 +63,7 @@ class ServiceThunk {
     switch (feathersParams.op) {
 
     {{#each operations as |fn|}}
-        case '{{fn.name}}}':
+        case '{{fn.name}}':
             validatedParams = this.checkParams(opParams, this.{{fn.name}}Signature);
             return Promise.resolve(this.serviceImpl.{{fn.name}}(validatedParams, feathersParams));
 

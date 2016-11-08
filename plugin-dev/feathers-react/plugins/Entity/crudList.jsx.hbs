@@ -9,12 +9,15 @@ class {{class.name}}CrudList extends FeathersComponent {
     super();
   }
 
+  // TODO supply {{class.name}}CrudList meaningful results for getPrimaryText and getSecondaryText
   render() {
       return (
           <CrudPage
-            pageTitle={'{{class.name}}} list'}
-            dao={this.api.{{class.jsClassNameWithPath}}}Dao}
+            pageTitle={'{{class.name}} list'}
+            dao={this.api.{{class.jsClassNameWithPath}}Dao}
             appComponent={this.appComponent}
+            getPrimaryText={(item) => return `${item.{{class.attributes.0.name}}\}` },
+            getSecondaryText={(item) => return `${item.{{class.attributes.1.name}}\}` }
           />
       );
   }
