@@ -20,6 +20,14 @@ var EntitySupport = {};
 		let schemaTemplate = {};
 		metaClass.attributes.forEach(function(attrib) {
 			schemaTemplate[attrib.name] = { type: attrib.omniSchemaTypeName };
+			let omniField = schemaTemplate[attrib.name];
+			omniField.validation = {};
+			if (attrib.hasMinValue) {
+				omniField.validation.min = attrib.minValue;
+			}
+			if (attrib.hasMaxValue) {
+				omniField.validation.max = attrib.maxValue;
+			}
 		});
 
 		metaClass.schema = OmniSchema.compile(schemaTemplate);

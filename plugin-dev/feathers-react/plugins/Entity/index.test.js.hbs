@@ -10,7 +10,7 @@ const authentication = require('feathers-authentication/client');
 const bodyParser = require('body-parser');
 const MockUsers = require('../../../MockUsers.js');
 
-const {{class.name}}Dao = app.service('/{{class.packageDirName}}{{class.name}}');
+const {{class.name}}Dao = app.service('{{class.expressServicePath}}');
  
 
 //config for app to do authentication
@@ -36,9 +36,9 @@ describe('{{class.name}} service', function() {
   var adminUser, user1, user2,
       adminAuthToken, user1AuthToken, user2AuthToken;
 
-  const mock{{class.name}}1 = {{class.outputMockRecord}}
+  const mock{{class.name}}1 = {{{class.outputMockRecord}}};
 
-  const mock{{class.name}}2 = {{class.outputMockRecord}}
+  const mock{{class.name}}2 = {{{class.outputMockRecord}}};
 
   // Before running the tests, setup the test environment...
   before(function(done) {
@@ -54,7 +54,7 @@ describe('{{class.name}} service', function() {
 		  .then(function() {
     			return Promise.all([
     				// Create mock {{class.name}} entities...
-   			    {{class.name}}Dao.create(Object.assign({}, mock{{class.name}}1, { ownerUserId: MockUsers.user1._id })),
+   			    {{class.name}}Dao.create(Object.assign({}, mock{{class.name}}1{{#if class.isUserOwned}}, { ownerUserId: MockUsers.user1._id }{{/if}} )),
 {{#if class.isUserOwned}}            
    			    {{class.name}}Dao.create(Object.assign({}, mock{{class.name}}2, { ownerUserId: MockUsers.user2._id })),
 {{/if}}            
@@ -113,7 +113,7 @@ describe('{{class.name}} service', function() {
 
           chai.request(app)
           //request to /{{class.name}} from user1
-          .get('/{{class.packageDirName}}/{{class.pluralName}}')
+          .get('/{{class.expressServicePath}}')
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(MockUsers.user1AuthToken))
           .end((err, res) => {
@@ -131,7 +131,7 @@ describe('{{class.name}} service', function() {
 
           chai.request(app)
           //request to /{{class.name}} from user1
-          .get('/{{class.packageDirName}}/{{class.pluralName}}')
+          .get('{{class.expressServicePath}}')
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(MockUsers.user2AuthToken))
           .end((err, res) => {
@@ -150,7 +150,7 @@ describe('{{class.name}} service', function() {
           console.log('Expecting 401');
           return chai.request(app)
 	          //request to /{{class.name}} from user1
-	          .get('//{{class.packageDirName}}/{{class.pluralName}}')
+	          .get('/{{class.expressServicePath}}')
 	          .set('Accept', 'application/json')
 	          .then(
 	              function(res) {
@@ -175,7 +175,7 @@ describe('{{class.name}} service', function() {
   		return chai.request(app)
 
   			// First, test the create() method...
-  			.post('/{{class.packageDirName}}/{{class.pluralName}}')
+  			.post('{{class.expressServicePath}}')
         	.set('Accept', 'application/json')
         	.set('Authorization', 'Bearer '.concat(user1AuthToken))
 
@@ -194,7 +194,7 @@ describe('{{class.name}} service', function() {
 
         		// Now, try to find {{class.attributes.0.jsIdentifierName}}Value2.  We should only get OUR {{class.attributes.0.jsIdentifierName}}Value2...
         		return chai.request(app)
-        				.get('/{{class.packageDirName}}/{{class.pluralName}}')
+        				.get('{{class.expressServicePath}}')
         				.query( { {{class.attributes.0.jsIdentifierName}}: mock{{class.name}}2.{{class.attributes.0.jsIdentifierName}} } )
 				        .set('Accept', 'application/json')
 				        .set('Authorization', 'Bearer '.concat(user1AuthToken));
@@ -216,7 +216,7 @@ describe('{{class.name}} service', function() {
 	            lastEntity.badField = 'wrong';
 	            lastEntity.ownerUserId = undefined;
         		return chai.request(app)
-        				.put('/{{class.packageDirName}}/{{class.pluralName}}/' + lastEntity._id)
+        				.put('{{class.expressServicePath}}/' + lastEntity._id)
 				        .set('Accept', 'application/json')
 				        .set('Authorization', 'Bearer '.concat(user1AuthToken))
 				        .send(lastEntity);
@@ -241,7 +241,7 @@ describe('{{class.name}} service', function() {
 
         		// Now, try to remove the entity...
         		return chai.request(app)
-        				.delete('/{{class.packageDirName}}/{{class.pluralName}}/' + lastEntity._id)
+        				.delete('{{class.expressServicePath}}/' + lastEntity._id)
 				        .set('Accept', 'application/json')
 				        .set('Authorization', 'Bearer '.concat(user1AuthToken));
         	})
@@ -252,7 +252,7 @@ describe('{{class.name}} service', function() {
 	            // Try to retrieve it now that its gone...
             console.log('Expecting 404');
         		return chai.request(app)
-        				.get('/{{class.packageDirName}}/{{class.pluralName}}/' + lastEntity._id)
+        				.get('{{class.expressServicePath}}/' + lastEntity._id)
 				        .set('Accept', 'application/json')
 				        .set('Authorization', 'Bearer '.concat(user1AuthToken));
         	})
@@ -278,7 +278,7 @@ describe('{{class.name}} service', function() {
         console.log('Expecting 403');
         return chai.request(app)
         	// Retrieve the entity owned by user #2
-        	.get('/{{class.packageDirName}}/{{class.pluralName}}')
+        	.get('{{class.expressServicePath}}')
         	.set('Accept', 'application/json')
         	.set('Authorization', 'Bearer '.concat(user2AuthToken))
 
@@ -298,7 +298,7 @@ describe('{{class.name}} service', function() {
 	            entity.{{class.attributes.0.jsIdentifierName}} = mock{{class.name}}2.{{class.attributes.0.jsIdentifierName}} + '-update';
 
         		return chai.request(app)
-        				.put('/{{class.packageDirName}}/{{class.pluralName}}/' + entity._id)
+        				.put('{{class.expressServicePath}}/' + entity._id)
 				        .set('Accept', 'application/json')
 				        .set('Authorization', 'Bearer '.concat(user1AuthToken))
 				        .send(entity);
@@ -324,7 +324,7 @@ describe('{{class.name}} service', function() {
         console.log('Expecting 401');
         return chai.request(app)
         	// Retrieve the entity owned by user #2
-        	.get('/{{class.packageDirName}}/{{class.pluralName}}')
+        	.get('{{class.expressServicePath}}')
         	.set('Accept', 'application/json')
         	.set('Authorization', 'Bearer '.concat(user2AuthToken))
 
@@ -343,7 +343,7 @@ describe('{{class.name}} service', function() {
 	            entity.{{class.attributes.0.jsIdentifierName}} = mock{{class.name}}2.{{class.attributes.0.jsIdentifierName}} + '-update';
 
         		return chai.request(app)
-        				.put('/{{class.packageDirName}}/{{class.pluralName}}/' + entity._id)
+        				.put('{{class.expressServicePath}}/' + entity._id)
 				        .set('Accept', 'application/json')
 				        .set('Authorization', 'Bearer '.concat(adminAuthToken))
 				        .send(entity);
@@ -374,7 +374,7 @@ describe('{{class.name}} service', function() {
   		return chai.request(app)
 
   			// First, test the create() method...
-  			.post('/{{class.packageDirName}}/{{class.pluralName}}')
+  			.post('{{class.expressServicePath}}')
         	.set('Accept', 'application/json')
         	.set('Authorization', 'Bearer '.concat(user1AuthToken))
 

@@ -83,7 +83,15 @@ var ServiceSupport = {};
 					function mockValue() {
 						let omniType = this.type.omniSchemaType;
 						let fakerSpec = omniType.fakerSpec;
-						return JSON.stringify(fakerSpec.getMockData());
+						let fakeField = new OmniSchema.OmniField(null, this.name, omniType);
+						fakeField.validation = {};
+						if (this.hasMinValue) {
+							fakeField.validation.min = this.minValue;
+						}
+						if (this.hasMaxValue) {
+							fakeField.validation.max = this.maxValue;
+						}
+						return JSON.stringify(fakerSpec.getMockData(fakeField));
 					},
 				],
 
