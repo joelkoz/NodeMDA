@@ -17,14 +17,14 @@ var pluralize = require('pluralize');
  *   {{/with}}
  * </code>
  */
-var TemplateSugar = {};
+var TemplateSupport = {};
 
 (function() {
 
     /**
      * Takes a string and translates it into a valid Javascript identifier.
      */
-    TemplateSugar.jsPathToIdentifier = function(packagePath) {
+    TemplateSupport.jsPathToIdentifier = function(packagePath) {
     	if (typeof packagePath === "string") {
     		return packagePath.replace(new RegExp("\\" + NodeMDA.Options.packageDelimeter, "g"), ".");
     	}
@@ -34,7 +34,7 @@ var TemplateSugar = {};
     };
     
 
-	TemplateSugar.initPlatform = function(context) {
+	TemplateSupport.initPlatform = function(context) {
 
 		let model = context.model;
 
@@ -69,7 +69,7 @@ var TemplateSugar = {};
 				     * identifier.
 				     */
 				    function jsClassNameWithPath() {
-	    	   			return TemplateSugar.jsPathToIdentifier(this.classNameWithPath);
+	    	   			return TemplateSupport.jsPathToIdentifier(this.classNameWithPath);
 				   	}
 				],
 			},
@@ -82,7 +82,7 @@ var TemplateSugar = {};
 				     * identifier.
 				     */
 					function jsClassNameWithPath() {
-	    	   			return TemplateSugar.jsPathToIdentifier(this.classNameWithPath);
+	    	   			return TemplateSupport.jsPathToIdentifier(this.classNameWithPath);
 					},
 					
 
@@ -90,7 +90,7 @@ var TemplateSugar = {};
 				     * Translates the metamodel's package name to a valid Javascript identifier.
 				     */
 					function jsPackageName() {
-	    	   			return TemplateSugar.jsPathToIdentifier(this.packageName);
+	    	   			return TemplateSupport.jsPathToIdentifier(this.packageName);
 					},
 
 					function pluralName() {
@@ -193,4 +193,4 @@ var TemplateSugar = {};
 	
 })();
 
-module.exports = TemplateSugar;
+module.exports = TemplateSupport;
