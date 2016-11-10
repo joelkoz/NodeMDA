@@ -9,6 +9,7 @@ const {{class.name}}Schema = OmniSchema.compile({
   {{attrib.name}}: { type: '{{attrib.omniSchemaTypeName}}', validation: { required: {{attrib.isRequired}}
   {{~#if attrib.hasMinValue}}, min: {{attrib.minValue}}{{/if}} 
   {{~#if attrib.hasMaxValue}}, max: {{attrib.maxValue}}{{/if}} }
+  {{~#if attrib.isUnique}}, db: { unique: true }{{/if}}
   {{~#if attrib.uiExclude}}, ui: { exclude: true }{{/if}}
   {{~#if attrib.hasDefaultValue}}, default: {{attrib.jsDefaultValue}}{{/if~}} 
   },
