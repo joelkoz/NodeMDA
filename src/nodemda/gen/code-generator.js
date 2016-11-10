@@ -322,7 +322,7 @@ const winston = require('winston');
         	fsx.writeFileSync(outputFileName, result);
     	}
     	else if (outputMode.toLowerCase() === "preserve") {
-    	   if (!fsx.existsSync(outputFileName)) {
+    	   if (!fsx.existsSync(outputFileName) || mda.Options.forceOverwrite) {
     		   checkDirectories(outputFileName);
     		   fsx.writeFileSync(outputFileName, result);
     	   }
@@ -476,7 +476,7 @@ const winston = require('winston');
 		if (fsx.existsSync(boilerplateSource)) {
 			// It does, copy it...
 			winston.info('Copying boilerplate code from plugin...')
-			copySync(boilerplateSource, NodeMDA.Options.output, { clobber: false, preserveTimestamps: true });
+			copySync(boilerplateSource, NodeMDA.Options.output, { clobber: mda.Options.forceOverwrite, preserveTimestamps: true });
 		}
 		
 		// Process each class...
