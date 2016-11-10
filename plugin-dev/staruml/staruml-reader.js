@@ -291,6 +291,8 @@ var winston = require('winston');
 			    metaAttribute._visibility = umlAttribute.visibility;
 			    metaAttribute._readOnly = umlAttribute.isReadOnly;
 			    metaAttribute._static = umlAttribute.isStatic;
+			    metaAttribute._unique = umlAttribute.isUnique;
+			    metaAttribute._defaultValue = umlAttribute.defaultValue;
 			    if ("multiplicity" in umlAttribute) {
 			    	metaAttribute._multiplicity = umlAttribute.multiplicity;
 			    }
@@ -344,6 +346,12 @@ var winston = require('winston');
 						    }
 						    if ("visibility" in umlParameter) {
 						        metaParam._visibility = umlParameter.visibility;
+						    }
+						    if ("isUnique" in umlParameter) {
+						        metaParam._unique = umlParameter.isUnique;
+						    }
+						    if ("defaultValue" in umlParameter) {
+						        metaParam._defaultValue = umlParameter.defaultValue;
 						    }
 						    
 							checkForComment(umlParameter, metaParam);

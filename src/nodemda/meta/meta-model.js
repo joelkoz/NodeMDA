@@ -329,6 +329,10 @@ let MetaModel = {};
 		get isVisible() {
 			return this._visibility !== "private";
 		}
+
+		get isUnique() {
+			return this._unique;
+		}
 		
 		get isReadOnly() {
 			return this._readOnly;
@@ -347,16 +351,16 @@ let MetaModel = {};
 		}
 		
 		get hasDefaultValue() {
-			return this.getTagValue("default") !== undefined || this.getTagValue("defaultValue") !== undefined;
+			return this._defaultValue !== undefined || this.getTagValue("default") !== undefined || this.getTagValue("defaultValue") !== undefined;
 		}
 		
 		get defaultValue() {
-			return this.getTagValue("default") || this.getTagValue("defaultValue");
+			return this._defaultValue || this.getTagValue("default") || this.getTagValue("defaultValue");
 		}
 		
 
 		get hasMinValue() {
-			return this.getTagValue('minVal');
+			return this.hasTag('minVal')
 		}
 
 		/**
@@ -374,7 +378,7 @@ let MetaModel = {};
 
 
 		get hasMaxValue() {
-			return this.getTagValue('maxVal');
+			return this.hasTag('maxVal')
 		}
 		/**
 		* Returns the maximum allowed value of this variable, if specified in the model. Otherwise,
@@ -400,16 +404,11 @@ let MetaModel = {};
 		constructor(name, type) {
 			super("Attribute", name, type);
 			this._static = false;
-			this._unique = false;
 		}
 		
 		
 		get isStatic() {
 			return this._static;
-		}
-		
-		get isUnique() {
-			return this._unique;
 		}
 		
 	};
