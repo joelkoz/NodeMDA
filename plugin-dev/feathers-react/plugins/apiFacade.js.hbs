@@ -2,15 +2,15 @@
 'use strict';
 
 {{#each apiDaoImport as |daoImport|}}
-{{daoImport}}
+{{{daoImport}}}
 {{/each}}
+import UserSchema from 'common/UserSchema';
 
 export default function apiFacade(app) {
 
 	let api = {};
-
 {{#each apiServiceEntries as |svcEntry|}}
-{{svcEntry}}
+{{{svcEntry}}}
 {{/each}}
 
 	api.AccountService = new class AccountService {
@@ -30,7 +30,7 @@ export default function apiFacade(app) {
 	}
 
 {{#each apiDaoEntries as |daoEntry|}}
-{{daoEntry}}
+{{{daoEntry}}}
 {{/each}}
 
 	api.AuthService = app.service('./authentication');

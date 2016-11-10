@@ -5,7 +5,7 @@ import App from './containers/App';
 import SignIn from './containers/SignIn';
 import Home from './containers/Home';
 {{#each crudListMenuImports as |crudImport|}}
-{{crudImport}}
+{{{crudImport}}}
 {{/each}}
 
 
@@ -55,7 +55,7 @@ let routerConfig = {
   childRoutes: [
 
 {{#each crudListMenuEntries as |crudEntry|}}
-{{crudEntry}}
+{{{crudEntry}}}
 {{/each}}
 
     { onEnter: redirectKnownUserToHome,
@@ -73,8 +73,6 @@ let routerConfig = {
 
 // Build a list of menu items to be used by the App object to build our UI menu.
 let getMenuItems = function() {
-
-   let routeInfo = routerConfig;
 
    return function() {
 

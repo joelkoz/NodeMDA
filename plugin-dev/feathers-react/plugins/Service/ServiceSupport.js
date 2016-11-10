@@ -46,30 +46,17 @@ var ServiceSupport = {};
 	   					},
 
 	   					function dependentServices() {
-	   						return this.getDependentClasses('Service');
-	   					},
-
-	   					function dependentDaos() {
-	   						return this.getDependentClasses('Entity');
+	   						let svc = [];
+	   						this.dependentClasses.forEach(function (depClass) {
+	   							if (depClass.stereotypeName === 'Service' ||
+	   								depClass.stereotypeName === 'Entity') {
+	   								svc.push(depClass);
+	   							}
+	   						});
+	   						return svc;
 	   					},
 
 	   				  ],
-
-	   			func: [
-	   					function getDependentClasses(stereotypeName) {
-	   						let depList = [];
-	   						this.dependencies.forEach(function(dep) {
-	   							let otherEnd = dep._otherObjectDatatype;
-	   							if (otherEnd.elementName === 'Object') {
-	   								let depClass = otherEnd.metaClass;
-	   								if (depClass.stereotypeName === stereotypeName) {
-	   									depList.push(depClass);
-	   								}
-	   							}
-	   						});
-	   						return depList;
-	   					},
-	   			],
 			},
 
 			onParameter: {

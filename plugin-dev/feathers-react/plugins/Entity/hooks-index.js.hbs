@@ -1,4 +1,4 @@
-##output preserve {{@root.output}}/src/services/{{class.packageDirName}}/{{class.name}}/hooks/index.js
+##output preserve {{@root.output}}/src/services/{{class.packageDirName}}/{{class.name}}Dao/hooks/index.js
 'use strict';
 
 const globalHooks = require('src/hooks');
@@ -14,7 +14,7 @@ const setOwnerToUser = auth.associateCurrentUser({ idField: '_id', as: 'ownerUse
 {{/if}}
 exports.before = {
   all: [
-    globalHooks.serviceCallLogger({serviceName: '{{class.name}}', logLevel: 'debug' }),
+    globalHooks.serviceCallLogger({serviceName: '{{class.name}}Dao', logLevel: 'debug' }),
 {{#if class.allowExternalAccess}}
     globalHooks.verifyTokenIfPresent(),
     auth.populateUser(),

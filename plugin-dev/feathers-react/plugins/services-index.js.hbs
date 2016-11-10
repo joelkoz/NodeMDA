@@ -1,12 +1,16 @@
+##output overwrite {{@root.output}}/src/services/index.js
 'use strict';
 
 // Register and initialize all services here...
-const exampleService = require('./ExamplePackage/ExampleService');
 const accountService = require('./AccountService');
-const contact = require('./AddressBook/Contact');
 const authentication = require('./authentication');
 const user = require('./user');
 const mongoose = require('mongoose');
+
+{{#each servicesIndexImport as |svcImport|}}
+{{{svcImport}}}
+{{/each}}
+
 module.exports = function() {
   const app = this;
 
@@ -15,7 +19,10 @@ module.exports = function() {
 
   app.configure(authentication);
   app.configure(user);
-  app.configure(contact);
   app.configure(accountService);
-  app.configure(exampleService);
+
+{{#each servicesIndexConfig as |svcConfig|}}
+{{{svcConfig}}}
+{{/each}}
+
 };

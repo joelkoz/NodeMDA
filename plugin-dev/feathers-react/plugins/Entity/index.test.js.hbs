@@ -1,4 +1,4 @@
-##output preserve {{@root.output}}/test/services/{{class.packageDirName}}/{{class.name}}/index.test.js
+##output preserve {{@root.output}}/test/services/{{class.packageDirName}}/{{class.name}}Dao/index.test.js
 'use strict';
 
 const chai = require('chai');
@@ -113,7 +113,7 @@ describe('{{class.name}} service', function() {
 
           chai.request(app)
           //request to /{{class.name}} from user1
-          .get('/{{class.packageDirName}}{{class.name}}')
+          .get('/{{class.packageDirName}}/{{class.pluralName}}')
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(MockUsers.user1AuthToken))
           .end((err, res) => {
@@ -131,7 +131,7 @@ describe('{{class.name}} service', function() {
 
           chai.request(app)
           //request to /{{class.name}} from user1
-          .get('/{{class.packageDirName}}{{class.name}}')
+          .get('/{{class.packageDirName}}/{{class.pluralName}}')
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(MockUsers.user2AuthToken))
           .end((err, res) => {
@@ -150,7 +150,7 @@ describe('{{class.name}} service', function() {
           console.log('Expecting 401');
           return chai.request(app)
 	          //request to /{{class.name}} from user1
-	          .get('/{{class.packageDirName}}{{class.name}}')
+	          .get('//{{class.packageDirName}}/{{class.pluralName}}')
 	          .set('Accept', 'application/json')
 	          .then(
 	              function(res) {
@@ -175,7 +175,7 @@ describe('{{class.name}} service', function() {
   		return chai.request(app)
 
   			// First, test the create() method...
-  			.post('/{{class.packageDirName}}{{class.name}}')
+  			.post('/{{class.packageDirName}}/{{class.pluralName}}')
         	.set('Accept', 'application/json')
         	.set('Authorization', 'Bearer '.concat(user1AuthToken))
 
@@ -194,7 +194,7 @@ describe('{{class.name}} service', function() {
 
         		// Now, try to find {{class.attributes.0.jsIdentifierName}}Value2.  We should only get OUR {{class.attributes.0.jsIdentifierName}}Value2...
         		return chai.request(app)
-        				.get('/{{class.packageDirName}}{{class.name}}')
+        				.get('/{{class.packageDirName}}/{{class.pluralName}}')
         				.query( { {{class.attributes.0.jsIdentifierName}}: mock{{class.name}}2.{{class.attributes.0.jsIdentifierName}} } )
 				        .set('Accept', 'application/json')
 				        .set('Authorization', 'Bearer '.concat(user1AuthToken));
@@ -216,7 +216,7 @@ describe('{{class.name}} service', function() {
 	            lastEntity.badField = 'wrong';
 	            lastEntity.ownerUserId = undefined;
         		return chai.request(app)
-        				.put('/{{class.packageDirName}}{{class.name}}/' + lastEntity._id)
+        				.put('/{{class.packageDirName}}/{{class.pluralName}}/' + lastEntity._id)
 				        .set('Accept', 'application/json')
 				        .set('Authorization', 'Bearer '.concat(user1AuthToken))
 				        .send(lastEntity);
@@ -241,7 +241,7 @@ describe('{{class.name}} service', function() {
 
         		// Now, try to remove the entity...
         		return chai.request(app)
-        				.delete('/{{class.packageDirName}}{{class.name}}/' + lastEntity._id)
+        				.delete('/{{class.packageDirName}}/{{class.pluralName}}/' + lastEntity._id)
 				        .set('Accept', 'application/json')
 				        .set('Authorization', 'Bearer '.concat(user1AuthToken));
         	})
@@ -252,7 +252,7 @@ describe('{{class.name}} service', function() {
 	            // Try to retrieve it now that its gone...
             console.log('Expecting 404');
         		return chai.request(app)
-        				.get('/{{class.packageDirName}}{{class.name}}/' + lastEntity._id)
+        				.get('/{{class.packageDirName}}/{{class.pluralName}}/' + lastEntity._id)
 				        .set('Accept', 'application/json')
 				        .set('Authorization', 'Bearer '.concat(user1AuthToken));
         	})
@@ -278,7 +278,7 @@ describe('{{class.name}} service', function() {
         console.log('Expecting 403');
         return chai.request(app)
         	// Retrieve the entity owned by user #2
-        	.get('/{{class.packageDirName}}{{class.name}}')
+        	.get('/{{class.packageDirName}}/{{class.pluralName}}')
         	.set('Accept', 'application/json')
         	.set('Authorization', 'Bearer '.concat(user2AuthToken))
 
@@ -298,7 +298,7 @@ describe('{{class.name}} service', function() {
 	            entity.{{class.attributes.0.jsIdentifierName}} = mock{{class.name}}2.{{class.attributes.0.jsIdentifierName}} + '-update';
 
         		return chai.request(app)
-        				.put('/{{class.packageDirName}}{{class.name}}/' + entity._id)
+        				.put('/{{class.packageDirName}}/{{class.pluralName}}/' + entity._id)
 				        .set('Accept', 'application/json')
 				        .set('Authorization', 'Bearer '.concat(user1AuthToken))
 				        .send(entity);
@@ -324,7 +324,7 @@ describe('{{class.name}} service', function() {
         console.log('Expecting 401');
         return chai.request(app)
         	// Retrieve the entity owned by user #2
-        	.get('/{{class.packageDirName}}{{class.name}}')
+        	.get('/{{class.packageDirName}}/{{class.pluralName}}')
         	.set('Accept', 'application/json')
         	.set('Authorization', 'Bearer '.concat(user2AuthToken))
 
@@ -343,7 +343,7 @@ describe('{{class.name}} service', function() {
 	            entity.{{class.attributes.0.jsIdentifierName}} = mock{{class.name}}2.{{class.attributes.0.jsIdentifierName}} + '-update';
 
         		return chai.request(app)
-        				.put('/{{class.packageDirName}}{{class.name}}/' + entity._id)
+        				.put('/{{class.packageDirName}}/{{class.pluralName}}/' + entity._id)
 				        .set('Accept', 'application/json')
 				        .set('Authorization', 'Bearer '.concat(adminAuthToken))
 				        .send(entity);
@@ -374,7 +374,7 @@ describe('{{class.name}} service', function() {
   		return chai.request(app)
 
   			// First, test the create() method...
-  			.post('/{{class.packageDirName}}{{class.name}}')
+  			.post('/{{class.packageDirName}}/{{class.pluralName}}')
         	.set('Accept', 'application/json')
         	.set('Authorization', 'Bearer '.concat(user1AuthToken))
 

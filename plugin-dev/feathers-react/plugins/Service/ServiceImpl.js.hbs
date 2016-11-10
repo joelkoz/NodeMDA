@@ -9,16 +9,9 @@ class {{class.name}}Impl {
     	this.app = app;
     }
 
-
 {{#each dependentServices as |svc|}}
-    get {{svc.name}}() {
-    	return this.app.service('/{{svc.packageDirName}}/{{svc.name}}/:op');
-    }
-
-{{/each}}
-{{#each dependentDaos as |dao|}}
-    get {{dao.name}}Dao() {
-        return this.app.service('/{{dao.packageDirName}}/{{dao.name}}Dao');
+    get {{svc.serviceVarName}}() {
+    	return this.app.service('{{svc.expressServicePath}}');
     }
 
 {{/each}}

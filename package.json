@@ -37,6 +37,7 @@
     "joi": "^9.2.0",
     "lodash": "^4.16.6",
     "omni-schema": "^1.5.0",
+    "pluralize": "^3.0.0",
     "winston": "^2.2.0"
   }
 }

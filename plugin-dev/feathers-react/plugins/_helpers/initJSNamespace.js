@@ -2,22 +2,17 @@
 
 var Handlebars = require("handlebars");
 
-var initJSNamespace = function(namespaceName) {
+var initJSNamespace = function(varName, namespaceName) {
 
     if (typeof namespaceName === "function") {
     	namespaceName = namespaceName.call(this);
     }
 	var paths = namespaceName.split(".");
-    var result = "var ";
-    var parentPath = "";
+    var result = "let ";
+    var parentPath = '';
     for (var i = 0; i < paths.length; i++) {
     	var nsName = parentPath + paths[i];
-    	if (i === 0) {
-    	    result += nsName + " = exports;\n";
-    	}
-    	else {
-    	    result += nsName + " = " + nsName + " || {};\n";
-    	}
+   	    result += varName + '.' + nsName + " = " + varName + '.' + nsName + " || {};\n";
     	parentPath = parentPath + paths[i] + ".";
     } // for
     

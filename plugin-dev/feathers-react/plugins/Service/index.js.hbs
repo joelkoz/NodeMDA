@@ -1,4 +1,4 @@
-##output overwrite {{@root.output}}/src/services/{{class.packageDirName}}/{{class.name}}/index.js
+##output overwrite {{@root.output}}/src/services/{{class.requireImportPath}}/index.js
 'use strict';
 
 const hooks = require('./hooks');
@@ -18,10 +18,11 @@ class ServiceThunk {
 
     {{#each operations as |fn|}}
     this.{{fn.name}}Signature = {
-         {{#each fn.parameters as |param|}}
-                                  {{param.name}}: {{param.joiDefinition}},
-         {{~/each}}
-                                };
+     {{#each fn.parameters as |param|}}
+        {{param.name}}: {{param.joiDefinition}},
+     {{/each}}
+    };
+
     {{/each}}
   }
 
@@ -79,10 +80,10 @@ module.exports = function(){
   const app = this;
 
   // Initialize our service 
-  app.use('/{{class.packageDirName}}/{{class.name}}/:op', new ServiceThunk());
+  app.use('{{class.expressServicePath}}', new ServiceThunk());
 
   // Get our initialize service to that we can bind hooks
-  const {{class.name}} = app.service('/{{class.packageDirName}}/{{class.name}}/:op');
+  const {{class.name}} = app.service('{{class.expressServicePath}}');
 
   // Set up our before hooks
   {{class.name}}.before(hooks.before);

@@ -1,4 +1,4 @@
-##output preserve {{@root.output}}/src/services/{{class.packageDirName}}/{{class.name}}/index.js
+##output preserve {{@root.output}}/src/services/{{class.requireImportPath}}/index.js
 'use strict';
 
 const service = require('feathers-mongoose');
@@ -17,19 +17,19 @@ module.exports = function() {
   };
 
   // Initialize our service with any options it requires
-  app.use('/{{class.packageDirName}}{{class.name}}', service(options));
+  app.use('{{class.expressServicePath}}', service(options));
 
   // Get our initialize service to that we can bind hooks
-  const {{class.name}}Dao = app.service('/{{class.packageDirName}}{{class.name}}Dao');
+  const {{class.serviceVarName}} = app.service('{{class.expressServicePath}}');
 
   // Set up our before hooks
-  {{class.name}}Dao.before(hooks.before);
+  {{class.serviceVarName}}.before(hooks.before);
 
   // Set up our after hooks
-  {{class.name}}Dao.after(hooks.after);
+  {{class.serviceVarName}}.after(hooks.after);
 
   // Filter real time events to only be sent to the entity owner
-  {{class.name}}Dao.filter(function(data, connection, hook) {
+  {{class.serviceVarName}}.filter(function(data, connection, hook) {
 
       if(!connection.user) {
         return false;

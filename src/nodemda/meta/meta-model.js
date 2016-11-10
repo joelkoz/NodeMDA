@@ -494,6 +494,10 @@ let MetaModel = {};
 			super("Dependency");
 			this._otherObjectDatatype = otherObjectDatatype;
 		}
+
+		get otherObject() {
+			return this._otherObjectDatatype;
+		}
 	};
 	
 	
@@ -792,6 +796,39 @@ let MetaModel = {};
 		    return this.inheritedRequiredAttributes.concat(aList);
 		}
 		
+
+
+
+
+		/**
+		 * Returns an array of all metaClass objects that this class
+		 * depends on.
+		 */
+		get dependentClasses() {
+			let depList = [];
+			this.dependencies.forEach(function(dep) {
+				let otherEnd = dep.otherObject;
+				if (otherEnd instanceof meta.ObjectDatatype) {
+					depList.push(otherEnd.metaClass);
+				}
+			});
+			return depList;
+		}
+
+		/**
+		 * Returns an array of all metaActor objects that this class
+		 * depends on.
+		 */
+		get dependentActors() {
+			let depList = [];
+			this.dependencies.forEach(function(dep) {
+				let otherEnd = dep.otherObject;
+				if (otherEnd instanceof meta.Actor) {
+					depList.push(otherEnd.metaClass);
+				}
+			});
+			return depList;
+		}
 	};
 
 	

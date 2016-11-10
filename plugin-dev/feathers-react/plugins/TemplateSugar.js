@@ -1,7 +1,7 @@
 "use strict";
 
 var NodeMDA = require("nodemda");
-
+var pluralize = require('pluralize');
 /*
  * Utility functions to make template generation much easier. Functions
  * added to object prototypes can be executed as if they are properties
@@ -91,6 +91,51 @@ var TemplateSugar = {};
 				     */
 					function jsPackageName() {
 	    	   			return TemplateSugar.jsPathToIdentifier(this.packageName);
+					},
+
+					function pluralName() {
+						return pluralize(this.name);
+					},
+
+
+					/**
+					 * The name to use for this service in code
+					 */
+					function serviceVarName() {
+						if (this.stereotypeName === 'Entity') {
+							return `${this.name}Dao`;
+						}
+						else if (this.stereotypeName === 'Service') {
+							return `${this.name}`;
+						}
+						else {
+							throw Error('There is no service path for stereotype ' + this.stereotypeName);
+						}
+					},
+
+
+					/**
+					* Returns the path used to register this service with
+					* express.
+					*/
+					function expressServicePath() {
+						if (this.stereotypeName === 'Entity') {
+							return `/${this.packageDirName}/${this.pluralName}`;
+						}
+						else if (this.stereotypeName === 'Service') {
+							return `/${this.packageDirName}/${this.name}/:op`;
+						}
+						else {
+							throw Error('There is no service path for stereotype ' + this.stereotypeName);
+						}
+					},
+
+
+					/**
+					 * The partial path to use to import this service with require()
+					 */
+					function requireImportPath() {
+						return `${this.packageDirName}/${this.serviceVarName}`;
 					},
 				],		
 
