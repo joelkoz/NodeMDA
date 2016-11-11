@@ -9,8 +9,8 @@ class AccountServiceImpl {
     	this.app = app;
     }
 
-    get userService() {
-    	return this.app.service('/users');
+    get UserDao() {
+    	return this.app.service('/Users');
     }
 
 
@@ -19,7 +19,7 @@ class AccountServiceImpl {
      */
 	SignUp({ firstName, lastName, email, password }, feathersParams) {
 
-		const users = this.userService;
+		const users = this.UserDao;
 
         // Make sure email is unique...
 		return users.find({ query: { email }})
@@ -30,7 +30,7 @@ class AccountServiceImpl {
 							throw new errors.Forbidden('An account already exists with email ' + email);
 						}
 
-						let newUser = Object.assign({}, { firstName, lastName, email, password });
+						let newUser = Object.assign({}, { firstName, lastName, email, password, roles: ['user'] });
 						return users.create(newUser);
 					});
 	}
@@ -42,7 +42,7 @@ class AccountServiceImpl {
      */
 	Remove({ email, password }, feathersParams) {
 
-		const users = this.userService;
+		const users = this.UserDao;
 		let user;
 
 		if (!feathersParams.user) {

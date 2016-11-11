@@ -121,10 +121,20 @@ var TemplateSupport = {};
 					*/
 					function expressServicePath() {
 						if (this.stereotypeName === 'Entity') {
-							return `/${this.packageDirName}/${this.pluralName}`;
+							if (this.inRootPackage) {
+								return `/${this.pluralName}`;
+							}
+							else {
+								return `/${this.packageDirName}/${this.pluralName}`;
+							}
 						}
 						else if (this.stereotypeName === 'Service') {
-							return `/${this.packageDirName}/${this.name}/:op`;
+							if (this.inRootPackage) {
+								return `/${this.name}/:op`;
+							}
+							else {
+								return `/${this.packageDirName}/${this.name}/:op`;
+							}
 						}
 						else {
 							throw Error('There is no service path for stereotype ' + this.stereotypeName);
@@ -136,7 +146,12 @@ var TemplateSupport = {};
 					 * The partial path to use to import this service with require()
 					 */
 					function requireImportPath() {
-						return `${this.packageDirName}/${this.serviceVarName}`;
+						if (this.inRootPackage) {
+							return `${this.serviceVarName}`;
+						}
+						else {
+							return `${this.packageDirName}/${this.serviceVarName}`;
+						}
 					},
 
 					/**
@@ -174,7 +189,7 @@ var TemplateSupport = {};
 					}
 
 
-				],		
+				],
 
 			},
 

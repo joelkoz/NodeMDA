@@ -6,21 +6,6 @@
     "token": {
       "secret": "hA+vEhNdk6CQwsGClaCttcpfIaZ1I5pKJBPl0FRDKev4VLk51i8SNCYeQQ0qT6jQcrKb+1XYpoLgTBGsg4txtA=="
     },
-    "local": {},
-    "successRedirect": "/main.html",
-    "facebook": {
-      "clientID": "your facebook client id",
-      "clientSecret": "your facebook client secret",
-      "permissions": {
-        "scope": ["public_profile","email"]
-      }
-    },
-    "google": {
-      "clientID": "your google client id",
-      "clientSecret": "your google client secret",
-      "permissions": {
-        "scope": ["profile"]
-      }
-    }
+    "local": {}
   }
 }

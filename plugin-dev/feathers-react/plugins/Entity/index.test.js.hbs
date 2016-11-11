@@ -1,4 +1,4 @@
-##output preserve {{@root.output}}/test/services/{{class.packageDirName}}/{{class.name}}Dao/index.test.js
+##output {{safePreserve class.name 'User'}} {{@root.output}}/test/services/{{class.packageDirName}}/{{class.name}}Dao/index.test.js
 'use strict';
 
 const chai = require('chai');
@@ -27,7 +27,7 @@ chai.use(chaiAsPromised);
 var should = chai.should();
 var expect = chai.expect;
 
-describe('{{class.name}} service', function() {
+describe('{{class.name}} Data Access service', function() {
 
 
   const mockAdminUser = MockUsers.mockAdminUser;

@@ -4,7 +4,6 @@
 {{#each apiDaoImport as |daoImport|}}
 {{{daoImport}}}
 {{/each}}
-import UserSchema from 'common/UserSchema';
 
 export default function apiFacade(app) {
 
@@ -12,33 +11,10 @@ export default function apiFacade(app) {
 {{#each apiServiceEntries as |svcEntry|}}
 {{{svcEntry}}}
 {{/each}}
-
-	api.AccountService = new class AccountService {
-		constructor() {
-			this.thunk = app.service('/AccountService/:op');
-		}
-
-
-		SignUp(firstName, lastName, email, password) {
-			return this.thunk.create({ _op: 'SignUp', firstName, lastName, email, password});
-		}
-
-
-		Remove(email, password) {
-			return this.thunk.create({ _op: 'Remove', email, password});
-		}
-	}
-
 {{#each apiDaoEntries as |daoEntry|}}
 {{{daoEntry}}}
 {{/each}}
-
 	api.AuthService = app.service('./authentication');
-
-
-	api.UserDao = app.service('/user');
-	api.UserDao.schema = UserSchema;
-
 
 	app.set('api', api);
 

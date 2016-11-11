@@ -2,9 +2,7 @@
 'use strict';
 
 // Register and initialize all services here...
-const accountService = require('./AccountService');
 const authentication = require('./authentication');
-const user = require('./user');
 const mongoose = require('mongoose');
 
 {{#each servicesIndexImport as |svcImport|}}
@@ -18,8 +16,6 @@ module.exports = function() {
   mongoose.Promise = global.Promise;
 
   app.configure(authentication);
-  app.configure(user);
-  app.configure(accountService);
 
 {{#each servicesIndexConfig as |svcConfig|}}
 {{{svcConfig}}}

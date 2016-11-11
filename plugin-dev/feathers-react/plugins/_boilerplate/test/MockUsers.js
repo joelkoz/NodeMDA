@@ -2,7 +2,7 @@
 
 const app = require('../src/app');
 
-const UserService = app.service('users');
+const UserService = app.service('/Users');
  
 var adminUser, user1, user2;
 var adminAuthToken, user1AuthToken, user2AuthToken;

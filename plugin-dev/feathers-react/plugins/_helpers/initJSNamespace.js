@@ -7,6 +7,9 @@ var initJSNamespace = function(varName, namespaceName) {
     if (typeof namespaceName === "function") {
     	namespaceName = namespaceName.call(this);
     }
+    if (namespaceName.trim().length === 0) {
+        return '';
+    }
 	var paths = namespaceName.split(".");
     var result = '';
     var parentPath = '';

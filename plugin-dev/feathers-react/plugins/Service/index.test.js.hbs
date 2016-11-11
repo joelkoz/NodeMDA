@@ -1,4 +1,4 @@
-##output preserve {{@root.output}}/test/services/{{class.packageDirName}}/{{class.name}}/index.test.js
+##output {{safePreserve class.name 'AccountService'}} {{@root.output}}/test/services/{{class.packageDirName}}/{{class.name}}/index.test.js
 'use strict';
 
 const chai = require('chai');
@@ -90,7 +90,7 @@ describe('{{class.name}} service', function() {
 			.set('Authorization', 'Bearer '.concat(authToken))
 			.send(Object.assign({}, { 
          						{{#each fn.parameters as |param|}}
-										{{param.name}}: {{param.mockValue}}, 
+										{{param.name}}: {{{param.mockValue}}}, 
 								{{/each}}
 									}))
 

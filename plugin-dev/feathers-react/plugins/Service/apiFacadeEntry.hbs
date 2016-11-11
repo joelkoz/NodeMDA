@@ -1,5 +1,4 @@
 ##output property apiServiceEntries
-
 {{#with class as |class|}}
     {{initJSNamespace 'api' class.jsPackageName}}
 	api.{{jsClassNameWithPath}} = new class {{class.name}} {
@@ -20,7 +19,6 @@
     {{~/each~}}
     });
 	    }
-	
 {{/each}}
 	}
 	

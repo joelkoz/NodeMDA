@@ -1,4 +1,4 @@
-##output preserve {{@root.output}}/src/services/{{class.packageDirName}}/{{class.name}}Dao/hooks/index.js
+##output {{safePreserve class.name 'User'}} {{@root.output}}/src/services/{{class.packageDirName}}/{{class.name}}Dao/hooks/index.js
 'use strict';
 
 const globalHooks = require('src/hooks');
@@ -20,7 +20,7 @@ exports.before = {
     globalHooks.serviceCallLogger({serviceName: '{{class.name}}Dao', logLevel: 'debug' }),
 {{#if class.allowExternalAccess}}
     globalHooks.verifyTokenIfPresent(),
-    auth.populateUser(),
+    auth.populateUser({userEndpoint: '/Users'}),
   {{#if class.isRoleRestricted}}    
     restrictToRoles,
   {{else}}

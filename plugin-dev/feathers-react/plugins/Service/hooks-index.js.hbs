@@ -13,7 +13,7 @@ exports.before = {
   all: [
     globalHooks.serviceCallLogger({serviceName: '{{class.name}}', logLevel: 'debug' }),
     globalHooks.verifyTokenIfPresent(),
-    auth.populateUser(),
+    auth.populateUser({userEndpoint: '/Users'}),
 {{#if class.allowExternalAccess}}    
   {{#if class.isRoleRestricted}}    
     restrictToRoles,

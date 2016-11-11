@@ -354,6 +354,9 @@ where *outputMode* is one of the following:
 * __*preserve*__ NodeMDA will not overwrite a preexisting file with the same name (usually
 created by a previous run of NodeMDA).
 
+* __*preserve!*__ Adding the exclamation point to the end of preserve ensures the file is preserved,
+even if the "force overwrite" option has been specified.
+
 * __*aggregate*__ The template output for each class will be gathered and placed in a single file of
 the specified name.
 
@@ -504,7 +507,7 @@ A support script file should follow this structure:
 ```javascript
 "use strict";
 
-var MySupport = MySupport || {};
+var MySupport = {};
 
 (function() {
 
@@ -549,8 +552,15 @@ Template Support Example
 ------------------------
 
 The following Javascript support file is used to demonstrate how the NodeMDA meta classes can
-be modified to make template authoring significantly easier.  This file comes from a platform 
-plugin that generates Javascript objects directly. It placed in the platfor directory of that plugin:
+be modified to make template authoring significantly easier. It demonstrates the user of NodeMDA's
+simple "mixin" system that allows you to easily add functionality to the meta model. 
+
+This file comes from a platform plugin that generates Javascript objects directly. It placed in 
+the platfor directory of that plugin.
+
+Note that the function in the specification is a "named function." This is critical to NodeMDA's
+mixin specification. Basically, the code below says "add a getter property named 'jsIdentifierNAme'
+to the Attribute meta model named.
 
 ```javascript
 "use strict";
@@ -560,34 +570,47 @@ var NodeMDA = require("nodemda");
 /*
  * Utility functions to make template generation much easier.
  */
-var TemplateSugar = TemplateSugar || {};
+var TemplateSupport = {};
 
 (function() {
 
-	TemplateSugar.initPlatform = function(context) {
 
-		/**
-		 * jsIdentifierName is the name to use as the identifier name
-		 * for an attribute in a class when generating Javascript code. 
-		 * The convention used is that read only and private variables are prefixed
-		 * with the "_" character.
-		 */
-		NodeMDA.Meta.Attribute.prototype.jsIdentifierName = function() {
-			if (this.isReadOnly || !this.isPublic) {
-				// A private variable...
-				return "_" + this.name;
-			}
-			else {
-				return this.name;
-			}
-	    };	
-			
-	};
+  TemplateSupport.initPlatform = function(context) {
 
-	
+    let model = context.model;
+
+    model.mixin({
+
+      onAttribute: {
+        get: [
+          /**
+           * jsIdentifierName is the name to use as the identifier name
+           * for an attribute in a class when generating Javascript code. 
+           * The convention used is that read only and private variables are prefixed
+           * with the "_" character.
+           */
+          function jsIdentifierName() {
+            if (this.isReadOnly || !this.isPublic) {
+              // A private variable...
+              return "_" + this.name;
+            }
+            else {
+              return this.name;
+            }
+
+            },
+        ],
+      },
+
+    }); // end mixin
+
+  };
+
+  
 })();
 
-module.exports = TemplateSugar;
+module.exports = TemplateSupport;
+
 ```
 
 With the above, any of the code templates can use a simple output format like this:

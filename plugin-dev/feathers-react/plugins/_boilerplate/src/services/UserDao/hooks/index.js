@@ -8,13 +8,13 @@ exports.before = {
   all: [],
   find: [
     auth.verifyToken(),
-    auth.populateUser(),
+    auth.populateUser({userEndpoint: '/Users'}),
     auth.restrictToAuthenticated(),
     auth.queryWithCurrentUser({ idField: '_id', as: '_id' })
   ],
   get: [
     auth.verifyToken(),
-    auth.populateUser(),
+    auth.populateUser({userEndpoint: '/Users'}),
     auth.restrictToAuthenticated(),
     auth.restrictToOwner({ ownerField: '_id' })
   ],
@@ -24,19 +24,19 @@ exports.before = {
   ],
   update: [
     auth.verifyToken(),
-    auth.populateUser(),
+    auth.populateUser({userEndpoint: '/Users'}),
     auth.restrictToAuthenticated(),
     auth.restrictToOwner({ ownerField: '_id' })
   ],
   patch: [
     auth.verifyToken(),
-    auth.populateUser(),
+    auth.populateUser({userEndpoint: '/Users'}),
     auth.restrictToAuthenticated(),
     auth.restrictToOwner({ ownerField: '_id' })
   ],
   remove: [
     auth.verifyToken(),
-    auth.populateUser(),
+    auth.populateUser({userEndpoint: '/Users'}),
     auth.restrictToAuthenticated(),
     hooks.disable('external')
   ]

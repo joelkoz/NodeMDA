@@ -608,6 +608,9 @@ let MetaModel = {};
 			this._package = pack;
 		}
 		
+		get inRootPackage() {
+			return !Boolean(this._package);
+		}
 		
 		getPackageName() {
 			if (this._package !== null) {

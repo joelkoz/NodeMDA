@@ -75,7 +75,7 @@ var ServiceSupport = {};
 							joiFieldCode += `.max(${this.maxValue})`;
 						}
 						if (this.isRequired) {
-							joiFieldCode += 'required()';
+							joiFieldCode += '.required()';
 						}
 						return joiFieldCode;
 					},

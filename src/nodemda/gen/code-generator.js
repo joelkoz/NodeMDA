@@ -321,8 +321,14 @@ const winston = require('winston');
         	checkDirectories(outputFileName);
         	fsx.writeFileSync(outputFileName, result);
     	}
-    	else if (outputMode.toLowerCase() === "preserve") {
-    	   if (!fsx.existsSync(outputFileName) || mda.Options.forceOverwrite) {
+    	else if (outputMode.toLowerCase().startsWith('preserve')) {
+    	   // mode 'preserve' can be overridden with the 'forceOverwrite' option,
+    	   // unless preserve ends with '!', which forces the preservation.
+    	   let forceOW = mda.Options.forceOverwrite;
+    	   if (outputMode.endsWith('!')) {
+    	   	   forceOW = false;
+    	   }
+    	   if (!fsx.existsSync(outputFileName) || forceOW) {
     		   checkDirectories(outputFileName);
     		   fsx.writeFileSync(outputFileName, result);
     	   }

@@ -51,7 +51,7 @@ var EntitySupport = {};
 	   					function allowExternalAccess() {
 	   						// By default, external access if OFF.
 	   						// It has to be turned on explicitly
-							return this.isTaggedAs('externalAccess');
+							return this.isRoleRestricted || this.isTaggedAs('externalAccess');
 	   					},
 
 	   					function doCrud() {
