@@ -8,7 +8,7 @@ var initJSNamespace = function(varName, namespaceName) {
     	namespaceName = namespaceName.call(this);
     }
 	var paths = namespaceName.split(".");
-    var result = "let ";
+    var result = '';
     var parentPath = '';
     for (var i = 0; i < paths.length; i++) {
     	var nsName = parentPath + paths[i];

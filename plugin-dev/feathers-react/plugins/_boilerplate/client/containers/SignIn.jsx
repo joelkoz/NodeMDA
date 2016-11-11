@@ -134,7 +134,7 @@ class SignIn extends FeathersComponent {
 
   getInputElements() {
 
-    const displayWithNext = { display: 'inline-block', marginRight: '25px' };
+    const displayWithNext = { display: 'inline-block', marginRight: '25px', verticalAlign: 'top' };
     const displayOnOwnLine = { display: 'block' };
     const msgBox = { width: '100%', display: 'block '};
     const infoMsgBox = Object.assign({ color: 'black'}, msgBox);
@@ -163,6 +163,7 @@ class SignIn extends FeathersComponent {
 
             <TextField key={3}
                 ref="lastName" 
+                style={ { verticalAlign: 'top'} }
                 floatingLabelText="Last name" 
                 type="text" /> 
     );}
@@ -190,6 +191,7 @@ class SignIn extends FeathersComponent {
         <TextField key={6}
             ref="passwordConfirmation" 
             floatingLabelText="Repeat password" 
+            style={ { verticalAlign: 'top'} }
             type="password" 
             onChange={ this.checkOkToContinue } 
             errorText={ this.state.passwordsMatch ? false : "Passwords don't match" }/> 

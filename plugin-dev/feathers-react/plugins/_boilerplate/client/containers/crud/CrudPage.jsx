@@ -239,6 +239,8 @@ class CrudPage extends FeathersComponent {
 
          return (
           <CrudList
+              getPrimaryText={this.props.getPrimaryText}
+              getSecondaryText={this.props.getSecondaryText}
               onLoadMoreRows={this.loadMoreRows.bind(this)}
               onEditRecord={this.onEditRecord.bind(this)}
               onAddNewRecord={this.onAddNewRecord.bind(this)}
