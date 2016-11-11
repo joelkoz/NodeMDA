@@ -15,6 +15,31 @@ function isAuthenticated() {
 }
 
 
+// Returns TRUE if the user is in the specified role
+function isInRole(roleList) {
+  let user = fapp.get('user');
+  let roles = user.roles;
+
+  if (!Array.isArray(roles)) {
+    roles = [roles];
+  }
+
+  if (!Array.isArray(roleList)) {
+    roleList = [roleList];
+  }
+
+  for (let ur = 0; ur < roles.length; ur++) {
+     let usrRole = roles[ur];
+     for (let rl = 0; rl < roleList.length; rl++) {
+        if (usrRole === roleList[rl]) {
+           return true;
+        }
+     }
+  }
+  return false;
+}
+
+
 // A React Router onEnter function to protect entries available only
 // to authenticated users.
 function redirectAnonToLogin(nextState, replace) {

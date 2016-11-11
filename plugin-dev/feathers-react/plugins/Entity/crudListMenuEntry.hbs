@@ -4,6 +4,6 @@
   	  path: '/{{class.name}}List',
   	  component: {{class.name}}List,
   	  _menuLabel: '{{class.name}} list',
-  	  _displayOnMenu: () => isAuthenticated(),
+  	  _displayOnMenu: () => isAuthenticated(){{#if class.isRoleRestricted}} && isInRole({{{class.stringifyRoleList}}}){{/if}},
   	  _menuKey: '{{class.name}}'
   	},
