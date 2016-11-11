@@ -2,6 +2,7 @@
 
 var NodeMDA = require("nodemda");
 var pluralize = require('pluralize');
+var _ = require('lodash');
 /*
  * Utility functions to make template generation much easier. Functions
  * added to object prototypes can be executed as if they are properties
@@ -137,6 +138,42 @@ var TemplateSupport = {};
 					function requireImportPath() {
 						return `${this.packageDirName}/${this.serviceVarName}`;
 					},
+
+					/**
+					* Returns TRUE if there are any dependencies on this class to one or more
+					* actors.
+					*/
+					function isRoleRestricted() {
+						return this.dependentActors.length > 0;
+					},
+
+
+					/**
+					 * Returns an array of roles this class is dependent on.
+					 */
+					function roleList() {
+						let roles = [];
+						this.dependentActors.forEach(function (actor) {
+							let roleName = actor.name;
+							if (roleName.endsWith('Role')) {
+								roleName = _.camelCase(roleName.slice(0, -4));
+							}
+							roles.push(roleName);
+						});
+						return roles;
+					},
+
+
+					/**
+					* Returns the stringified version of the roles use.  It will be in the
+					* format [ 'role1', 'role2',...]
+					*/
+					function stringifyRoleList() {
+						let strList = JSON.stringify(this.roleList);
+						return strList.replace(/"/g, '\'');
+					}
+
+
 				],		
 
 			},

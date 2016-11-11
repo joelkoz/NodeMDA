@@ -5,12 +5,22 @@ const globalHooks = require('src/hooks');
 const hooks = require('feathers-hooks');
 const auth = require('feathers-authentication').hooks;
 
+{{#if class.isRoleRestricted}}
+const restrictToRoles = auth.restrictToRoles({ roles: {{{class.stringifyRoleList}}}, owner: false });
+{{/if}}
+
 exports.before = {
   all: [
     globalHooks.serviceCallLogger({serviceName: '{{class.name}}', logLevel: 'debug' }),
     globalHooks.verifyTokenIfPresent(),
     auth.populateUser(),
-    auth.restrictToAuthenticated()
+{{#if class.allowExternalAccess}}    
+  {{#if class.isRoleRestricted}}    
+    restrictToRoles,
+  {{/if}}
+{{else}}
+    hooks.disable('external') 
+{{/if}}
   ],
   get: [],
   create: [ globalHooks.socketServiceThunkAdapter() ],

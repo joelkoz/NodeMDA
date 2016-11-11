@@ -837,7 +837,7 @@ let MetaModel = {};
 			this.dependencies.forEach(function(dep) {
 				let otherEnd = dep.otherObject;
 				if (otherEnd instanceof meta.Actor) {
-					depList.push(otherEnd.metaClass);
+					depList.push(otherEnd);
 				}
 			});
 			return depList;

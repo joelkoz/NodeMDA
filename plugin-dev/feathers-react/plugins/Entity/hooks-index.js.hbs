@@ -6,6 +6,9 @@ const hooks = require('feathers-hooks');
 const auth = require('feathers-authentication').hooks;
 // const customHooks = require('./custom-hooks');
 
+{{#if class.isRoleRestricted}}
+const restrictToRoles = auth.restrictToRoles({ roles: {{{class.stringifyRoleList}}}, owner: false });
+{{/if}}
 {{#if class.isUserOwned}}
 const restrictQueryToUser = auth.queryWithCurrentUser({ idField: '_id', as: 'ownerUserId' });
 const restrictToOwner = auth.restrictToOwner({ ownerField: 'ownerUserId' });
@@ -18,7 +21,11 @@ exports.before = {
 {{#if class.allowExternalAccess}}
     globalHooks.verifyTokenIfPresent(),
     auth.populateUser(),
+  {{#if class.isRoleRestricted}}    
+    restrictToRoles,
+  {{else}}
     auth.restrictToAuthenticated(),
+  {{/if}}    
 {{else}}    
     hooks.disable('external')    
 {{/if}}
