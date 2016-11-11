@@ -467,6 +467,10 @@ let MetaModel = {};
 			return (typeof(this._returnType) !== "undefined" && this._returnType !== null &&
 			        this.name !== "Void");
 		}
+
+		get hasParameters() {
+			return this.parameters.length > 0;
+		}
 		
 	};
 	
@@ -674,6 +678,15 @@ let MetaModel = {};
 		
 		get hasOperations() {
 			return (this.operations.length > 0);
+		}
+
+		get hasOperationsWithParams() {
+			for (let i = 0; i < this.operations.length; i++) {
+				if (this.operations[i].hasParameters) {
+					return true;
+				}
+			}
+			return false;
 		}
 		
 		/**

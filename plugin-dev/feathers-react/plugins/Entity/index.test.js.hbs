@@ -103,8 +103,8 @@ describe('{{class.name}} service', function() {
   });
 
 
-  it('registered the {{class.name}} service', function() {
-    assert.ok(app.service('/{{class.packageDirName}}{{class.name}}'));
+  it('registered the {{class.name}}Dao service', function() {
+    assert.ok(app.service('{{class.expressServicePath}}'));
   });
 
 
@@ -113,7 +113,7 @@ describe('{{class.name}} service', function() {
 
           chai.request(app)
           //request to /{{class.name}} from user1
-          .get('/{{class.expressServicePath}}')
+          .get('{{class.expressServicePath}}')
           .set('Accept', 'application/json')
           .set('Authorization', 'Bearer '.concat(MockUsers.user1AuthToken))
           .end((err, res) => {
@@ -150,7 +150,7 @@ describe('{{class.name}} service', function() {
           console.log('Expecting 401');
           return chai.request(app)
 	          //request to /{{class.name}} from user1
-	          .get('/{{class.expressServicePath}}')
+	          .get('{{class.expressServicePath}}')
 	          .set('Accept', 'application/json')
 	          .then(
 	              function(res) {

@@ -59,7 +59,9 @@ var EntitySupport = {};
 	   					},
 
 	   					function outputMockRecord() {
-	   						return JSON.stringify(this.schema.getMockData(), null, 4);
+	   						let mockRec = JSON.stringify(this.schema.getMockData(), null, 4);
+
+	   						return mockRec.replace(/"/g, '\'');
 	   					}
 	   				  ],
 			},

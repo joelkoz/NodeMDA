@@ -16,11 +16,15 @@ class {{class.name}}Impl {
 
 {{/each}}
 {{#each operations as |fn|}}
-	{{fn.name}}({ 
+	{{fn.name}}(
+     {{~#if fn.hasParameters~}}
+       { 
     {{~#each fn.parameters as |param|}}
          {{~param.name}}, 
     {{~/each~}}
-         }, feathersParams) {
+         },
+    {{~/if~}}
+         feathersParams) {
         // TODO supply implementation for {{class.name}}.{{fn.name}}()
 		// Return either a JSON object, or a Promise.
 		throw new errors.NotImplemented('{{class.name}}.{{fn.name}}() not yet implemented.');

@@ -17,12 +17,14 @@ class ServiceThunk {
   constructor(options) {
 
     {{#each operations as |fn|}}
+    {{#if fn.hasParameters}}
     this.{{fn.name}}Signature = {
      {{#each fn.parameters as |param|}}
         {{param.name}}: {{param.joiDefinition}},
      {{/each}}
     };
 
+    {{/if}}
     {{/each}}
   }
 
@@ -40,7 +42,7 @@ class ServiceThunk {
     return this.call(data, feathersParams);
   }
 
-
+{{#if class.hasOperationsWithParams}}
   checkParams(params, methodSignature) {
 
      let validated = Joi.validate(params, methodSignature);
@@ -50,11 +52,13 @@ class ServiceThunk {
 
      return validated.value;
   }
-
+{{/if}}
 
   call(opParams, feathersParams) {
 
+{{#if class.hasOperationsWithParams}}
     let validatedParams;
+{{/if}}    
     feathersParams.Model = this.Model;
 
     if (!feathersParams.op) {
@@ -65,11 +69,13 @@ class ServiceThunk {
 
     {{#each operations as |fn|}}
         case '{{fn.name}}':
+          {{#if fn.hasParameters}}
             validatedParams = this.checkParams(opParams, this.{{fn.name}}Signature);
-            return Promise.resolve(this.serviceImpl.{{fn.name}}(validatedParams, feathersParams));
+          {{/if}}
+            return Promise.resolve(this.serviceImpl.{{fn.name}}({{#if fn.hasParameters}}validatedParams, {{/if}}feathersParams));
 
     {{/each}}
-    }
+    } // switch
 
     throw new errors.NotFound('Unknown operation: {{class.name}}.' + feathersParams.op);
   }

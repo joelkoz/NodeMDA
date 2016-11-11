@@ -2,7 +2,7 @@
 'use strict';
 
 const mongoose = require('mongoose');
-const {{class.name}}Schema = require('common/{{class.name}}Schema');
+const {{class.name}}Schema = require('common/{{class.packageDirName}}/{{class.name}}Schema');
 
 const {{class.name}}Model = mongoose.model('{{class.pluralName}}', {{class.name}}Schema.getMongooseSchema());
 

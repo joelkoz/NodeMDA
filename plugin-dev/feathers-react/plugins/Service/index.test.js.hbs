@@ -73,7 +73,7 @@ describe('{{class.name}} service', function() {
 
 
 	it('registered the {{class.name}} service', () => {
-		assert.ok(app.service('/{{class.packageDirName}}/{{class.name}}/:op'));
+		assert.ok(app.service('{{class.expressServicePath}}'));
 	});
 
 

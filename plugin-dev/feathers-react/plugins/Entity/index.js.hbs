@@ -2,14 +2,14 @@
 'use strict';
 
 const service = require('feathers-mongoose');
-const Contact = require('./{{class.name}}-model');
+const {{class.name}}Model = require('./{{class.name}}-model');
 const hooks = require('./hooks');
 
 module.exports = function() {
   const app = this;
 
   const options = {
-    Model: Contact,
+    Model: {{class.name}}Model,
     paginate: {
       default: 5,
       max: 25
