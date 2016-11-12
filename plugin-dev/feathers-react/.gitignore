@@ -1,0 +1,7 @@
+/output
+/testmda.js
+/node_modules
+/node_modules/*
+*.tgz
+nodemda.json
+

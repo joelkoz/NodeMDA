@@ -1,6 +1,6 @@
 {
   "name": "nodemda-feathers-react",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "NodeMDA plugin to generate a full stack Javascript app using Feathers, React, and Material-UI",
   "main": "index.js",
   "scripts": {
@@ -16,9 +16,10 @@
     "formsy"
   ],
   "dependencies": {
-    "omni-schema": "^1.5.0",
     "faker": "^3.1.0",
-    "joi": "^9.2.0"
+    "joi": "^9.2.0",
+    "omni-schema": "^1.5.0",
+    "winston": "^2.3.0"
   },
   "author": "Joel Kozikowski",
   "license": "MIT"

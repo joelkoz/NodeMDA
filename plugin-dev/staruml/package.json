@@ -1,6 +1,6 @@
 {
   "name": "nodemda-staruml",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "NodeMDA meta model reader for StarUML",
   "main": "index.js",
   "scripts": {
@@ -11,5 +11,8 @@
     "staruml"
   ],
   "author": "Joel Kozikowski",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "winston": "^2.3.0"
+  }
 }
