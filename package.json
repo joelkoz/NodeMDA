@@ -38,6 +38,7 @@
     "lodash": "^4.16.6",
     "omni-schema": "^1.6.2",
     "pluralize": "^3.0.0",
+    "prompt-sync": "^4.1.4",
     "winston": "^2.2.0"
   }
 }

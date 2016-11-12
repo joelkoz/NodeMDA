@@ -1,3 +1,5 @@
-var winston = require('winston');
-
-winston.info("Including NodeMDA module feathers-react");
+module.exports = {
+	type: 'platform',
+	name: 'feathers-react',
+	desc: 'Full stack multi-user SOA application using Express, Feathers, React, and Material-UI'
+};

@@ -1,8 +1,8 @@
 {
   "name": "nodemda-staruml",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "NodeMDA meta model reader for StarUML",
-  "main": "staruml-reader.js",
+  "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

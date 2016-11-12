@@ -1,6 +1,6 @@
 {
   "name": "nodemda-javascript-es6",
-  "version": "0.1.2",
+  "version": "0.5.0",
   "description": "NodeMDA templates to generate Javascript using ES6 standard",
   "main": "index.js",
   "scripts": {
