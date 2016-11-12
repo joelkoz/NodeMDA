@@ -43,6 +43,11 @@ function getPlugins() {
 		discoverPlugins(localPath);
 
 		let nodeMDADir = NodeMDA.getNodeMDADir();
+		let nmi = nodeMDADir.indexOf('node_modules');
+		if (nmi >= 0) {
+			nodeMDADir = nodeMDADir.slice(0, nmi+12);
+		}
+
 		discoverPlugins(nodeMDADir + '/nodemda-*');
 	}
 
@@ -147,7 +152,7 @@ program
 
 		}
 
-		console.log('Using platform ' + NodeMDA.Options.platform);
+		console.log('\nUsing platform ' + NodeMDA.Options.platform);
 
 		
 		if (cmd.output) {
