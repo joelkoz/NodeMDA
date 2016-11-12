@@ -888,7 +888,7 @@ let MetaModel = {};
 		static findClass(packageName, className, model) {
 
 			if (typeof(model) === 'undefined') {
-			    model = NodeMDA.runtime.model;
+			    model = global._nodemda_runtime_model_;
 			}
 
 			if (typeof(model) === "undefined") {

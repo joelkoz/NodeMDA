@@ -441,11 +441,10 @@ const winston = require('winston');
 	mda.gen = function(modelFileName) {
 		
 		winston.info("Starting code generation.");
-		NodeMDA.runtime = {};
 		
 		var metaModel = MetaModel.Reader.getMeta(modelFileName);
 		
-		NodeMDA.runtime.model = metaModel;
+		global._nodemda_runtime_model_ = metaModel;
 
 		if (!mda.Meta.validate(metaModel)) {
 			// We failed validation, just just stop processing.
