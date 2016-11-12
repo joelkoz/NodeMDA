@@ -279,7 +279,8 @@ const winston = require('winston');
     	   result = render(context);
     	}
     	catch (error) {
-    		winston.error(`Render error in template file ${templateFile}:\n--- ${error.message}`);
+    		winston.error(`\n\nRender error in template file ${templateFile}:\n`);
+    		winston.error(error.stack);
     		process.exit(-1);
     	}
     	
