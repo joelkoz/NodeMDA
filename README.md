@@ -47,30 +47,31 @@ a reader for [StarUML](http://staruml.io/).
 
 **_Command line_**
 ```
-mkdir test
 
-cd test
+## The core NodeMDA system is best installed globally
+npm install -g nodemda
+npm install -g nodemda-staruml
+npm install -g nodemda-feathers-react
+npm install -g nodemda-javascript-es6
 
-npm install nodemda-javascript-es6
+## Create a new directory for your application
 
-cp node_modules/nodemda/addressBook.mdj .
+mkdir example-project
 
-node_modules/nodemda/bin/nodemda addressBook.mdj
-```
+cd example-project
 
+## Create and generate a project:
 
-**_Javascript_**
-```javascript
-var NodeMDA = require('nodemda');
+nodemda init
 
-// Specify the code that can read our model and return a NodeMDA Meta Model JSON structure: 
-NodeMDA.Meta.Reader = require('nodemda-staruml'); 
+nodemda gen
 
-// Specify which platform we want to generate code for:
-NodeMDA.Options.platform = "javascript-es6";
+## You should now be able to:
 
-// Generate code!
-NodeMDA.gen('addressBook.mdj');
+npm test
+
+npm start
+
 ```
 
 
@@ -118,6 +119,7 @@ The JSON meta model used by NodeMDA to generate code currently supports the foll
 * Generalization
 * Dependency
 * Association
+* Actor
 
 Whether or not a particular element has any affect on code generation depends entirely on
 the plugin being used. These elements do exist in the NodeMDA meta model, however, so if
@@ -179,15 +181,14 @@ Plugin Conventions
 
 1. Plugins are organized by *platform*.  A *platform* is a particular software stack that the 
 plugins are designed to generate code for. A plugin platform may be as generic as
-"Javascript and SQL" or as specific as "Meteor with React and Bootstrap".
+"Javascript and SQL" or as specific as "Express with Feathers service layer and React plus Material-UI for the client".
 
 1.  A plugin is an npm package that has the name "nodemda-<platformId>" where platformId is
 a platform identifier that makes a valid module name.  The plugin package is expected to have a directory
 named "plugins" that contains all of the templates and helper scripts.
 
-2. By default, all plugins are located in the same node_modules directory that the "handlebars" module is
-located in. The can be overridden by setting the value of `NodeMDA.Options.plugins` 
-
+2. All plugins are anywhere that is discoverable by the Node require system. The command "nodemda dirs" will
+show you the exact locations of where NodeMDA is looking for its plugins in your project.
 
 3. Inside the platform module's "plugins" directory lies zero or more "Stereotype" directories.  These directories
 can contain zero or more Javascript files (which *must* end in `.js`) that are executed to aid in code generation, 
@@ -195,7 +196,7 @@ as well as zero or more Handlebar template files (which *must* end in `.hbs`). T
 match the name of the actual stereotype in both spelling and case.
 
 4. Generated code will be placed in the directory specified by the property
-`NodeMDA.Options.output` (default value is "./output"). Unless otherwise specified, generated
+`NodeMDA.Options.output` (default value is "."). Unless otherwise specified, generated
 code will be placed in a sub-directory that matches the "UML package name" of the class, and
 it will have a file name that is the "UML name" of the class.  The extension used for the
 generated file will be the same as the template file, minus the ".hbs" extension.
@@ -312,9 +313,9 @@ Here is a simple example of a template:
 **pojo.js.hbs**
 ```
 {{#with class}}
-var {{_name}} = {
+var {{name}} = {
    {{#each attributes}}
-      {{_name}} : "",
+      {{name}} : "",
    {{/each}}
 };
 {{/with}}
@@ -377,7 +378,7 @@ as the second parameter.
 For example, this is an explicit declaration of the otherwise default output behavior of a
 .js.hbs file:
 ```
-##output overwrite {{@root.output}}/{{class._package._name}}/{{class._name}}.js
+##output overwrite {{@root.output}}/{{class.package.name}}/{{class.name}}.js
 ```
 
 as is this:
