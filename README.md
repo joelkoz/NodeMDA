@@ -66,6 +66,10 @@ nodemda init
 
 nodemda gen
 
+## After the initial generation, install the dependencies
+
+npm install
+
 ## You should now be able to:
 
 npm test
