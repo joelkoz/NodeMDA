@@ -1,6 +1,6 @@
 {
   "name": "nodemda-feathers-react",
-  "version": "0.5.3",
+  "version": "0.5.5",
   "description": "NodeMDA plugin to generate a full stack Javascript app using Feathers, React, and Material-UI",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joelkoz/NodeMDA/tree/master/plugin-dev/feathers-react.git"
+    "url": "git+https://github.com/joelkoz/NodeMDA/tree/master/plugin-dev/feathers-react"
   },
   "keywords": [
     "nodemda",
