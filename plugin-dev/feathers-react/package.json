@@ -20,7 +20,8 @@
     "formsy",
     "SOA",
     "services",
-    "code generator"
+    "code generator",
+    "express"
   ],
   "dependencies": {
     "faker": "^3.1.0",
