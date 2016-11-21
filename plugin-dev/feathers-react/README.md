@@ -75,4 +75,4 @@ a role named "subscriber".  If you don't use the "Role" suffix, the role name is
 
 Example Model
 ----------------------------
-![alt text](feathers-react-default-model.png "Example UML processed by this plugin")
+![alt text](https://github.com/joelkoz/NodeMDA/raw/master/plugin-dev/feathers-react/feathers-react-default-model.png "Example UML processed by this plugin")
