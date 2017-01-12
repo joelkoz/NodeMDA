@@ -19,7 +19,12 @@ var EntitySupport = {};
 			onClass: { 
 				matches: { stereotypeName: 'Entity' },
 			    get: [ function isUserOwned() {
+			    			if (this.isSubClass) {
+			    				return this.parentClass.isUserOwned;
+			    			}
+			    			else {
 								return this.isTaggedAs('userOwned');
+			    			}
 	   					},
 
 	   					function doCrud() {

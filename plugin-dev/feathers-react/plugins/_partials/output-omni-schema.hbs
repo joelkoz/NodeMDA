@@ -1,8 +1,11 @@
 const OmniSchema = require('omni-schema');
 {{#with class as |class|}}
 {{#if class.isSubClass}}
-const {{parentClass.name}}Schema = require('{{#if parentClass.allowExternalAccess}}common/{{else}}src/{{/if}}{{parentClass.packageDirName}}/{{parentClass.name}}Schema');
+const {{parentClass.name}}Schema = require('common/{{parentClass.packageDirName}}/{{parentClass.name}}Schema');
 {{/if}}
+{{#each class.referencedEmbeddedClasses as |refClass|}}
+const {{refClass.name}}Schema = require('common/{{refClass.packageDirName}}/{{refClass.name}}Schema');
+{{/each}}
 
 const Types = OmniSchema.Types;
 
@@ -22,8 +25,10 @@ const {{class.name}}Schema = OmniSchema.compile({
   {{~#if attrib.hasDefaultValue}}, default: {{attrib.jsDefaultValue}}{{/if~}} 
   } {{~#if attrib.isArray}} ]{{/if}},
 {{/each}}
-{{#if class.isUserOwned}}  
+{{#if class.isUserOwned}}
+  {{#unless class.isSubClass}}
   ownerUserId: { type: 'String', required: true, ui: { exclude: true } },
+  {{/unless}}
 {{/if}}
 {{#if class.autogenPrimaryKey}}
   _id: { type: 'String', ui: { exclude: true } },

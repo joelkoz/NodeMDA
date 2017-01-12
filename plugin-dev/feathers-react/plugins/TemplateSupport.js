@@ -297,15 +297,24 @@ var TemplateSupport = {};
 					* actors.
 					*/
 					function isRoleRestricted() {
-						return this.dependentActors.length > 0;
+						return this.roleList.length > 0;
 					},
 
 
 					/**
-					 * Returns an array of roles this class is dependent on.
+					 * Returns an array of roles this class is dependent on.  Note
+					 * that role dependencies are inherited from parent classes
 					 */
 					function roleList() {
+						if (this.hasOwnProperty('__roleList')) {
+							return this.__roleList;
+						}
+
 						let roles = [];
+						if (this.isSubClass) {
+							roles = this.parentClass.roleList;
+						}
+
 						this.dependentActors.forEach(function (actor) {
 							let roleName = actor.name;
 							if (roleName.endsWith('Role')) {
@@ -313,9 +322,33 @@ var TemplateSupport = {};
 							}
 							roles.push(roleName);
 						});
+
+						this.__roleList = roles;
+
 						return roles;
 					},
 
+
+					/**
+					* Returns a list of all referenced objects that are "db embedded" to allow
+					* schema generation to properly import them.
+					*/ 
+					function referencedEmbeddedClasses() {
+
+						let referenced = this.referencedClasses;
+
+						let refEmbed = [];
+
+						referenced.forEach(function (metaClass) {
+		    		   		if (metaClass.stereotypeName === 'ValueObject' || metaClass.stereotypeName === 'POJO') {
+		    		   			refEmbed.push(metaClass);
+		    		   		}
+						});
+
+						return refEmbed;
+
+
+					},
 
 					/**
 					* Returns the stringified version of the roles use.  It will be in the
