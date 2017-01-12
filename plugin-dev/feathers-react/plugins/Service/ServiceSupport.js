@@ -34,17 +34,6 @@ var ServiceSupport = {};
 			onClass: { 
 				matches: { stereotypeName: 'Service' },
 			    get: [ 
-	   					function allowExternalAccess() {
-	   						// By default, services are externally available
-	   						// They can only be turned off explicitly
-	   						if (!this.hasTag('externalAccess')) {
-	   							return true;
-	   						}
-	   						else {
-								return this.isTaggedAs('externalAccess');
-	   						}
-	   					},
-
 	   					function dependentServices() {
 	   						let svc = [];
 	   						this.dependentClasses.forEach(function (depClass) {

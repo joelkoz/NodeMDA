@@ -24,6 +24,7 @@ THE SOFTWARE.
 
 const NodeMDA = require("../nodemda-core.js");
 const _ = require('lodash');
+const pluralize = require('pluralize');
 
 let MetaModel = {};
 
@@ -226,7 +227,7 @@ let MetaModel = {};
 		/**
 		 * Returns a reference to the NodeMDA.Meta.Class object that this ObjectDatatype references
 		 */
-	    get metaClass () {
+	    get metaClass() {
 	    	var metaClass = meta.Model.findClass(this.packageName, this.className);
 	    	return metaClass;
 	    }
@@ -346,6 +347,15 @@ let MetaModel = {};
 			return this._multiplicity.slice(-1) === "*";
 		}
 		
+		get isMany() {
+			return this._multiplicity.slice(-1) === "*";
+		}
+
+
+		get isOne() {
+			return this._multiplicity.slice(-1) === "1";
+		}
+
 		get isObject() {
 	    	return (this.type.name === "Object");
 		}
@@ -510,17 +520,13 @@ let MetaModel = {};
 	 * Associations between two objects have an "end" at each endpoint
 	 * that describes the details of the relationship.
 	 */
-    meta.AssociationEnd = class AssociationEnd extends meta.MetaElement {
+    meta.AssociationEnd = class AssociationEnd extends meta.AbstractVariable {
         constructor() {
-			super("AssociationEnd");
-        	this._name = null;
-        	this._type = null;
+			super("AssociationEnd", null, null);
         	this._multiplicity = "1";
         	this._navigable = true;
         	this._aggregation = false;
         	this._composition = false;
-        	this._public = true;
-        	this._isReadOnly = false;
         }	
 
         /**
@@ -533,15 +539,28 @@ let MetaModel = {};
         	}
         	else {
         	    // Synthesize a name from the type name...
-        		var typeName = this._type.name;
-        		return typeName.charAt(0).tolowercase() + typeName.slice(2);
+        		let typeName = this._type.className;
+        		if (this.isMany) {
+        			typeName = pluralize(typeName);
+        		}
+        		return typeName.charAt(0).toLowerCase() + typeName.slice(1);
         	}
 		}
 
-        get type() {
-        	return this._type;
-        }
-        
+		get isNavigable() {
+			return this._navigable;
+		}
+
+
+		get isAggregation() {
+			return this._aggregation;
+		}
+
+
+		get isComposition() {
+			return this._composition;
+		}
+
     };	
 	
     
@@ -648,6 +667,20 @@ let MetaModel = {};
 			}
 		}
 		
+
+		/**
+		* Returns the full path to this class. If separator is specified, the path
+		* nodes will be separated with the specified separator character.
+		*/
+		getClassNameWithPath(separator) {
+			let cp = this.classNameWithPath;
+			if (separator) {
+			   cp = cp.replace(new RegExp("\\" + NodeMDA.Options.packageDelimeter, "g"), separator);
+			}
+			return cp;
+		}
+
+
 		get isSubClass() {
 			return (this.generalizations.length > 0);
 		}
@@ -813,6 +846,31 @@ let MetaModel = {};
 		}
 		
 
+		/**
+		 * Returns an array of all metaClass objects that this class
+		 * references. This includes all attributes that have a data type
+		 * of that is another class, as well as all association ends that
+		 * are classes.
+		 */
+		get referencedClasses() {
+			let refList = [];
+
+			this.attributes.forEach(function (attribute) {
+				if (attribute.type instanceof meta.ObjectDatatype) {
+					refList.push(attribute.type.metaClass);
+				}
+			});
+
+			this.associations.forEach(function(assoc) {
+				let otherEnd = assoc.otherObject;
+				if (otherEnd instanceof meta.ObjectDatatype) {
+					refList.push(otherEnd.metaClass);
+				}
+			});
+
+			return refList;
+		}
+
 
 
 
@@ -830,6 +888,8 @@ let MetaModel = {};
 			});
 			return depList;
 		}
+
+
 
 		/**
 		 * Returns an array of all metaActor objects that this class
