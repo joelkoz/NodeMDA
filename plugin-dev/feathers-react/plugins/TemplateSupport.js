@@ -82,7 +82,7 @@ var TemplateSupport = {};
 
 		// Build an OmniSchema for this class so we can mock a record...
 		let schemaTemplate = {};
-		metaClass.attributes.forEach(function(attrib) {
+		metaClass.allVisibleAttributes.forEach(function(attrib) {
 			if (attrib.isObject) {
 				schemaTemplate[attrib.name] = { schema: attrib.type.metaClass.schemaCollectionName };
 			}
