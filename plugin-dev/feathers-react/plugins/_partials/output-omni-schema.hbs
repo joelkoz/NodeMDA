@@ -3,7 +3,7 @@ const OmniSchema = require('omni-schema');
 {{#if class.isSubClass}}
 const {{parentClass.name}}Schema = require('common/{{parentClass.packageDirName}}/{{parentClass.name}}Schema');
 {{/if}}
-{{#each class.referencedEmbeddedClasses as |refClass|}}
+{{#each class.referencedForSchemaImport as |refClass|}}
 const {{refClass.name}}Schema = require('common/{{refClass.packageDirName}}/{{refClass.name}}Schema');
 {{/each}}
 
@@ -13,7 +13,11 @@ const {{class.name}}Schema = OmniSchema.compile({
 {{#each class.attributes as |attrib|}}
   {{attrib.name}}: {{#if attrib.isArray}} [ {{/if~}}
   {{~#if attrib.isObject}}
+     {{~#if attrib.importedBySchema}}
+     { schema: {{attrib.type.metaClass.name}}Schema
+     {{~else~}}
      { schema: '{{attrib.type.metaClass.schemaCollectionName}}'
+     {{~/if~}}
   {{~else~}}
      { type: '{{attrib.omniSchemaTypeName}}'
   {{~/if~}}

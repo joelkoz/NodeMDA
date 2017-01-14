@@ -4,6 +4,6 @@
 const mongoose = require('mongoose');
 const {{class.name}}Schema = require('common/{{#unless class.inRootPackage}}{{class.packageDirName}}/{{/unless}}{{class.name}}Schema');
 
-const {{class.name}}Model = {{class.name}}Schema.getMongooseModel());
+const {{class.name}}Model = {{class.name}}Schema.getMongooseModel();
 
 module.exports = {{class.name}}Model;

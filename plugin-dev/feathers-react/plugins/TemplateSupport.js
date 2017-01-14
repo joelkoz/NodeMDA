@@ -161,7 +161,25 @@ var TemplateSupport = {};
    						if (this._schemaDbProp) {
    							return JSON.stringify(this._schemaDbProp);
    						}
+   					},
+
+   					/**
+   					* Returns TRUE if this attribute is an object attribute that can and should be 
+   					* imported and referenced directly by the schema.
+   					*/
+   					function importedBySchema() {
+
+						if (this.isObject) {
+							if (_.get(this, '_schemaDbProp.persistence') === 'embed' || 
+								_.get(this, '_schemaDbProp.foreignKeyField')) {
+									return true;
+						    }
+						}
+
+						return false;
    					}
+
+
 				]},
 			     
 			    { func: [
@@ -330,25 +348,22 @@ var TemplateSupport = {};
 
 
 					/**
-					* Returns a list of all referenced objects that are "db embedded" to allow
-					* schema generation to properly import them.
+					* Returns a list of all referenced objects that referenced for
+					* direct import by a schema definition.
 					*/ 
-					function referencedEmbeddedClasses() {
-
-						let referenced = this.referencedClasses;
+					function referencedForSchemaImport() {
 
 						let refEmbed = [];
 
-						referenced.forEach(function (metaClass) {
-		    		   		if (metaClass.stereotypeName === 'ValueObject' || metaClass.stereotypeName === 'POJO') {
-		    		   			refEmbed.push(metaClass);
-		    		   		}
+						this.attributes.forEach(function (attribute) {
+							if (attribute.importedBySchema) {
+								refEmbed.push(attribute.type.metaClass);
+							}
 						});
 
 						return refEmbed;
-
-
 					},
+
 
 					/**
 					* Returns the stringified version of the roles use.  It will be in the
