@@ -48,19 +48,48 @@ strategy for creating your model is as follows:
 1. Add one or more class definitions to your diagram(s) based on your design.
 
 1. Tag each class with one of the stereotypes found in the FeathersReactProfile. Database entities
-are marked with the "Entity" stereotype, and services interfaces are marked with the "Service" stereotype
+are marked with the `Entity` stereotype, and services interfaces are marked with the `Service` stereotype.
+You can also use `POJO` (Plain Old Javascript Object) and `ValueObject` to create generic data structures.
 
 1. Populate your classes with attributes and/or methods, making sure to specify a Datatype for
 your attributes and method parameters.  Datatypes used must be one of the data types defined in the
-UML Profile that comes with this plugin.
+UML Profile that comes with this plugin, or another class you define in your model.
 
-1. Specify a "multiplicity" value on class Attributes and operation Parameters to indicate if the
+1. There is no semantic meaning for attributes on a `Service` class. This plugin does not currently
+support methods on an `Entity` class.  `POJO` and `Value Object` classes can have attributes and/or
+methods.
+
+
+1. Specify a "multiplicity" value for class Attributes and method Parameters to indicate if the
 value is optional or not. If the Multiplicity is not explicitly set, "0..1" is assumed, which translates
 to an "optional value" for most plugins.  Attributes and parameters can be made "required" by
 setting the lower limit of the multiplicity to one (e.g. "1" or "1..*").
 
 1. Arrays can be modeled by specifying an upper limit of the multiplicity on an attribute or
 parameter to a value that is greater than one (e.g. "0..*").
+
+1. You can draw a "generalization" from one class to another to indicate inheritance for those
+classes marked as an `Entity`, `POJO`, or `ValueObject`, provided both classes have the same
+stereotype. You can not model something like a `POJO` inheriting from an `Entity` or visa versa.
+Inheritance is not understood at all for `Service` classes.
+
+1. You can draw an association between an `Entity` class and another class that is marked as an `Entity`,
+`POJO`, or `Value Object`.  An association between an `Entity` and a non-entity (`POJO`) implies an
+embedded class (i.e. that data of the POJO is stored inside the `Entity` document in the database).
+An association between one `Entity` and another `Entity` implies a "reference" type relationship between
+two different database documents.  The relationships can be "zero to one", "one to one", "zero to many",
+or "one to many." A "Many to many" relationship gets stored as an array of references in both entity
+documents and requires that you manually manage the array values. For this reason, using "many to many"
+is not recommended.
+
+1. As an alternative way of specifying associtations, you can use classes in your model as the data type
+of an Attribute in an `Entity` class.  For example, class "Person" could have an attribute named "addresses",
+which is an array of "Address" POJO classes.
+
+1. Both "assocations" and "attributes of type *another class*" in practice generates the same code for Entities
+as they have the same semantics. It is recommended that you model "embedded" documents as "attributes of type
+*another class*", and model "references to other documents" as associations to keep the peristence method in 
+your models clear.
 
 1. You can draw a dependency from a service to an entity to indicate the service would like easy
 access to the data access service interface of the entity.  You can also draw dependencies to other services
