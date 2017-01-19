@@ -48,15 +48,15 @@ strategy for creating your model is as follows:
 1. Add one or more class definitions to your diagram(s) based on your design.
 
 1. Tag each class with one of the stereotypes found in the FeathersReactProfile. Database entities
-are marked with the `Entity` stereotype, and services interfaces are marked with the `Service` stereotype.
+are marked with the `Entity` stereotype, and service interfaces are marked with the `Service` stereotype.
 You can also use `POJO` (Plain Old Javascript Object) and `ValueObject` to create generic data structures.
 
 1. Populate your classes with attributes and/or methods, making sure to specify a Datatype for
 your attributes and method parameters.  Datatypes used must be one of the data types defined in the
 UML Profile that comes with this plugin, or another class you define in your model.
 
-1. There is no semantic meaning for attributes on a `Service` class. This plugin does not currently
-support methods on an `Entity` class.  `POJO` and `Value Object` classes can have attributes and/or
+1. There is no semantic definition for attributes on a `Service` class. This plugin also does not currently
+support methods on an `Entity` class.  `POJO` and `Value Object` classes *can* have attributes and/or
 methods.
 
 
