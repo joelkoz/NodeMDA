@@ -382,6 +382,11 @@ var winston = require('winston');
 			metaClass.setPackage(metaPackage);
 		}
 
+		// VP: Check if this class represents enumeration, then add enumeration stereotype to it
+		if(umlClass._type === "UMLEnumeration") {
+			metaClass.addStereotype(metaStereotypes["umlEnumeration"]);
+		}
+
 		if ("stereotype" in umlClass) {
 		
 			var umlStereotypeId = umlClass.stereotype.$ref;
@@ -426,6 +431,12 @@ var winston = require('winston');
 			readClass(metaPackage, umlClass);
 		});
 
+		// VP: Adding support for reading enumeration types
+		var enumerationList = getOwnedElementsOfType(umlPackage, "UMLEnumeration");
+		enumerationList.forEach(function(umlEnumerationClass) {
+			readClass(metaPackage, umlEnumerationClass);
+		});
+
 		
 		// Recursively process any child packages...
 		var packageList = getOwnedElementsOfType(umlPackage, "UMLPackage");
@@ -449,7 +460,12 @@ var winston = require('winston');
 		classList.forEach(function(umlClass) {
 			readClass(null, umlClass);
 		});
-		
+
+		// VP: Adding support for reading enumeration types
+		var enumerationList = getOwnedElementsOfType(umlModel, "UMLEnumeration");
+		enumerationList.forEach(function(umlEnumerationClass) {
+			readClass(metaPackage, umlEnumerationClass);
+		});
 	};
 	
 	
@@ -558,6 +574,9 @@ var winston = require('winston');
 		umlProfiles.forEach(function (umlProfile) {
 			readProfile(umlProfile);
 		});
+
+		// VP: Adding enumeration stereotype
+		metaStereotypes["umlEnumeration"] = new MetaModel.Stereotype("enumeration");
 		
 		metaClassMap = {};
 		processedMetaClasses = [];
