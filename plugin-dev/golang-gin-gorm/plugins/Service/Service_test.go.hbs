@@ -1,0 +1,136 @@
+package addressbook_test
+
+import (
+
+	"bytes"
+    "encoding/json"	
+    "fmt"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+
+	"github.com/joelkoz/apptemplate/app"
+    // "github.com/joelkoz/apptemplate/addressbook"	
+)
+
+
+func TestSaveOrUpdate(t *testing.T) {
+
+//    t.Skip("Not yet implemented") // Remove this line
+
+	router := app.GetRouter()
+
+	// Build a request to test the service method...
+	w := httptest.NewRecorder()
+
+
+	// Method 1 - Marshalling a Go structure
+	// newPerson := addressbook.Person{ FirstName: "Fred", LastName: "Smith" }
+	// newPerson.Address = addressbook.Address{ Street: "1313 Mockingbird Ln" }
+	// reqStr, _ := json.Marshal(newPerson)
+
+
+	// Method 2 - Direct strings	
+	//	var reqStr = []byte(`{ "firstname": "Fred", "lastname": "Smith", "address": { "street": "1313 Mockingbird Ln"}}`)
+
+
+	// Method 3 - Marshalling a map
+	var data = map[string]interface{} {
+       "firstname": "John",
+       "lastname": "Doe",
+       "phoneNumber": "555-1234",
+       "Address": map[string]interface{} {
+            "street": "123 Main",
+            "city": "LHP",
+            "state": "FL",
+            "zip": "33064",
+        },
+    }
+	reqStr, _ := json.Marshal(data)
+
+	req, _ := http.NewRequest("POST", "/addressbook/addressservice/saveorupdate", bytes.NewBuffer(reqStr))
+    req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+
+	const expectedResult = `result:
+  id: 1
+  firstName: John
+  lastName: Doe
+  phoneNumber: 555-1234
+  address:
+    street: 123 Main
+    city: LHP
+    state: FL
+    zip: "33064"
+status: 200
+`
+
+	assert.Equal(t, w.Code, 200)
+	assert.Equal(t, expectedResult, w.Body.String())
+
+
+
+	// Adding a second time should result in an error, as the phone number is a dup...
+	w = httptest.NewRecorder()
+	req, _ = http.NewRequest("POST", "/addressbook/addressservice/saveorupdate", bytes.NewBuffer(reqStr))
+    req.Header.Set("Content-Type", "application/json")
+	router.ServeHTTP(w, req)
+	const expectedResult2 = `error: 'UNIQUE constraint failed: people.phone_number'
+status: 500
+`
+
+	assert.Equal(t, w.Code, 500)
+	assert.Equal(t, expectedResult2, w.Body.String())
+}
+
+
+func TestGetPersonByPhone(t *testing.T) {
+
+	router := app.GetRouter()
+
+	// Build a request to test the service method...
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/addressbook/addressservice/getpersonbyphone/555-1234", nil)
+	router.ServeHTTP(w, req)
+
+
+	const expectedResult = `result:
+  id: 1
+  firstName: John
+  lastName: Doe
+  phoneNumber: 555-1234
+  address:
+    street: 123 Main
+    city: LHP
+    state: FL
+    zip: "33064"
+status: 200
+`
+
+	assert.Equal(t, w.Code, 200)
+	assert.Equal(t, expectedResult, w.Body.String())
+
+}
+
+
+func TestMain(m *testing.M) {
+
+	var result int
+
+	// Create a temporary database and hold a connection open untilt he test is run...
+	app.DatabaseName = "/tmp/test-apptest.db"
+	db := app.GetDb()
+	defer func() {
+		db.Close()
+		err := os.Remove(app.DatabaseName)
+		if (err != nil) {
+			fmt.Println(err)
+		}
+		os.Exit(result)
+	}()
+
+	result = m.Run()
+}

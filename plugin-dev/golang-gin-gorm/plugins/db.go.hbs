@@ -1,0 +1,68 @@
+##output preserve {{@root.projectRootDir}}/app/db.go
+package app
+
+import (
+	"fmt"
+	"reflect"
+
+    "github.com/jinzhu/gorm"
+    _ "github.com/jinzhu/gorm/dialects/sqlite"
+)
+
+
+var DatabaseName = "/tmp/{{@root.model.name}}.db"
+
+var dbInititalized = false
+
+var entityRegistry []interface{}
+
+
+func init() {
+	entityRegistry = make([]interface{}, 0)
+}
+
+
+func RegisterEntity(entity interface{}) {
+	fmt.Println("Registering entity", getStructName(entity))
+	entityRegistry = append(entityRegistry, entity)
+}
+
+
+func getStructName(obj interface{}) string {
+	if t := reflect.TypeOf(obj); t.Kind() == reflect.Ptr {
+		return t.Elem().Name()
+	} else {
+		return t.Name()
+	}
+}
+
+
+func initDb() {
+   db := GetDb()
+   defer db.Close()
+
+   for  ; len(entityRegistry) > 0 ; entityRegistry = entityRegistry[1:] {
+   		entity := entityRegistry[0]
+   		entityName := getStructName(entity);
+   		fmt.Println("   migration check for", entityName)
+		db.AutoMigrate(entity)
+   } // initDb
+   fmt.Println("Done with database initialization")
+}
+
+
+func GetDb() *gorm.DB {
+
+	if !dbInititalized {
+		dbInititalized = true
+		fmt.Println("Initializing database...", DatabaseName)
+		initDb();
+	}
+
+   db, err := gorm.Open("sqlite3", DatabaseName)
+   if err != nil {
+   		panic(err)
+   }
+
+   return db
+}
