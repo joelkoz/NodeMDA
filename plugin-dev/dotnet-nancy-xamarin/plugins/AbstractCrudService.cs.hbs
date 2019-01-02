@@ -1,0 +1,41 @@
+##output preserve {{@root.output}}/{{@root.libraryNamespace}}/Server/AbstractCrudService.cs
+using System;
+using Nancy;
+using Nancy.ModelBinding;
+
+namespace {{@root.libraryNamespace}}.Server
+{
+
+    public abstract class AbstractCrudService<T> : NancyModule, ICrudService<T>
+    {
+
+        protected AbstractCrudService(string baseUri) : base(baseUri)
+        {
+            Get(@"/", args => { return this.FindAll(); });
+            Post(@"/", args => { return this.Create(this.Bind<T>()); });
+            Get(@"/{uriId}", args => { return this.Find(args.uriId, this.LoadRelated()); });
+            Put(@"/{uriId}", args => { return this.Update(args.uriId, this.Bind<T>()); });
+            Delete(@"/{uriId}", args => { return this.Delete(args.uriId); });
+        }
+
+        abstract public T Create(T entity);
+        abstract protected T Update(int id, T entity);
+        abstract public T Update(T entity);
+        abstract public bool Delete(int id);
+        abstract public T Find(int id, bool loadRelated = true);
+        abstract public T[] FindAll();
+
+        private bool LoadRelated() {
+            var includeVal = this.Request.Query["include"];
+            if (includeVal != null) {
+                string val = includeVal.ToString();
+                return val.Equals("1") || val.Equals("true", StringComparison.OrdinalIgnoreCase);
+            }
+            else {
+                // Default behavior is to include the related entities
+                return true;
+            }
+        }
+
+    }
+}

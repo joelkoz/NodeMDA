@@ -1,0 +1,40 @@
+##output preserve {{@root.output}}/{{@root.serverProjectNamespace}}/Program.cs
+using System;
+using System.Runtime.InteropServices;
+using Mono.Unix;
+using Mono.Unix.Native;
+using {{@root.libraryNamespace}}.Server;
+
+namespace {{@root.serverProjectNamespace}}
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            using (var server = new EmbeddedServer(port: 1234))
+            {
+                Console.WriteLine("{{@root.model.name}} services running on " + server.HostUri.AbsoluteUri);
+
+                if (!System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    Console.WriteLine("Ctrl-C to stop service host");
+                    UnixSignal.WaitAny(UnixTerminationSignals);
+                }
+                else
+                {
+                    Console.WriteLine("ENTER to stop service host");
+                    Console.ReadLine();
+                }
+
+                Console.WriteLine("Stopping service host");
+            }
+        }
+
+        private static UnixSignal[] UnixTerminationSignals => new[] {
+            new UnixSignal(Signum.SIGINT),
+            new UnixSignal(Signum.SIGTERM),
+            new UnixSignal(Signum.SIGQUIT),
+            new UnixSignal(Signum.SIGHUP)
+        };
+    }
+}

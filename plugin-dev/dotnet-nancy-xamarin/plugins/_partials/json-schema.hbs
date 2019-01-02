@@ -1,0 +1,72 @@
+{{#* inline "outputObjectRef" ~}}
+   { "$ref": "
+      {{~#outputIfEqual objRef.className @root.class.name~}}
+         #
+      {{~else~}}
+         #/definitions/{{objRef.className}}
+      {{~/outputIfEqual~}}
+      " }
+{{~/inline}}
+{{#* inline "outputObject"}}
+{{#if this.hasComment}}
+    "description": "{{{jsStringEscape this.comment}}}",
+{{/if}}
+    "properties": {
+     {{#each this.allVisibleAttributes as |prop|}}
+        
+        "{{prop.jsIdentifierName}}" : {
+       {{#if prop.hasComment}}
+           "description": "{{{jsStringEscape prop.comment}}}",
+       {{/if}}
+       {{#unless isArray}}
+           "type": {{#if prop.isObject~}}
+                        {{~> outputObjectRef objRef=prop.type}}
+                   {{else~}}
+                      "{{prop.jsonSchemaTypeName}}"
+                   {{/if}}
+       {{else}}
+           "type": "array", 
+           "items": {{#if prop.isObject~}}
+                        {{~> outputObjectRef objRef=prop.type}}
+                    {{else~}}
+                       { "type": "{{prop.jsonSchemaTypeName}}" }
+                    {{/if}}
+       {{/unless}}
+
+        }{{^@last}},{{/@last}}
+     {{/each}}
+    },
+   
+    "required": [
+ {{#each this.allRequiredAttributes as |prop|}}
+       "{{prop.jsIdentifierName}}",
+ {{/each}}
+    ]
+{{/inline}}
+{
+    "$schema": "http://json-schema.org/draft-04/hyper-schema#"
+{{#with class as |class|}}
+    {{~#if class.hasObjectAttributes}}
+    "definitions": {
+    {{#each class.allVisibleAttributes as |prop|}}
+        {{#if prop.isObject}}
+          {{#outputUnlessEqual prop.type.className @root.class.name}}
+              {{#with this.type.metaClass as |metaClass|}}
+              "{{metaClass.name}}": {
+                   "type": "object",
+               {{> outputObject}}
+              }{{^@last}},{{/@last}}
+              {{/with}}
+          {{else}}
+          {{> outputObjectRef objRef=prop.type}}
+          {{/outputUnlessEqual}}
+        {{/if}}
+    {{/each}}
+    },
+    
+    {{/if}}
+    "title": "{{class.name}}",
+    "type": "object",
+{{> outputObject}}
+{{/with}}
+}

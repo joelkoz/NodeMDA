@@ -1,0 +1,122 @@
+﻿##output preserve {{@root.output}}/{{@root.libraryNamespace}}/Client/CrudServiceRemoteClient.cs
+using System.Net.Http;
+using System.Reflection;
+using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+
+
+namespace {{@root.libraryNamespace}}.Client
+{
+    public class CrudServiceRemoteClient<T> : ICrudServiceAsync<T>, ICrudService<T>
+    {
+
+        private HttpClient httpClient;
+        private string uriRoot;
+
+
+        /**
+         * @param uriRoot complete URI up to and including entity in REST.  Example: http://localhost:1234/{{@root.rootServiceUri}}/someEntity
+         */
+        public CrudServiceRemoteClient(string uriRoot)
+        {
+            this.uriRoot = uriRoot;
+            this.httpClient = new HttpClient();
+        }
+
+
+        public async Task<T> CreateAsync(T entity)
+        {
+            string json = JsonConvert.SerializeObject(entity);
+            var payload = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await httpClient.PostAsync(this.uriRoot, payload);
+            response.EnsureSuccessStatusCode();
+
+            string jsonResp = await response.Content.ReadAsStringAsync();
+
+            T entity2 = JsonConvert.DeserializeObject<T>(jsonResp);
+
+            return entity2;
+        }
+
+
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var response = await httpClient.DeleteAsync(this.uriRoot + "/" + id);
+            response.EnsureSuccessStatusCode();
+            return true;
+        }
+
+
+        public async Task<T> FindAsync(int id, bool loadRelated = true)
+        {
+            var response = await httpClient.GetAsync(this.uriRoot + "/" + id + "?include=" + (loadRelated ? "1" : "0"));
+            response.EnsureSuccessStatusCode();
+
+            string jsonResp = await response.Content.ReadAsStringAsync();
+
+            T entity = JsonConvert.DeserializeObject<T>(jsonResp);
+
+            return entity;
+        }
+
+
+        public async Task<T[]> FindAllAsync()
+        {
+            var response = await httpClient.GetAsync(this.uriRoot);
+            response.EnsureSuccessStatusCode();
+
+            string jsonResp = await response.Content.ReadAsStringAsync();
+
+            T[] entities = JsonConvert.DeserializeObject<T[]>(jsonResp);
+
+            return entities;
+        }
+
+
+        public async Task<T> UpdateAsync(T entity)
+        {
+            string json = JsonConvert.SerializeObject(entity);
+            var payload = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var id = entity.GetType().GetProperty("id", BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
+
+            var response = await httpClient.PutAsync(this.uriRoot + "/" + id, payload);
+            response.EnsureSuccessStatusCode();
+
+            string jsonResp = await response.Content.ReadAsStringAsync();
+
+            T entity2 = JsonConvert.DeserializeObject<T>(jsonResp);
+
+            return entity2;
+        }
+
+
+        public T Create(T entity)
+        {
+            return this.CreateAsync(entity).Result;
+        }
+
+        public bool Delete(int id)
+        {
+            return this.DeleteAsync(id).Result;
+        }
+
+        public T Find(int id, bool loadRelated = true)
+        {
+            return this.FindAsync(id, loadRelated).Result;
+        }
+
+        public T[] FindAll()
+        {
+            return this.FindAllAsync().Result;
+        }
+
+        public T Update(T entity)
+        {
+            return this.UpdateAsync(entity).Result;
+        }
+    }
+
+}

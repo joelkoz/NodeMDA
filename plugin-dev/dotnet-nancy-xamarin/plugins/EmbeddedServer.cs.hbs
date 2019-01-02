@@ -1,0 +1,43 @@
+﻿##output preserve {{@root.output}}/{{@root.libraryNamespace}}/Server/EmbeddedServer.cs
+using System;
+using Nancy.Hosting.Self;
+
+namespace {{@root.libraryNamespace}}.Server
+{
+    public class EmbeddedServer : IDisposable
+    {
+        public Uri HostUri { get; private set; }
+
+        private NancyHost Host;
+
+        public EmbeddedServer(String hostName = "localhost", int port = 1234, bool AutoStart = true)
+        {
+            this.HostUri = new Uri($"http://{hostName}:{port}/{{@root.rootServiceUri}}/");
+            if (AutoStart)
+            {
+                this.Start();
+            }
+        }
+
+
+        public void Start()
+        {
+            this.Host = new NancyHost(HostUri);
+            this.Host.Start();
+            Database.GetInstance().Start();
+        }
+
+
+        public void Stop()
+        {
+            this.Host.Stop();
+            Database.GetInstance().Stop();
+        }
+
+
+        public void Dispose()
+        {
+            this.Stop();
+        }
+    }
+}

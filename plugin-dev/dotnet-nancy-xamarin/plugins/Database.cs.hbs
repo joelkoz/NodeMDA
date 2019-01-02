@@ -1,0 +1,72 @@
+﻿##output preserve {{@root.output}}/{{@root.libraryNamespace}}/Server/Database.cs
+using System;
+using LiteDB;
+using System.IO;
+
+namespace {{@root.libraryNamespace}}.Server
+{
+    public class Database : IDisposable
+    {
+
+        public LiteDatabase db { get; private set; }
+        public string FileName { get; set; }
+
+        /**
+         * To specify the use of an in-memory database vs. a file, set MemSize to a value greater than zero,
+         * which will indicate the maximum size of the in memory database.        
+         */
+        public int MemSize { get; set; }
+
+
+        private Database()
+        {
+            this.FileName = "local.db";
+            this.MemSize = 0;
+        }
+
+
+        public void Start()
+        {
+            if (this.MemSize > 0)
+            {
+                // Start using an in-memory database
+                db = new LiteDatabase(new MemoryStream(MemSize));
+            }
+            else
+            {
+                Directory.CreateDirectory(@"db");
+                db = new LiteDatabase(@"db/" + FileName);
+            }
+        }
+
+
+        public void Stop()
+        {
+            db.Dispose();
+        }
+
+
+        private static Database instance = null;
+
+        public static Database GetInstance() {
+            if (instance == null) {
+                instance = new Database();
+            }
+            return instance;
+        }
+
+
+        public static LiteDatabase GetDb()
+        {
+            return GetInstance().db;
+        }
+
+
+
+        public void Dispose()
+        {
+            this.Stop();
+        }
+
+    }
+}

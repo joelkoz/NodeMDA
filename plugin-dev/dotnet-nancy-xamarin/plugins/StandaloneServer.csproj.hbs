@@ -1,0 +1,15 @@
+##output preserve {{@root.output}}/{{@root.serverProjectNamespace}}/{{@root.serverProjectName}}.csproj
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Mono.Posix.NETStandard" Version="1.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\\{{@root.libraryNamespace}}\\{{@root.libraryName}}.csproj" />
+  </ItemGroup>
+</Project>

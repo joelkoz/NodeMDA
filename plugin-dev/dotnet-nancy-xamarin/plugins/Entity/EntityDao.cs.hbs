@@ -1,0 +1,246 @@
+##output overwrite {{class.ServerNamespaceSourceDir}}/{{class.name}}Dao.cs
+{{#with class as |class|}}
+// This file was generated with NodeMDA. It will be overwritten if generated again.
+// Do not modify this file.
+using System;
+using LiteDB;
+using System.Collections.Generic;
+using {{class.Namespace}};
+{{#each class.foreignServerNamespaces as |fNamespace|}}
+{{#if (@root.notEq fNamespace "System")}}
+using {{fNamespace}};
+{{/if}}
+{{/each}}
+
+
+namespace {{class.ServerNamespace}}
+{
+    public static class {{class.name}}Dao
+    {
+
+        public static LiteCollection<{{class.name}}> GetCol() {
+            LiteDatabase db = Database.GetDb();
+            var col = db.GetCollection<{{class.name}}>("{{class.schemaCollectionName}}");
+            return col;
+        }
+
+
+        public static {{class.name}} Create({{class.name}} new{{class.name}}) {
+            var col = GetCol();
+            {{#if class.hasEntityMembers}}
+            SaveRelated(new{{class.name}});
+            {{/if}}
+            col.Insert(new{{class.name}});
+            return new{{class.name}};
+        }
+
+
+        public static {{class.name}} Update({{class.name}} {{class.entityVarName}})
+        {
+            var col = GetCol();
+            {{#if class.hasEntityMembers}}
+            SaveRelated({{class.entityVarName}});
+            {{/if}}
+            if (col.Update({{class.entityVarName}}))
+            {
+                return {{class.entityVarName}};
+            }
+            else
+            {
+                throw new ArgumentException("No such {{class.entityVarName}} with Id of " + {{class.entityVarName}}.id);
+            }
+        }
+
+
+        public static {{class.name}} Merge({{class.name}} {{class.entityVarName}})
+        {
+            var col = GetCol();
+            var dest = col.FindById({{class.entityVarName}}.id);
+            if (dest == null)
+            {
+                throw new ArgumentException("No such {{class.entityVarName}} with Id of " + {{class.entityVarName}}.id);
+            }
+
+            dest.CopyByName({{class.entityVarName}});
+
+            {{#if class.hasEntityMembers}}
+            SaveRelated({{class.entityVarName}});
+            {{/if}}
+            if (col.Update(dest))
+            {
+                return dest;
+            }
+            else
+            {
+                throw new ArgumentException("No such {{class.entityVarName}} with Id of " + {{class.entityVarName}}.id);
+            }
+        }
+
+
+
+        public static {{class.name}} SaveOrMerge({{class.name}} {{class.entityVarName}})
+        {
+            var col = GetCol();
+            if ({{class.entityVarName}}.id != 0)
+            {
+                var dest = col.FindById({{class.entityVarName}}.id);
+                if (dest == null)
+                {
+                    throw new ArgumentException("No such {{class.entityVarName}} with Id of " + {{class.entityVarName}}.id);
+                }
+
+                dest.CopyByName({{class.entityVarName}});
+                {{#if class.hasEntityMembers}}
+                SaveRelated({{class.entityVarName}});
+                {{/if}}
+                col.Update(dest);
+                return dest;
+            }
+            else
+            {
+                {{#if class.hasEntityMembers}}
+                SaveRelated({{class.entityVarName}});
+                {{/if}}
+                col.Insert({{class.entityVarName}});
+                return {{class.entityVarName}};
+            }
+        }
+
+
+        public static {{class.name}}[] SaveOrMergeAll({{class.name}}[] list)
+        {
+            for (int i = 0; i < list.Length; i++)
+            {
+                list[i] = SaveOrMerge(list[i]);
+            }
+
+            return list;
+        }
+
+
+        public static bool Delete(int id)
+        {
+            var col = GetCol();
+            return col.Delete(id);
+        }
+
+
+
+        public static bool Delete({{class.name}} {{class.entityVarName}})
+        {
+            return Delete({{class.entityVarName}}.id);
+        }
+
+
+        public static {{class.name}} Find(int {{class.entityVarName}}Id{{#if class.hasEntityMembers}}, bool loadRelated = true{{/if}})
+        {
+            var col = GetCol();
+            var result = col.FindById({{class.entityVarName}}Id);
+            if (result != null)
+            {
+            {{#if class.hasEntityMembers}}
+                if (loadRelated) {
+                    LoadRelated(result);
+                }
+            {{/if}}
+                return result;
+            }
+            else
+                throw new NotFoundException("{{class.entityVarName}}Id " + {{class.entityVarName}}Id + " does not exist");
+
+        }
+
+
+        public static {{class.name}} FindFirst(Query q)
+        {
+            var col = GetCol();
+            var result = col.FindOne(q);
+            return result;
+
+        }
+
+
+
+        public static IEnumerable<{{class.name}}> FindAll(Query q)
+        {
+            var col = GetCol();
+            var result = col.Find(q);
+            return result;
+
+        }
+
+
+        public static IEnumerable<{{class.name}}> FindAll() {
+            var col = GetCol();
+            var result = col.FindAll();
+            return result;
+        }
+
+
+
+{{#if class.hasEntityMembers}}
+        public static void SaveRelated({{class.name}} {{class.entityVarName}}) {
+        {{#each class.attributes as |attrib|}}
+            {{#if attrib.isEntity}}
+            Save{{attrib.firstUpperName}}({{class.entityVarName}});
+            {{/if}}
+        {{/each}}
+        }
+
+
+        public static void LoadRelated({{class.name}} {{class.entityVarName}}) {
+        {{#each class.attributes as |attrib|}}
+            {{#if attrib.isEntity}}
+                {{#if attrib.isEntityArray}}
+            {{class.entityVarName}}.{{attrib.name}} = Load{{attrib.firstUpperName}}({{class.entityVarName}}.id);
+                {{else}}
+            {{class.entityVarName}}.{{attrib.name}} = Load{{attrib.firstUpperName}}({{class.entityVarName}});
+                {{/if}}
+            {{/if}}
+        {{/each}}
+        }
+
+
+    {{#each class.attributes as |attrib|}}
+        {{#if attrib.isEntity}}
+        public static void Save{{attrib.firstUpperName}}({{class.name}} {{class.entityVarName}})
+        {
+
+            var {{attrib.name}} = {{class.entityVarName}}.{{attrib.name}};
+            if ({{attrib.name}} != null)
+            {
+        {{#if attrib.isEntityArray}}
+                for (int i = 0; i < {{attrib.name}}.Count; i++)
+                {
+                    {{class.entityVarName}}.{{attrib.name}}[i] = {{attrib.type.className}}Dao.SaveOrMerge({{attrib.name}}[i]);
+                }
+        {{else}}
+                {{class.entityVarName}}.{{attrib.name}} = {{attrib.type.className}}Dao.SaveOrMerge({{attrib.name}});
+        {{/if}}
+            }
+        }
+
+        {{#if attrib.isEntityArray}}
+        public static List<{{attrib.type.className}}> Load{{attrib.firstUpperName}}(int {{class.entityVarName}}Id)
+        {
+            IEnumerable<{{attrib.type.className}}> results = {{attrib.type.className}}Dao.FindAll(Query.EQ("{{attrib.dbProperties.foreignPropertyName}}.id", {{class.entityVarName}}Id));
+            var list = new List<{{attrib.type.className}}>();
+            list.AddRange(results);
+            return list;
+        }
+        {{else}}
+        public static {{attrib.type.className}} Load{{attrib.firstUpperName}}({{class.name}} {{class.entityVarName}})
+        {
+            if ({{class.entityVarName}}.{{attrib.name}} != null)
+                return {{attrib.type.className}}Dao.Find({{class.entityVarName}}.{{attrib.name}}.id);
+            else
+                return null;
+        }
+        {{/if}}
+
+        {{/if}}
+    {{/each}}
+{{/if}}
+    }
+}
+{{/with}}
