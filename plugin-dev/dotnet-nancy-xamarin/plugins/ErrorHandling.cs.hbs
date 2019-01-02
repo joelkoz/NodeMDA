@@ -1,0 +1,62 @@
+﻿##output preserve {{@root.output}}/{{@root.libraryNamespace}}/Server/ErrorHandling.cs
+using System;
+using System.Text;
+using Nancy;
+using Nancy.Bootstrapper;
+using Newtonsoft.Json;
+
+namespace {{@root.libraryNamespace}}.Server
+{
+    public class ErrorHandling : IApplicationStartup
+    {
+        public void Initialize(IPipelines pipelines)
+        {
+            pipelines.OnError += (ctx, err) => HandleExceptions(err, ctx);
+        }
+
+
+        private class ErrorResponse
+        {
+            public int statusCode { get; set; }
+            public string message { get; set; }
+        }
+
+
+        private static Response HandleExceptions(Exception err, NancyContext ctx)
+        {
+            var baseError = err.GetBaseException();
+
+            var result = new Response { ReasonPhrase = baseError.Message };
+
+            if (baseError is NotFoundException)
+            {
+                result.StatusCode = HttpStatusCode.NotFound;
+            }
+            else if (baseError is NotImplementedException)
+            {
+                result.StatusCode = HttpStatusCode.NotImplemented;
+            }
+            else if (baseError is UnauthorizedAccessException)
+            {
+                result.StatusCode = HttpStatusCode.Unauthorized;
+            }
+            else if (baseError is ArgumentException)
+            {
+                result.StatusCode = HttpStatusCode.BadRequest;
+            }
+            else
+            {
+                // An unexpected exception occurred!
+                result.StatusCode = HttpStatusCode.InternalServerError;
+            }
+
+            var errorResponse = new ErrorResponse { statusCode = (int)result.StatusCode, message = result.ReasonPhrase };
+            var jsonResult = JsonConvert.SerializeObject(errorResponse);
+            var jsonBytes = Encoding.UTF8.GetBytes(jsonResult);
+            result.Contents = s => s.Write(jsonBytes, 0, jsonBytes.Length);
+
+            return result;
+        }
+
+    }
+}

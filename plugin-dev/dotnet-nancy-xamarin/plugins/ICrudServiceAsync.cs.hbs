@@ -1,0 +1,17 @@
+﻿##output overwrite {{@root.output}}/{{@root.libraryNamespace}}/ICrudServiceAsync.cs
+using System.Threading.Tasks;
+
+namespace {{@root.libraryNamespace}}
+{
+    /**
+     * Interface for a Crud service accessed asynchronously
+     */
+    public interface ICrudServiceAsync<T>
+    {
+        Task<T> CreateAsync(T entity);
+        Task<bool> DeleteAsync(int id);
+        Task<T> FindAsync(int id, bool loadRelated = true);
+        Task<T[]> FindAllAsync();
+        Task<T> UpdateAsync(T entity);
+    }
+}

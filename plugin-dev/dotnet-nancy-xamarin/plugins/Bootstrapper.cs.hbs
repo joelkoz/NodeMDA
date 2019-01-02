@@ -1,0 +1,25 @@
+﻿##output preserve {{@root.output}}/{{@root.libraryNamespace}}/Server/Bootstrapper.cs
+using Nancy;
+using Nancy.Configuration;
+using Nancy.TinyIoc;
+using Newtonsoft.Json;
+
+namespace {{@root.libraryNamespace}}.Server
+{
+    public class Bootstrapper : DefaultNancyBootstrapper
+    {
+        public override void Configure(INancyEnvironment environment)
+        {
+            environment.Tracing(enabled: false, displayErrorTraces: true);
+            base.Configure(environment);
+        }
+
+
+        protected override void ConfigureApplicationContainer(TinyIoCContainer container)
+        {
+            base.ConfigureApplicationContainer(container);
+
+            container.Register<JsonSerializer, CustomJsonSerializer>();
+        }
+    }
+}

@@ -1,0 +1,17 @@
+﻿##output preserve {{@root.output}}/{{@root.libraryNamespace}}/Server/CustomJsonSerializer.cs
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+
+namespace {{@root.libraryNamespace}}.Server
+{
+    public class CustomJsonSerializer : JsonSerializer
+    {
+        public CustomJsonSerializer()
+        {
+            this.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            this.DateTimeZoneHandling = DateTimeZoneHandling.Unspecified;
+            this.NullValueHandling = NullValueHandling.Ignore;
+        }
+
+    }
+}

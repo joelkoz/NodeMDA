@@ -1,0 +1,43 @@
+const OmniSchema = require('omni-schema');
+{{#with class as |class|}}
+{{#if class.isSubClass}}
+const {{parentClass.name}}Schema = require('common/{{parentClass.packageDirName}}/{{parentClass.name}}Schema');
+{{/if}}
+{{#each class.referencedForSchemaImport as |refClass|}}
+const {{refClass.name}}Schema = require('common/{{refClass.packageDirName}}/{{refClass.name}}Schema');
+{{/each}}
+
+const Types = OmniSchema.Types;
+
+const {{class.name}}Schema = OmniSchema.compile({
+{{#each class.attributes as |attrib|}}
+  {{attrib.name}}: {{#if attrib.isArray}} [ {{/if~}}
+  {{~#if attrib.isObject}}
+     {{~#if attrib.importedBySchema}}
+     { schema: {{attrib.type.metaClass.name}}Schema
+     {{~else~}}
+     { schema: '{{attrib.type.metaClass.schemaCollectionName}}'
+     {{~/if~}}
+  {{~else~}}
+     { type: '{{attrib.omniSchemaTypeName}}'
+  {{~/if~}}
+  {{~#if attrib.schemaDbProperties}}, db: {{{attrib.schemaDbProperties}}}{{/if~}}
+  , validation: { required: {{attrib.isRequired}}
+  {{~#if attrib.hasMinValue}}, min: {{attrib.minValue}}{{/if}} 
+  {{~#if attrib.hasMaxValue}}, max: {{attrib.maxValue}}{{/if}} }
+  {{~#if attrib.uiExclude}}, ui: { exclude: true }{{/if}}
+  {{~#if attrib.hasDefaultValue}}, default: {{attrib.jsDefaultValue}}{{/if~}} 
+  } {{~#if attrib.isArray}} ]{{/if}},
+{{/each}}
+{{#if class.isUserOwned}}
+  {{#unless class.isSubClass}}
+  ownerUserId: { type: 'String', required: true, ui: { exclude: true } },
+  {{/unless}}
+{{/if}}
+{{#if class.autogenPrimaryKey}}
+  _id: { type: 'String', ui: { exclude: true } },
+{{/if}}
+}, "{{class.schemaCollectionName}}"{{#if class.isSubClass}}, {{parentClass.name}}Schema{{/if}});
+
+module.exports = {{class.name}}Schema;
+{{/with}}

@@ -228,7 +228,9 @@ var winston = require('winston');
 	var readActors = function(umlParentElement) {
 		let stList = getOwnedElementsOfType(umlParentElement, "UMLActor");
 		stList.forEach(function (umlActor) {
-			metaActors[umlActor._id] = new MetaModel.Actor(umlActor.name);
+			let metaActor = new MetaModel.Actor(umlActor.name);
+			metaActor._visibility = umlActor.visibility;
+			metaActors[umlActor._id] = metaActor;
 		});
 	}
 
@@ -382,6 +384,9 @@ var winston = require('winston');
 			metaClass.setPackage(metaPackage);
 		}
 
+
+		metaClass._visibility = umlClass.visibility;
+
 		if ("stereotype" in umlClass) {
 		
 			var umlStereotypeId = umlClass.stereotype.$ref;
@@ -421,6 +426,8 @@ var winston = require('winston');
 		
 		var	metaPackage = new MetaModel.Package(packageName);
 		
+		metaPackage._visibility = umlPackage.visibility;
+
 		var classList = getOwnedElementsOfType(umlPackage, "UMLClass");
 		classList.forEach(function(umlClass) {
 			readClass(metaPackage, umlClass);
@@ -494,7 +501,7 @@ var winston = require('winston');
 		metaEnd._navigable = umlEnd.navigable;
 		metaEnd._aggregation = (umlEnd.aggregation === "shared");
 		metaEnd._composition = (umlEnd.aggregation === "composite");
-		metaEnd._public = (umlEnd.visibility === "public");
+		metaEnd._visibility = umlEnd.visibility;
 		return metaEnd;
 	};
 	

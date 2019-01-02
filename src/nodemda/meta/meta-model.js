@@ -51,6 +51,7 @@ let MetaModel = {};
 			this.elementName = elementName;
 			this.stereotypes = [];
 	    	this._comment = null;
+			this._visibility = "public";
 	    }
 		
 		addTag(metaTag) {
@@ -116,6 +117,17 @@ let MetaModel = {};
 			this.stereotypes.push(stereotype);
 		}
 		
+		get isPublic() {
+			return this._visibility === "public";
+		}
+		
+		/**
+		 * Is this variable visible to other classes inside the package?
+		 */
+		get isVisible() {
+			return this._visibility !== "private";
+		}
+
 	};
 	
 	
@@ -156,6 +168,16 @@ let MetaModel = {};
 		get rootPackageName() {
 		    return this.nameAsArray[0];	
 		}
+
+
+		/**
+		 * Returns the first package name in the package path
+		 */
+		get lastPackageName() {
+			let ar = this.nameAsArray;
+		    return ar[ar.length - 1];	
+		}
+		
 		
 	};
 	
@@ -296,7 +318,6 @@ let MetaModel = {};
 			this._type = type;
 			this._readOnly = false;
 			this._multiplicity = "0..1";
-			this._visibility = "public";
     	}
     	
 		getName() {
@@ -320,16 +341,6 @@ let MetaModel = {};
 			return this._type.getName();
 		}
 
-		get isPublic() {
-			return this._visibility === "public";
-		}
-		
-		/**
-		 * Is this variable visible to other classes inside the package?
-		 */
-		get isVisible() {
-			return this._visibility !== "private";
-		}
 
 		get isUnique() {
 			return this._unique;
@@ -339,21 +350,30 @@ let MetaModel = {};
 			return this._readOnly;
 		}
 
+		get multiplicity() {
+			if (typeof this._multiplicity !== 'undefined') {
+				return this._multiplicity;
+			}
+			else {
+				return "1";
+			}
+		}
+
 		get isRequired() {
-			return this._multiplicity.charAt(0) === "1";
+			return this.multiplicity.charAt(0) === "1";
 		}
 		
 		get isArray() {
-			return this._multiplicity.slice(-1) === "*";
+			return this.multiplicity.slice(-1) === "*";
 		}
 		
 		get isMany() {
-			return this._multiplicity.slice(-1) === "*";
+			return this.multiplicity.slice(-1) === "*";
 		}
 
 
 		get isOne() {
-			return this._multiplicity.slice(-1) === "1";
+			return this.multiplicity.slice(-1) === "1";
 		}
 
 		get isObject() {
@@ -448,7 +468,6 @@ let MetaModel = {};
 		    else {
 		       this._returnType = returnType;
 		    }
-			this._visibility = "public";
 			this._static = false;
 		}
 		
@@ -463,11 +482,6 @@ let MetaModel = {};
 		get type() {
 		   return this._returnType;	
 		}
-		
-		get isPublic() {
-			return this._visibility === "public";
-		}
-		
 		
 		get isStatic() {
 			return this._static;

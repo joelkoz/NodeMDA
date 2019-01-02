@@ -1,0 +1,36 @@
+// This file was generated with NodeMDA, but you may place your customizations here
+// because it will not be overwritten again.
+using System;
+
+{{#with class as |class|}}
+namespace {{class.Namespace}}
+{
+    public class {{class.name}}Impl : {{class.name}}
+    {
+
+    	public {{class.name}}Impl({{#each class.allRequiredAttributes as |varDef|}}{{#unless @first}}, {{/unless}}{{varDef.type.csTypeName}} {{varDef.name}}{{#if varDef.hasDefaultValue}} = {{{varDef.defaultValue}}}{{/if}}{{/each}}) : base({{#each class.allRequiredAttributes as |varDef|}}{{#unless @first}}, {{/unless}}{{varDef.name}}{{/each}}) {
+    		
+    	}
+
+   {{#each operations as |fn|}}
+		/**
+	{{#each fn.jsCommentsFormatted as |cmtLine|}}
+		 * {{{cmtLine}}}
+	{{/each~}}
+	   	{{~#each fn.parameters as |param|}}
+	 	* @param { {{param.javascriptTypeName}}{{#if param.isArray}}[]{{/if}} } {{param.name}}{{#if param.hasComment}} - {{{param.comment}}}{{/if}}{{#if param.isReadOnly}} (read only){{/if}}
+		{{/each}}
+	{{#if fn.hasReturnType}}
+     	* @returns { {{fn.jsReturnType}} }
+	{{/if}} 
+	 	*/
+		override public {{#if fn.hasReturnType}}{{fn.type.csTypeName}}{{else}}void{{/if}} {{fn.name}}({{#each parameters as |param|}}{{#unless @first}}, {{/unless}}{{param.type.csTypeName}} {{param.name}}{{#if param.hasDefaultValue}} = {{{param.defaultValue}}}{{/if}}){{/each}})
+		{
+    	    // Put your custom code here.
+          throw new NotImplementedException("Operation {{fn.name}} not yet implemented.");    	    
+	    }   
+   {{/each}}
+
+	}
+}
+{{/with}}
