@@ -287,7 +287,7 @@ const winston = require('winston');
 
     	var outputFileName = "";
     	var outputMode = "overwrite";
-    	if (result.startsWith("##output ")) {
+    	if (result.indexOf("##output") >= 0) {
     		var lineBreak = result.indexOf("\n");
     		var outputDirective = result.slice(0, lineBreak).trim();
     		result = result.slice(lineBreak+1, -1);
@@ -300,6 +300,10 @@ const winston = require('winston');
     		   outputFileName = params[2];
     		}
     	}
+    	else {
+    		console.log("WARNING - No output directive found in tempalte file " + templateFile);
+    	}
+
     	
     	if (outputFileName.length === 0) {
     		// No output directive specified.  Create a default output file name...
