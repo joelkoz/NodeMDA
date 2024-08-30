@@ -118,7 +118,13 @@ let MetaModel = {};
 		}
 		
 		get isPublic() {
-			return this._visibility === "public";
+			if (typeof this._visibility === 'undefined') {
+				// Default value if not specified
+				return true;
+			}
+			else {
+  			   return this._visibility === "public";
+			}
 		}
 		
 		/**
