@@ -105,12 +105,14 @@ var winston = require('winston');
 	var getOwnedElementsOfType = function(umlElement, umlTypeName) {
 		var results = [];
 		var ownedElements = umlElement.ownedElements;
-		ownedElements.forEach(function(umlOwned) {
-			var typeId = umlOwned._type;
-			if (typeId === umlTypeName) {
-				results.push(umlOwned);
-			}
-		});
+		if (ownedElements) {
+			ownedElements.forEach(function(umlOwned) {
+				var typeId = umlOwned._type;
+				if (typeId === umlTypeName) {
+					results.push(umlOwned);
+				}
+			});
+		}
 		
 		return results;
 	};
