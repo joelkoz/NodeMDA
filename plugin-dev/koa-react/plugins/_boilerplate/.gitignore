@@ -1,0 +1,6 @@
+.history
+DS_Store
+node_modules
+npm-debug.log
+*.log
+.env

@@ -1,0 +1,54 @@
+##output preserve {{@root.output}}/frontend/src/api/{{class.packageDirPath}}{{class.name}}Api.js
+import apiClient from '{{class.relativeParentPrefix}}/api/apiClient';
+
+export const fetch{{class.pluralName}} = async (page = 1, limit = 10) => {
+  try {
+    const response = await apiClient.get('/{{class.packageDirPath}}{{lowercase class.pluralName}}', {
+      params: { page, limit },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching {{lowercase class.pluralName}}:', error);
+    throw error;
+  }
+};
+
+export const fetch{{class.name}}ById = async (id) => {
+  try {
+    const response = await apiClient.get(`/{{class.packageDirPath}}{{lowercase class.pluralName}}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching {{lowercase class.name}} with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+export const create{{class.name}} = async ({{lowercase class.name}}Data) => {
+  try {
+    const response = await apiClient.post('/{{class.packageDirPath}}{{lowercase class.pluralName}}', {{lowercase class.name}}Data);
+    return response.data;
+  } catch (error) {
+    console.error('Error creating {{lowercase class.name}}:', error);
+    throw error;
+  }
+};
+
+export const update{{class.name}} = async (id, {{lowercase class.name}}Data) => {
+  try {
+    const response = await apiClient.put(`/{{class.packageDirPath}}{{lowercase class.pluralName}}/${id}`, {{lowercase class.name}}Data);
+    return response.data;
+  } catch (error) {
+    console.error(`Error updating {{lowercase class.name}} with ID ${id}:`, error);
+    throw error;
+  }
+};
+
+export const delete{{class.name}} = async (id) => {
+  try {
+    const response = await apiClient.delete(`/{{class.packageDirPath}}{{lowercase class.pluralName}}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error(`Error deleting {{lowercase class.name}} with ID ${id}:`, error);
+    throw error;
+  }
+};

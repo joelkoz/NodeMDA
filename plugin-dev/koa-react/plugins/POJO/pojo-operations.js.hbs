@@ -1,0 +1,29 @@
+##output {{#if class.hasOperations}}preserve{{else}}ignore{{/if}} {{@root.output}}/{{#if class.allowExternalAccess}}common/{{else}}src/services{{/if}}{{class.packageDirName}}/{{class.name}}-operations.js
+{{#with class as |class|}}
+
+// This file was generated with NodeMDA, but you may place your customizations here
+// because it will not be overwritten again.
+var {{class.name}} = require('{{class.packageDirPath}}{{class.name}}.js');
+
+(function() {
+   {{#each operations as |fn|}}
+   
+	/**
+{{#each fn.jsCommentsFormatted as |cmtLine|}}
+	 * {{{cmtLine}}}
+{{/each~}}
+	   {{~#each fn.parameters as |param|}}
+	 * @param { {{param.javascriptTypeName}}{{#if param.isArray}}[]{{/if}} } {{param.name}}{{#if param.hasComment}} - {{{param.comment}}}{{/if}}{{#if param.isReadOnly}} (read only){{/if}}
+	   {{/each}}
+{{#if fn.hasReturnType}}
+     * @returns { {{fn.jsReturnType}} }
+{{/if}} 
+	 */
+	{{class.name}}.{{fn.name}} = function({{#each parameters as |param|}}{{#unless @first}}, {{/unless}}{{param.name}}{{#if param.hasDefaultValue}} = {{{param.defaultValue}}}{{/if}}{{/each}}) {
+        // Put your custom code here.
+    };   
+   {{/each}}
+   
+})();
+
+{{/with}}

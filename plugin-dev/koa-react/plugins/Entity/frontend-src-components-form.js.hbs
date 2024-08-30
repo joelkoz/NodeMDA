@@ -1,0 +1,92 @@
+##output overwrite {{@root.output}}/frontend/src/components/{{class.packageDirPath}}{{class.name}}Form.js
+// This file was generated with NodeMDA. It will be overwritten if generated again.
+// Do not modify this file.
+//
+import React, { useState, useEffect } from 'react';
+import { TextInput, NumberInput, Checkbox, Select, Button } from '@mantine/core';
+import { DateInput, TimeInput } from '@mantine/dates';
+import { fetch{{class.name}}ById, create{{class.name}}, update{{class.name}} } from '{{class.relativeParentPrefix}}/api/{{class.packageDirPath}}{{class.name}}Api';
+
+const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) => {
+  const [{{lowercase class.name}}, set{{class.name}}] = useState({
+{{#each class.attributes as |attrib|}}
+{{#if attrib.isPublic}}
+    {{attrib.jsIdentifierName}}: {{{attrib.jsDefaultValue}}},
+{{/if}}    
+{{/each}}
+  });
+
+  useEffect(() => {
+    if ({{lowercase class.name}}Id) {
+      // Load {{lowercase class.name}} data for editing
+      fetch{{class.name}}ById({{lowercase class.name}}Id).then((data) => { 
+        // Special formatting of data before editing goes here:
+        // const fmtPublishsed = data.published ? data.published.split('T')[0] : '';
+        set{{class.name}}({ ...data, /* published: fmtPublishsed */ });
+      });
+    }
+  }, [{{lowercase class.name}}Id]);
+
+
+  const handleChange = (name, value) => {
+    set{{class.name}}({ ...{{lowercase class.name}}, [name]: value });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if ({{lowercase class.name}}Id) {
+      update{{class.name}}({{lowercase class.name}}Id, {{lowercase class.name}}).then(onSave);
+    } else {
+      create{{class.name}}({{lowercase class.name}}).then(onSave);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>   
+{{#each class.attributes as |attrib|}}      
+{{#if attrib.isPublic}}
+      <{{attrib.type.mantineInputTag}}
+        label="{{attrib.mantineDataLabel}}"
+{{#if (isdefined attrib.type.mantineInputType)}}
+        type="{{attrib.type.mantineInputType}}"
+{{/if}}
+{{#if (isdefined attrib.type.mantineAllowDecimal)}}
+        allowDecimal={ {{attrib.type.mantineAllowDecimal}} }
+{{/if}}
+{{#if (isdefined attrib.type.mantineDecimalScale)}}
+        decimalScale={ {{attrib.type.mantineDecimalScale}} }
+{{/if}}
+{{#if attrib.type.mantineFixedDecimalScale}}
+        fixedDecimalScale
+{{/if}}
+{{#if (isdefined attrib.type.mantineValueFormat)}}
+        valueFormat="{{attrib.type.mantineValueFormat}}"
+{{/if}}
+{{#if (isdefined attrib.type.mantineData)}}
+        data={{{attrib.type.mantineData}}}
+{{/if}}
+{{#if attrib.type.mantineUsedCheckedForValue}}
+        checked={ {{lowercase class.name}}.{{attrib.jsIdentifierName}} }
+{{else}}
+        value={ {{lowercase ../class.name}}.{{attrib.jsIdentifierName}} }
+        defaultValue={ {{{attrib.type.globalDefaultValue}}} }
+  {{#if attrib.isRequired}}        
+        required
+  {{/if}}
+{{/if}}        
+        onChange={ {{{attrib.mantineOnChange}}} }
+      />
+{{/if}}      
+{{/each}}
+
+      <Button type="submit" mt="md">
+        { {{lowercase class.name}}Id ? 'Update {{class.name}}' : 'Create {{class.name}}' }
+      </Button>
+      <Button type="button" mt="md" ml="md" variant="outline" onClick={onCancel}>
+        Cancel
+      </Button>
+    </form>
+  );
+};
+
+export default {{class.name}}Form;

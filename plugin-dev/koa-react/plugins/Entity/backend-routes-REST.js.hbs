@@ -1,0 +1,22 @@
+##output overwrite {{@root.output}}/backend/routes/{{class.packageDirPath}}{{lowercase class.name}}.js
+// This file was generated with NodeMDA. It will be overwritten if generated again.
+// Do not modify this file.
+//
+const Router = require('koa-router');
+const { isAdmin } = require('../config/auth');
+const {{lowercase class.name}}Dao = require('../controllers/{{class.packageDirPath}}{{class.name}}Dao');
+
+const router = new Router({
+  prefix: '/api/v1/{{class.packageDirPath}}{{lowercase name.pluralName}}',
+});
+
+// Public routes
+router.get('/', {{lowercase class.name}}Dao.getAll{{class.pluralName}});
+router.get('/:id', {{lowercase class.name}}Dao.get{{class.name}}ById);
+
+// Protected routes (require Admin role)
+router.post('/', isAdmin, {{lowercase class.name}}Dao.create{{class.name}});
+router.put('/:id', isAdmin, {{lowercase class.name}}Dao.update{{class.name}});
+router.delete('/:id', isAdmin, {{lowercase class.name}}Dao.delete{{class.name}});
+
+module.exports = router;

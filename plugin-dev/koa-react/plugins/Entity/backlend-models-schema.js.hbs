@@ -1,0 +1,33 @@
+##output overwrite {{@root.output}}/backend/models/{{class.packageDirPath}}{{lowercase class.name}}.js
+// This file was generated with NodeMDA. It will be overwritten if generated again.
+// Do not modify this file.
+//
+const mongoose = require('mongoose');
+{{#if class.isUserEntity}}
+const bcrypt = require('bcryptjs');
+{{/if}}
+
+const {{lowercase class.name}}Schema = new mongoose.Schema({
+{{#each class.attributes as |attrib|}}  
+  {{attrib.jsIdentifierName}}: { type: '{{attrib.type.mongooseType}}', required: {{attrib.isRequired}} },
+{{/each}}  
+});
+
+{{#if class.isUserEntity}}
+// Password hash middleware
+userSchema.pre('save', async function(next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
+
+// Method to compare password
+userSchema.methods.comparePassword = function(password) {
+  return bcrypt.compare(password, this.password);
+};
+{{/if}}
+
+const {{class.name}} = mongoose.model('{{class.name}}', {{lowercase class.name}}Schema);
+
+module.exports = {{class.name}};

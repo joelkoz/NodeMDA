@@ -1,0 +1,38 @@
+{
+  "name": "nodemda-koa-react",
+  "version": "1.0",
+  "description": "NodeMDA plugin to generate a full stack NodeJS app using Koa, React, and Mantine",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joelkoz/NodeMDA/tree/master/plugin-dev/koa-react"
+  },
+  "keywords": [
+    "nodemda",
+    "plugin",
+    "javascript",
+    "nodejs",
+    "koa",
+    "react",
+    "mantine",
+    "mongoose",
+    "mongodb",
+    "docker",
+    "SOA",
+    "services",
+    "code generator"
+  ],
+  "dependencies": {
+    "faker": "^3.1.0",
+    "handlebars": "^4.0.5",
+    "joi": "^9.2.0",
+    "omni-schema": "^2.0.3",
+    "pluralize": "^3.0.0",
+    "winston": "^2.3.0"
+  },
+  "author": "Joel Kozikowski",
+  "license": "MIT"
+}
