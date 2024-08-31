@@ -3,7 +3,7 @@
 // Do not modify this file.
 //
 import React, { useState, useEffect } from 'react';
-import { TextInput, NumberInput, PasswordInput,Checkbox, Select, Button } from '@mantine/core';
+import { TextInput, NumberInput, PasswordInput,Checkbox, Select, MultiSelect,Button } from '@mantine/core';
 import { DateInput, TimeInput } from '@mantine/dates';
 import { fetch{{class.name}}ById, create{{class.name}}, update{{class.name}} } from '{{class.relativeParentPrefix}}/api/{{class.packageDirPath}}{{class.name}}Api';
 
@@ -45,7 +45,7 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
     <form onSubmit={handleSubmit}>   
 {{#each class.attributes as |attrib|}}      
 {{#if attrib.visibleToForm}}
-      <{{attrib.type.mantineInputTag}}
+      <{{attrib.mantineInputTag}}
         label="{{attrib.mantineDataLabel}}"
 {{#if (isdefined attrib.type.mantineInputType)}}
         type="{{attrib.type.mantineInputType}}"

@@ -23,6 +23,16 @@ var EntitySupport = {};
 
 			onAttribute: [ 
 			   { get: [
+
+					function mantineInputTag() {
+						if (this.isArray && this.type.isEnum) {
+							return 'MultiSelect';
+						}
+						else {
+						   return this.type.mantineInputTag;
+						}
+					},
+
 					/**
 					 * mantineOnChange returns the code fragment to to as the value
 					 * of the onChange attribute in a Mantine input compontent.
