@@ -213,9 +213,15 @@ var winston = require('winston');
 	    	   let tagVal;
 	    	   if (tag.kind === 'boolean') {
 	    	   	 tagVal = tag.checked;
+				 if (!tagVal) {
+					tagVal = false;
+				 }
 	    	   }
 	    	   else if (tag.kind === 'number') {
 	    	   	 tagVal = tag.number;
+				 if (!tagVal) {
+					tagVal = 0;
+				 }
 	    	   }
 	    	   else {
 	    	   	 tagVal = tag.value;
