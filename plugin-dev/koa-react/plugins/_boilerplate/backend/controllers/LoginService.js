@@ -6,7 +6,7 @@ const { SECRET_KEY } = require('../config/auth');
 exports.registerUser = async (ctx) => {
   try {
     const { username, password } = ctx.request.body;
-
+    console.log(`Registering user with username: ${username}`);
     // Prevent users from registering with the Admin role
     const user = new User({ username, password, role: 'User' });
     await user.save();
@@ -25,7 +25,7 @@ exports.loginUser = async (ctx) => {
   if (!user || !(await user.comparePassword(password))) {
     ctx.throw(401, 'Invalid username or password');
   }
-  const token = jwt.sign({ id: user._id, role: user.role }, SECRET_KEY, { expiresIn: '1h' });
+  const token = jwt.sign({ id: user._id, roles: user.roles }, SECRET_KEY, { expiresIn: '1h' });
   ctx.body = { token };
 };
 

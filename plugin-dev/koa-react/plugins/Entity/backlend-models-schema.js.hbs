@@ -9,7 +9,21 @@ const bcrypt = require('bcryptjs');
 
 const {{lowercase class.name}}Schema = new mongoose.Schema({
 {{#each class.attributes as |attrib|}}  
-  {{attrib.jsIdentifierName}}: { type: '{{attrib.type.mongooseType}}', required: {{attrib.isRequired}} },
+  {{attrib.jsIdentifierName}}: { type: 
+
+     {{~#if attrib.isArray}}[{{/if~}} '{{attrib.type.mongooseType}}' {{~#if attrib.isArray}}]{{/if~}}
+
+     {{~#if attrib.type.isEnum}}, enum: {{{attrib.type.jsOptionList}}} {{~/if~}}
+
+     {{~#if attrib.hasMinValue}}, min: {{{attrib.minValue}}} {{~/if~}}
+
+     {{~#if attrib.hasMaxValue}}, max: {{{attrib.maxValue}}} {{~/if~}}
+
+     {{~#if attrib.isUnique~}}
+     , unique: true
+     {{~/if~}}
+
+     , required: {{attrib.isRequired}} },
 {{/each}}  
 });
 

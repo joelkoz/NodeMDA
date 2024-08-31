@@ -3,11 +3,11 @@
 // Do not modify this file.
 //
 const Router = require('koa-router');
-const { isAdmin } = require('../config/auth');
-const {{lowercase class.name}}Dao = require('../controllers/{{class.packageDirPath}}{{class.name}}Dao');
+const { isAdmin } = require('{{class.relativeParentPrefix}}/config/auth');
+const {{lowercase class.name}}Dao = require('{{class.relativeParentPrefix}}/controllers/{{class.packageDirPath}}{{class.name}}Dao');
 
 const router = new Router({
-  prefix: '/api/v1/{{class.packageDirPath}}{{lowercase name.pluralName}}',
+  prefix: '/api/v1/{{class.packageDirPath}}{{lowercase class.pluralName}}',
 });
 
 // Public routes

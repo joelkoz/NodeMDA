@@ -10,6 +10,73 @@ const OmniFaker = require('omni-schema/lib/plugins/mock-faker');
 var Datatypes = {};
 
 
+// Define a mixin function so we can define our own Enumeration datatype...
+const EnumerationBehavior = Base => class extends Base {
+
+    constructor(...args) {
+        super(...args);
+    }
+
+    addOption(opt) {
+        if (typeof opt === 'string') {
+            this._options.push(opt);
+        } else {
+            throw new Error('Enumeration option must be a string');
+        }
+    }
+
+    setOptions(opts) {
+        if (Array.isArray(opts) && opts.every(val => typeof val === 'string')) {
+			this._options.length = 0;
+			this._options.push(...opts);
+        } else {
+            throw new Error('Options must be an array of strings');
+        }
+    }
+
+    getOptions() {
+		return this._options;
+	}
+
+    get options() {
+		 return this._options;
+    }
+
+    get mantineInputTag() { return 'Select'; }
+    
+    get mantineData() { return `{ ${JSON.stringify(this._options)} }`; }
+        
+	get jsOptionList() { return JSON.stringify(this._options); }
+};
+
+
+// The mixin function to allow us to add the EnumerationBehavior to our new data type...
+function applyEnumerationBehavior(target) {
+    const Behavior = EnumerationBehavior(Object);
+    const instance = new Behavior();
+
+    // Copy properties from the instance to the target object	
+	Object.assign(target, instance);
+
+    // Copy methods and getter/setters from the instance to the target object
+    Object.getOwnPropertyNames(Behavior.prototype).forEach(name => {
+        if (name !== 'constructor') {
+            const descriptor = Object.getOwnPropertyDescriptor(Behavior.prototype, name);
+
+            if (typeof descriptor.value === 'function') {
+                // It's a method; bind it to the instance
+				target[name] = descriptor.value;
+            } else {
+                // It's a getter/setter or non-function property; define it on the target
+                Object.defineProperty(target, name, descriptor);
+            }
+        }
+    });
+
+    return target;
+}
+
+
 /**
  *  Decorates the NodeMDA data type instances in the model with properties used by this plugin
  *  during code generation.
@@ -37,8 +104,8 @@ function initDataTypes(model) {
 	defineDataSpec('Number', { jsTypeName: 'number', globalDefaultValue: '0', mongooseType: 'Number', mantineInputTag: 'NumberInput', mantineAllowDecimal: true});
 	defineDataSpec('Boolean', { jsTypeName: 'boolean', globalDefaultValue: false, mongooseType: 'Boolean', mantineInputTag: 'Checkbox', mantineUseCheckedForValue: true });
 	defineObjectType('DateTime', 'Date', { globalDefaultValue: 'new Date()', mongooseType: 'Date', mantineInputTag: 'DateInput', mantineValueFormat: 'MM-DD-YYYY HH:mm' });
-
-
+    
+	
 	function defineStringType(name, props) {
 		defineDataSpec(name, props, Types.String);
 	}
@@ -54,6 +121,23 @@ function initDataTypes(model) {
 	function defineDateType(name, props) {
 		defineDataSpec(name, props, Types.DateTime);
 	}
+
+	defineStringType('Enumeration', { isEnum: true });
+	applyEnumerationBehavior(Types.Enumeration);
+
+
+	defineBooleanType('BooleanEnum', { isBoolEnum: true });
+	applyEnumerationBehavior(Types.BooleanEnum);
+
+
+    function defineEnumerationType(name, options) {
+		defineDataSpec(name, { _options: options }, Types.Enumeration);
+	}
+
+    function defineBooleanEnumType(name, options) {
+		defineDataSpec(name, { _options: options }, Types.BooleanEnum);
+	}
+
 
 	// Higher order string types...
 	defineStringType('Text', { mantineInputTag: 'Textarea' });
@@ -80,9 +164,13 @@ function initDataTypes(model) {
 	defineStringType('Time', { mantineInputTag: 'TimeInput' });
 
 	// Common enumerations...
-	defineBooleanType('YesNo', { mantineInputTag: 'Select', mantineData: '{[\'Yes\', \'No\']}' });
-	defineStringType('Sex', { mantineInputTag: 'Select', mantineData: '{[\'Male\', \'Female\', \'Other\']}' });
-	defineBooleanType('OnOff', { mantineInputTag: 'Select', mantineData: '{[\'On\', \'Off\']}'  });
+	defineBooleanEnumType('YesNo', [ 'No', 'Yes']);
+	defineEnumerationType('Sex', ['Male', 'Female', 'Other'] );
+	defineBooleanEnumType('OnOff', [ 'Off', 'On']);
+
+    // Save the enumeration definition functions for modeled enumerations
+	model.defineEnumerationType = defineEnumerationType;
+	model.defineBooleanEnumType = defineBooleanEnumType;
 }
 
 
@@ -127,13 +215,23 @@ function initDataTypes(model) {
 			
 
 					function omniSchemaTypeName() {
-						return this.type.omniSchemaType.name;
+						if (this.type.omniSchemaType) {
+						   return this.type.omniSchemaType.name;
+						}
+						else {
+							return 'String';
+						}
 			   		},
 
 					function jsDefaultValue() {
 						if (this.hasDefaultValue) {
-							let jsValue = this.type.omniSchemaType.fromString(this.defaultValue);
-							return JSON.stringify(jsValue);
+							if (this.type.omniSchemaType) {
+							   let jsValue = this.type.omniSchemaType.fromString(this.defaultValue);
+							   return JSON.stringify(jsValue);
+							}
+							else {
+								return this.defaultValue;
+							}
 						}
 						else if (this.isArray) {
 							return "[]";

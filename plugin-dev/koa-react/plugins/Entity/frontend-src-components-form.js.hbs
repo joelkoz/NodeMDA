@@ -3,14 +3,14 @@
 // Do not modify this file.
 //
 import React, { useState, useEffect } from 'react';
-import { TextInput, NumberInput, Checkbox, Select, Button } from '@mantine/core';
+import { TextInput, NumberInput, PasswordInput,Checkbox, Select, Button } from '@mantine/core';
 import { DateInput, TimeInput } from '@mantine/dates';
 import { fetch{{class.name}}ById, create{{class.name}}, update{{class.name}} } from '{{class.relativeParentPrefix}}/api/{{class.packageDirPath}}{{class.name}}Api';
 
 const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) => {
   const [{{lowercase class.name}}, set{{class.name}}] = useState({
 {{#each class.attributes as |attrib|}}
-{{#if attrib.isPublic}}
+{{#if attrib.visibleToForm}}
     {{attrib.jsIdentifierName}}: {{{attrib.jsDefaultValue}}},
 {{/if}}    
 {{/each}}
@@ -44,7 +44,7 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
   return (
     <form onSubmit={handleSubmit}>   
 {{#each class.attributes as |attrib|}}      
-{{#if attrib.isPublic}}
+{{#if attrib.visibleToForm}}
       <{{attrib.type.mantineInputTag}}
         label="{{attrib.mantineDataLabel}}"
 {{#if (isdefined attrib.type.mantineInputType)}}
@@ -68,8 +68,8 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
 {{#if attrib.type.mantineUsedCheckedForValue}}
         checked={ {{lowercase class.name}}.{{attrib.jsIdentifierName}} }
 {{else}}
-        value={ {{lowercase ../class.name}}.{{attrib.jsIdentifierName}} }
-        defaultValue={ {{{attrib.type.globalDefaultValue}}} }
+        value={ {{lowercase ../class.name}}.{{attrib.jsIdentifierName}}{{{attrib.mantineValueSuffix}}} }
+        defaultValue={ {{{attrib.mantineDefaultValue}}} }
   {{#if attrib.isRequired}}        
         required
   {{/if}}

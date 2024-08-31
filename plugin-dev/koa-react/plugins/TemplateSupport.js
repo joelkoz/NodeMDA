@@ -3,7 +3,6 @@
 const NodeMDA = require("nodemda");
 const pluralize = require('pluralize');
 const _ = require('lodash');
-const OmniSchema = require('omni-schema');
 
 
 /*
@@ -71,37 +70,6 @@ var TemplateSupport = {};
        metaClass.associations = [];
     };
     
-    
-
-	/**
-	 * Creates a minimal OmniSchema for the specified class and saves it in the
-	 * "schema" property of the meta class object. This schema is used to create
-	 * mock records by the unit test generation code.
-	 */
-	function makeSchema(metaClass) {
-
-		// Build an OmniSchema for this class so we can mock a record...
-		let schemaTemplate = {};
-		metaClass.allVisibleAttributes.forEach(function(attrib) {
-			if (attrib.isObject) {
-				schemaTemplate[attrib.name] = { schema: attrib.type.metaClass.schemaCollectionName };
-			}
-			else {
-				schemaTemplate[attrib.name] = { type: attrib.omniSchemaTypeName };
-			}
-			let omniField = schemaTemplate[attrib.name];
-			omniField.validation = {};
-			if (attrib.hasMinValue) {
-				omniField.validation.min = attrib.minValue;
-			}
-			if (attrib.hasMaxValue) {
-				omniField.validation.max = attrib.maxValue;
-			}
-		});
-
-		metaClass.schema = OmniSchema.compile(schemaTemplate, metaClass.schemaCollectionName);
-	}
-
 
 
 
@@ -145,14 +113,13 @@ var TemplateSupport = {};
 					 * with the "_" character.
 					 */
 					function jsIdentifierName() {
-						if (this.isReadOnly || !this.isPublic) {
-							// A private variable...
-							return "_" + this.name;
-						}
-						else {
-							return this.name;
-						}
-
+						// if (this.isReadOnly || !this.isPublic) {
+						// 	return "_" + this.name;
+						// }
+						// else {
+						// 	return this.name;
+						// }
+						return this.name;
    					},
 
 
@@ -432,14 +399,78 @@ var TemplateSupport = {};
 		}); // end mixin
 
 
+        // All code from this point on will be executed once just before NodeMDA starts
+		// processing classes in the model. This is where we put any special transformations
+		// or model additions that are needed for the NodeMDA templates to work.
+
+
 		// Transform the associations on all of the classes to simple object properties...
 		model.classes.forEach(function (metaClass) {
 			transformAssocsToAttribs(metaClass);
-			let sname = metaClass.stereotypeName;
-			if (sname === 'ValueObject' || sname === 'POJO' || sname === 'Entity') {
-				makeSchema(metaClass);
+		});
+
+
+        // Gather all of the roles defined in the model...
+		model.defineEnumerationType('SystemRole', []);
+		model.actors.forEach(function (actor) {
+			let roleName = actor.name;
+			if (roleName.endsWith('Role')) {
+				roleName = _.camelCase(roleName.slice(0, -4));
+				model.Types.SystemRole.addOption(roleName);				
 			}
 		});
+
+
+		// Turn all of the classes marked with the Enumeration stereotype into enumerations...
+		model.classes.forEach(function (metaClass) {
+			if (metaClass.stereotypeName === 'Enumeration') {
+				model.defineEnumerationType(metaClass.name, []);
+
+				// Now turn each attribute into an option in the enumeration...
+				let enumType = model.Types[metaClass.name];
+				metaClass.attributes.forEach(function (attrib) {
+					enumType.addOption(attrib.name);
+				});
+			}
+		});
+
+
+		// Finally, find every class that is marked with the "Entity" stereotype and
+        // change any attrributes that reference the enumeration class into the
+		// enumeration data type.
+		model.classes.forEach(function (metaClass) {
+			if (metaClass.stereotypeName === 'Entity') {
+				metaClass.attributes.forEach(function (attrib) {
+					if (attrib.isObject) {
+						let attribClass = attrib.type.metaClass;
+						if (attribClass && attribClass.stereotypeName === 'Enumeration') {
+							attrib._type = model.Types[attribClass.name];
+						}
+					}
+				});
+			}
+		});
+
+
+		model.classes.forEach(function (metaClass) {
+			if (metaClass.stereotypeName === 'Entity') {
+				console.log(`Entity name: ${metaClass.name}`);
+				console.log(JSON.stringify(metaClass,null,6));
+			}
+		});
+
+
+		// Dump out the classes...
+		// Uncomment the code block below to get a dump of the meta model
+		/**
+		console.log("Class meta model:");
+		model.classes.forEach(function (metaClass) {
+			console.log(`\nClass: ${metaClass.name} <<${metaClass.stereotypeName}>>`);
+			metaClass.attributes.forEach(function (attrib) {
+				console.log(`    Attrib: ${JSON.stringify(attrib,null,6)}`);
+			});
+		});
+		*/
 	};
 
 	

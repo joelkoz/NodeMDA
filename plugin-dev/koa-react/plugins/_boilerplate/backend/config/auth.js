@@ -8,11 +8,13 @@ const SECRET_KEY = process.env.SECRET_KEY; // Get the secret key from environmen
 
 // Middleware to check if the user has the Admin role
 const isAdmin = async (ctx, next) => {
-  if (ctx.state.user.role !== 'Admin') {
+  if (!ctx.state.user.roles.includes('admin')) {
+    console.log('Access denied');
     ctx.throw(403, 'Access denied');
   }
   await next();
 };
+
 
 // JWT Middleware to protect routes
 const jwtMiddleware = koaJwt({ secret: SECRET_KEY });

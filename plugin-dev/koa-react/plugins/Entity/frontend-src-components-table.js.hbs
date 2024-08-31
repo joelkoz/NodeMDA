@@ -47,7 +47,7 @@ const {{class.name}}Table = ({ onEdit }) => {
       records={ {{lowercase class.pluralName}} }
       columns={[
 {{#each class.attributes as |attrib|}}
-{{#if attrib.isPublic}}
+{{#if attrib.visibleToTable}}
         { accessor: '{{attrib.jsIdentifierName}}', title: '{{attrib.mantineDataLabel}}' },
 {{/if}}        
 {{/each}}

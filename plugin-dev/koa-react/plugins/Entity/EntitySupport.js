@@ -31,14 +31,17 @@ var EntitySupport = {};
 						if (this.type.mantineInputTag == 'NumberInput') {
 							return `(value) => handleChange('${this.jsIdentifierName}', value)`;
 						}
+						else if (this.type.mantineInputTag == 'DateInput') {
+							return `(value) => handleChange('${this.jsIdentifierName}', value)`;
+						}
 						else if (this.type.mantineInputTag == 'Checkbox') {
 							return `(e) => handleChange('${this.jsIdentifierName}', e.currentTarget.checked)`;
 						}
 						else if (this.type.name == 'YesNo') {
-							return `(value) => handleChange('${this.jsIdentifierName}', value == 'Yes')`;
+							return `(value) => handleChange('${this.jsIdentifierName}', value === 'Yes')`;
 						}
 						else if (this.type.name == 'OnOff') {
-							return `(value) => handleChange('${this.jsIdentifierName}', value == 'On')`;
+							return `(value) => handleChange('${this.jsIdentifierName}', value === 'On')`;
 						}
 						else if (this.type.mantineInputTag == 'Select') {
 							return `(value) => handleChange('${this.jsIdentifierName}', value)`;
@@ -53,6 +56,35 @@ var EntitySupport = {};
 						return camelToWords(this.name);
 				   },
 
+				   function mantineValueSuffix() {
+						if (this.type.name == 'YesNo') {
+							return ' ? "Yes" : "No"';
+						}
+						else if (this.type.name == 'OnOff') {
+							return ' ? "On" : "Off"';
+						}
+						return '';
+				   },
+
+
+				   function mantineDefaultValue() {
+						if (this.type.name == 'YesNo') {
+							return this.defaultValue ? "'Yes'" : "'No'";
+						}
+						else if (this.type.name == 'OnOff') {
+							return this.defaultValue ? "'On'" : "'Off'";
+						}
+
+						return this.jsDefaultValue;
+				   },
+
+				   function visibleToForm() {
+					  return this.isPublic;
+				   },
+
+				   function visibleToTable() {
+					  return this.isTaggedAs('uiTableColumn');
+				   },
 
 				]},
 

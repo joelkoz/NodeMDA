@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../api/userApi';
+import { loginUser } from '../api/LoginApi';
 import { TextInput, Button, Alert } from '@mantine/core';
 
 function LoginPage() {
