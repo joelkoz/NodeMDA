@@ -167,7 +167,7 @@ var Datatypes = Datatypes || {};
 			return "[]";
 		}
 		else if (this.isObject) {
-			return "new " + this.type.jsClassNameWithPath() + "()";
+			return "new " + this.type.jsClassNameWithPath + "()";
 		}
 		else {
 			var jsdt = Datatypes.getTypeInfo(this.type);

@@ -237,7 +237,7 @@ function initDataTypes(model) {
 							return "[]";
 						}
 						else if (this.isObject) {
-							return "new " + this.type.jsClassNameWithPath() + "()";
+							return "new " + this.type.jsClassNameWithPath + "()";
 						}
 						else {
 							return this.type.globalDefaultValue;
