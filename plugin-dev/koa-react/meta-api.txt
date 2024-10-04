@@ -24,6 +24,9 @@ attribute|parameter
 attribute
   .jsIdentifierName
   .uiExclude
+  .schemaDbProperties  // falsey, or JSON string of _schemaDbProp
+  .mongooseSubDoc // TRUE if attribute represents a POJO object to be defined as a sub document
+  ._schemaDbProp // { persistence: 'embed', foreignKeyField: 'myNameForThatInstance' }
 
 operation
   .jsReturnType
@@ -55,4 +58,7 @@ class
   .isUserOwned
   .allowExternalAccess
   .doCrud
+  .referencedForSchemaImport // An array of zero or more metaClass objects that are referenced in the schema of this class
 
+  .isEntity // True if this class is an isEntity
+  .isUserEntity // True if this class is the special entity named 'User'

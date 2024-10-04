@@ -143,6 +143,41 @@ var TemplateSupport = {};
    						}
    					},
 
+					function mongooseType() {
+						if (this.mongooseRefObject) {
+							return `mongoose.ObjectId, ref: '${this.type.metaClass.name}'`;
+						}
+						else if (this.mongooseSubDoc) {
+							return `${this.type.metaClass.name.toLowerCase()}Schema`;
+						}
+						else {
+						   return `'${this.type.mongooseType}'`;
+						}
+					},
+
+
+
+                    function mongooseSubDoc() {
+						if (this.isObject) {
+							let metaClass = this.type.metaClass;
+							if (metaClass.stereotypeName === 'ValueObject' || metaClass.stereotypeName === 'POJO') {
+								return true;
+							}
+						}
+
+						return false;
+					},
+
+                    function mongooseRefObject() {
+						if (this.isObject) {
+							let metaClass = this.type.metaClass;
+							return metaClass.isEntity;
+						}
+
+						return false;
+					},
+
+
    					/**
    					* Returns TRUE if this attribute is an object attribute that can and should be 
    					* imported and referenced directly by the schema.
@@ -324,6 +359,25 @@ var TemplateSupport = {};
 
 
 					/**
+					* Returns a list of all POJO objects that are referenced
+					* by this class.
+					*/ 
+					function embeddedClasses() {
+
+						let embedded = [];
+
+						this.attributes.forEach(function (attribute) {
+							if (attribute.mongooseSubDoc) {
+								embedded.push(attribute.type.metaClass);
+							}
+						});
+
+						return embedded;
+					},
+
+
+
+					/**
 					* Returns the stringified version of the roles use.  It will be in the
 					* format [ 'role1', 'role2',...]
 					*/
@@ -345,6 +399,10 @@ var TemplateSupport = {};
 
 					function isUserEntity() {
 						return this.stereotypeName === 'Entity' && this.name === 'User';
+					},
+
+					function isEntity() {
+						return this.stereotypeName === 'Entity';
 					}
 
 				],
@@ -451,14 +509,16 @@ var TemplateSupport = {};
 			}
 		});
 
+/*
 
-		model.classes.forEach(function (metaClass) {
+        // Dump out the entire meta model for plugin development and debugging purposes...
+        model.classes.forEach(function (metaClass) {
 			if (metaClass.stereotypeName === 'Entity') {
 				console.log(`Entity name: ${metaClass.name}`);
 				console.log(JSON.stringify(metaClass,null,6));
 			}
 		});
-
+*/
 
 		// Dump out the classes...
 		// Uncomment the code block below to get a dump of the meta model
