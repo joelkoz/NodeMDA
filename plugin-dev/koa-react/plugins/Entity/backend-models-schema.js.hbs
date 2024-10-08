@@ -50,6 +50,16 @@ const {{lowercase class.name}}Schema = new mongoose.Schema({
 {{/each}}  
 });
 
+{{#each class.virtuals as |vAttrib|}} 
+{{lowercase ../class.name}}Schema.virtual('{{vAttrib.name}}', {
+  ref: '{{vAttrib.type.metaClass.name}}',
+  localField: '_id',
+  foreignField: '{{vAttrib._schemaDbProp.foreignKeyField}}',
+  justOne: {{#if vAttrib.isArray}}false{{else}}true{{/if}}
+});
+
+{{/each}} 
+
 {{#if class.isUserEntity}}
 // Password hash middleware
 userSchema.pre('save', async function(next) {
@@ -63,8 +73,8 @@ userSchema.pre('save', async function(next) {
 userSchema.methods.comparePassword = function(password) {
   return bcrypt.compare(password, this.password);
 };
-{{/if}}
 
+{{/if}}
 const {{class.name}} = mongoose.model('{{class.name}}', {{lowercase class.name}}Schema);
 
 module.exports = {{class.name}};

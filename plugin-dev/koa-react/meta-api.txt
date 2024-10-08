@@ -62,3 +62,8 @@ class
 
   .isEntity // True if this class is an isEntity
   .isUserEntity // True if this class is the special entity named 'User'
+
+
+An enumertion named "SystemRole" is automatically defined.  The elements of the enumeration are the names of any Actor objects
+defined in the UML model that are suffixed with "Role".  "Role" will be removed from the element name. For example,
+an Actor named "UserRole" will add an element named "User" to the "SystemRole" enumeration.

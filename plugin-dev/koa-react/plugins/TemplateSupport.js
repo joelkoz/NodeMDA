@@ -33,6 +33,7 @@ var TemplateSupport = {};
 	     */
 	    function assocsToArrayAttribs(metaClass) {
 	    	let attribs = [];
+			let virtuals = [];
 	    	metaClass.associations.forEach(function(metaAssoc) {
 	    	   let myEnd = metaAssoc.myEnd;
 	    	   let otherEnd = metaAssoc.otherEnd; 
@@ -57,17 +58,47 @@ var TemplateSupport = {};
 	    		   		}
 	    		   }
 
-	    		   attribs.push(attrib);
-	    	   }	
+				   if (myEnd.type.metaClass.isEntity && otherEnd.type.metaClass.isEntity) {
+					    // Two associated Entity properties have special handling depending on the multiplicity
+						if (otherEnd.isOne) {
+								// For One to Many relationships, the "one" side holds
+								// an actual reference to the other object Id as a real
+								// property. The "many" side can use a virtual property and simply query
+								// the database to gather the many members. Here, the "other" end
+								// is a "one", so we make an actual attribute to hold the reference.
+								attribs.push(attrib);
+						}
+						else if (myEnd.isMany && otherEnd.isMany) {
+								// Many to Many relationship are modeled by an array that holds
+								// a reference to the object Ids of the other objects. As with the
+								// "one" side, we make an actual attribute to hold the references.
+								// It will be generated as an array attribute since it is "many".
+								attribs.push(attrib);
+						}
+						else {
+								// If we are here, the other end is a many, but myEnd is a "one".
+								// You can gather the other objects by querying the database using the
+								// "one" side. Thus, we make this attribute a virtual property on
+								// the entity.
+								virtuals.push(attrib);
+						}
+					}
+					else {
+						// If any side is NOT an entity, just handle it as any other attribute.
+						attribs.push(attrib);
+					}
+	    	   }
 	    	});
-	    	return attribs;
+	    	return { attribs, virtuals };
 	    };
 
-       let jsAttributeList = metaClass.attributes.concat(assocsToArrayAttribs(metaClass));
+	   const {attribs, virtuals} = assocsToArrayAttribs(metaClass);
+       let jsAttributeList = metaClass.attributes.concat(attribs);
        metaClass.jsOriginalAttributes = metaClass.attributes;
        metaClass.attributes = jsAttributeList;
        metaClass.jsOriginalAssociations = metaClass.associations;
        metaClass.associations = [];
+	   metaClass.virtuals = virtuals;
     };
     
 
@@ -145,7 +176,12 @@ var TemplateSupport = {};
 
 					function mongooseType() {
 						if (this.mongooseRefObject) {
-							return `mongoose.ObjectId, ref: '${this.type.metaClass.name}'`;
+							if (this.isArray) {
+								return `{ type: mongoose.ObjectId, ref: '${this.type.metaClass.name}' }`;
+							}
+							else {
+								return `mongoose.ObjectId, ref: '${this.type.metaClass.name}'`;
+							}
 						}
 						else if (this.mongooseSubDoc) {
 							return `${this.type.metaClass.name.toLowerCase()}Schema`;
@@ -154,8 +190,6 @@ var TemplateSupport = {};
 						   return `'${this.type.mongooseType}'`;
 						}
 					},
-
-
 
                     function mongooseSubDoc() {
 						if (this.isObject) {
@@ -403,6 +437,11 @@ var TemplateSupport = {};
 
 					function isEntity() {
 						return this.stereotypeName === 'Entity';
+					},
+
+					function isEnumeration() {
+						return this.stereotypeName === 'Enumeration' ||
+							   this.stereotypeName === 'enumeration';
 					}
 
 				],
@@ -481,7 +520,7 @@ var TemplateSupport = {};
 
 		// Turn all of the classes marked with the Enumeration stereotype into enumerations...
 		model.classes.forEach(function (metaClass) {
-			if (metaClass.stereotypeName === 'Enumeration') {
+			if (metaClass.isEnumeration) {
 				model.defineEnumerationType(metaClass.name, []);
 
 				// Now turn each attribute into an option in the enumeration...
@@ -501,7 +540,7 @@ var TemplateSupport = {};
 				metaClass.attributes.forEach(function (attrib) {
 					if (attrib.isObject) {
 						let attribClass = attrib.type.metaClass;
-						if (attribClass && attribClass.stereotypeName === 'Enumeration') {
+						if (attribClass && attribClass.isEnumeration) {
 							attrib._type = model.Types[attribClass.name];
 						}
 					}
@@ -509,8 +548,8 @@ var TemplateSupport = {};
 			}
 		});
 
-/*
 
+/*
         // Dump out the entire meta model for plugin development and debugging purposes...
         model.classes.forEach(function (metaClass) {
 			if (metaClass.stereotypeName === 'Entity') {
