@@ -42,6 +42,10 @@ const {{lowercase class.name}}Schema = new mongoose.Schema({
 
      {{~#if attrib.hasMaxValue}}, max: {{{attrib.maxValue}}} {{~/if~}}
 
+     {{~#if attrib.hasIndex~}}
+     , index: true
+     {{~/if~}}
+
      {{~#if attrib.isUnique~}}
      , unique: true
      {{~/if~}}

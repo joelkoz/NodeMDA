@@ -211,6 +211,9 @@ var TemplateSupport = {};
 						return false;
 					},
 
+					function hasIndex() {
+						return this.getTagValue('dbIndex');
+					},
 
    					/**
    					* Returns TRUE if this attribute is an object attribute that can and should be 
