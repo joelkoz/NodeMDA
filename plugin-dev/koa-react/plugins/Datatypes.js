@@ -102,7 +102,7 @@ function initDataTypes(model) {
 	// The primative types...
 	defineDataSpec('String', { jsTypeName: 'string', globalDefaultValue: '\'\'', mongooseType: 'String', mantineInputTag: 'TextInput'});
 	defineDataSpec('Number', { jsTypeName: 'number', globalDefaultValue: '0', mongooseType: 'Number', mantineInputTag: 'NumberInput', mantineAllowDecimal: true});
-	defineDataSpec('Boolean', { jsTypeName: 'boolean', globalDefaultValue: false, mongooseType: 'Boolean', mantineInputTag: 'Checkbox', mantineUseCheckedForValue: true });
+	defineDataSpec('Boolean', { jsTypeName: 'boolean', globalDefaultValue: false, mongooseType: 'Boolean', mantineInputTag: 'Checkbox', mantineInputType: 'checkbox' });
 	defineObjectType('DateTime', 'Date', { globalDefaultValue: 'new Date()', mongooseType: 'Date', mantineInputTag: 'DateInput', mantineValueFormat: 'MM-DD-YYYY HH:mm' });
     
 	

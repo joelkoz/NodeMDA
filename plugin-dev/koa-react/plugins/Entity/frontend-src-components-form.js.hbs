@@ -3,9 +3,6 @@
 {{#ifBoth attrib.visibleToForm attrib.mantineInputTag}}
       <{{attrib.mantineInputTag}}
         label="{{attrib.mantineDataLabel}}"
-{{#if (isdefined attrib.type.mantineInputType)}}
-        type="{{attrib.type.mantineInputType}}"
-{{/if}}
 {{#if (isdefined attrib.type.mantineAllowDecimal)}}
         allowDecimal={ {{attrib.type.mantineAllowDecimal}} }
 {{/if}}
@@ -21,30 +18,45 @@
 {{#if (isdefined attrib.type.mantineData)}}
         data={{{attrib.type.mantineData}}}
 {{/if}}
-{{#if attrib.type.mantineUseCheckedForValue}}
-        checked={ {{classVar}}.{{attrib.jsIdentifierName}} }
-{{else}}
-        value={ {{classVar}}.{{attrib.jsIdentifierName}}{{{attrib.mantineValueSuffix}}} }
-        defaultValue={ {{{attrib.mantineDefaultValue}}} }
   {{#if attrib.isRequired}}        
         required
   {{/if}}
-{{/if}}        
-        onChange={ {{{attrib.mantineOnChange}}} }
+        key={ form.key('{{varPrefix}}{{varName}}') }
+        { ...form.getInputProps('{{varPrefix}}{{varName}}'
+           {{~#if (isdefined attrib.type.mantineInputType)~}}
+             , { type: '{{attrib.type.mantineInputType}}' }
+            {{~/if}}) }
       />
 
 {{/ifBoth}}
 {{/inline~}}
 
+
+
 {{~#* inline "inputObject" ~}}
 {{#each attributes as |attrib|}}
 {{#if attrib.isObject}}
      <Fieldset legend="{{attrib.mantineDataLabel}}">
-{{> inputObject attributes=attrib.type.metaClass.attributes classVar=(concat ../classVar "." attrib.jsIdentifierName)}}
+{{> inputObject attributes=attrib.type.metaClass.attributes varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".")}}
      </Fieldset>
 
 {{else}}
-{{> inputTag attrib=attrib classVar=../classVar}}
+{{> inputTag attrib=attrib varPrefix=../varPrefix varName=attrib.jsIdentifierName}}
+{{/if}}
+{{/each}}
+{{/inline~}}
+
+
+{{~#* inline "initialValues" ~}}
+{{#each attributes as |attrib|}}
+{{#if attrib.visibleToForm}}
+{{#if attrib.isObject}}
+{{../indent}}{{prefix}}{{attrib.jsIdentifierName}}: {
+{{> initialValues attributes=attrib.type.metaClass.attributes prefix=(concat ../prefix attrib.jsIdentifierName ".") indent=(concat ../indent "    ")}}
+{{../indent}} },
+{{else}}
+{{../indent}}{{prefix}}{{attrib.jsIdentifierName}}: {{{attrib.mantineDefaultValue}}},
+{{/if}}
 {{/if}}
 {{/each}}
 {{/inline~}}
@@ -55,46 +67,44 @@
 import React, { useState, useEffect } from 'react';
 import { TextInput, NumberInput, PasswordInput, Checkbox, Select, MultiSelect, Button, Fieldset } from '@mantine/core';
 import { DateInput, TimeInput } from '@mantine/dates';
+import { useForm } from '@mantine/form';
 import { fetch{{class.name}}ById, create{{class.name}}, update{{class.name}} } from '{{class.relativeParentPrefix}}/api/{{class.packageDirPath}}{{class.name}}Api';
-import assignPath from '{{class.relativeParentPrefix}}/utils/assignPath';
 
 const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) => {
-  const [{{lowercase class.name}}, set{{class.name}}] = useState({
-{{#each class.attributes as |attrib|}}
-{{#if attrib.visibleToForm}}
-    {{attrib.jsIdentifierName}}: {{{attrib.jsDefaultValue}}},
-{{/if}}    
-{{/each}}
+
+  const form = useForm({
+    mode: 'uncontrolled',
+    initialValues: {
+{{> initialValues attributes=class.attributes indent="        " prefix=""}}
+    },
+    validate: {
+    }
   });
+
 
   useEffect(() => {
     if ({{lowercase class.name}}Id) {
       // Load {{lowercase class.name}} data for editing
       fetch{{class.name}}ById({{lowercase class.name}}Id).then((data) => { 
-        // Special formatting of data before editing goes here:
-        // const fmtPublishsed = data.published ? data.published.split('T')[0] : '';
-        set{{class.name}}({ ...data, /* published: fmtPublishsed */ });
+        form.setValues(data);
+        form.resetDirty(data);        
       });
     }
   }, [{{lowercase class.name}}Id]);
 
 
-  const handleChange = (name, value) => {
-    set{{class.name}}(assignPath({{lowercase class.name}}, name, value));
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (values) => {
     if ({{lowercase class.name}}Id) {
-      update{{class.name}}({{lowercase class.name}}Id, {{lowercase class.name}}).then(onSave);
+      update{{class.name}}({{lowercase class.name}}Id, values).then(onSave);
     } else {
-      create{{class.name}}({{lowercase class.name}}).then(onSave);
+      create{{class.name}}(values).then(onSave);
     }
   };
 
+
   return (
-    <form onSubmit={handleSubmit}>   
-{{> inputObject attributes=class.attributes classVar=(lowercase class.name)}}
+    <form onSubmit={form.onSubmit(handleSubmit)}>   
+{{> inputObject attributes=class.attributes varPrefix=""}}
       <Button type="submit" mt="md">
         { {{lowercase class.name}}Id ? 'Update {{class.name}}' : 'Create {{class.name}}' }
       </Button>

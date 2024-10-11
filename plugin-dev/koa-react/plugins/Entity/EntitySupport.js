@@ -89,7 +89,7 @@ var EntitySupport = {};
 				   },
 
 				   function visibleToForm() {
-					  return this.isPublic;
+					  return this.isPublic && !this.isTaggedAs('uiExclude');
 				   },
 
 				   function visibleToTable() {
