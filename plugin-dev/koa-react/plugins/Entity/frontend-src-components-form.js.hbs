@@ -1,11 +1,62 @@
 ##output overwrite {{@root.output}}/frontend/src/components/{{class.packageDirPath}}{{class.name}}Form.js
+{{#* inline "inputTag" ~}}
+{{#ifBoth attrib.visibleToForm attrib.mantineInputTag}}
+      <{{attrib.mantineInputTag}}
+        label="{{attrib.mantineDataLabel}}"
+{{#if (isdefined attrib.type.mantineInputType)}}
+        type="{{attrib.type.mantineInputType}}"
+{{/if}}
+{{#if (isdefined attrib.type.mantineAllowDecimal)}}
+        allowDecimal={ {{attrib.type.mantineAllowDecimal}} }
+{{/if}}
+{{#if (isdefined attrib.type.mantineDecimalScale)}}
+        decimalScale={ {{attrib.type.mantineDecimalScale}} }
+{{/if}}
+{{#if attrib.type.mantineFixedDecimalScale}}
+        fixedDecimalScale
+{{/if}}
+{{#if (isdefined attrib.type.mantineValueFormat)}}
+        valueFormat="{{attrib.type.mantineValueFormat}}"
+{{/if}}
+{{#if (isdefined attrib.type.mantineData)}}
+        data={{{attrib.type.mantineData}}}
+{{/if}}
+{{#if attrib.type.mantineUseCheckedForValue}}
+        checked={ {{classVar}}.{{attrib.jsIdentifierName}} }
+{{else}}
+        value={ {{classVar}}.{{attrib.jsIdentifierName}}{{{attrib.mantineValueSuffix}}} }
+        defaultValue={ {{{attrib.mantineDefaultValue}}} }
+  {{#if attrib.isRequired}}        
+        required
+  {{/if}}
+{{/if}}        
+        onChange={ {{{attrib.mantineOnChange}}} }
+      />
+
+{{/ifBoth}}
+{{/inline~}}
+
+{{~#* inline "inputObject" ~}}
+{{#each attributes as |attrib|}}
+{{#if attrib.isObject}}
+     <Fieldset legend="{{attrib.mantineDataLabel}}">
+{{> inputObject attributes=attrib.type.metaClass.attributes classVar=(concat ../classVar "." attrib.jsIdentifierName)}}
+     </Fieldset>
+
+{{else}}
+{{> inputTag attrib=attrib classVar=../classVar}}
+{{/if}}
+{{/each}}
+{{/inline~}}
+
 // This file was generated with NodeMDA. It will be overwritten if generated again.
 // Do not modify this file.
 //
 import React, { useState, useEffect } from 'react';
-import { TextInput, NumberInput, PasswordInput,Checkbox, Select, MultiSelect,Button } from '@mantine/core';
+import { TextInput, NumberInput, PasswordInput, Checkbox, Select, MultiSelect, Button, Fieldset } from '@mantine/core';
 import { DateInput, TimeInput } from '@mantine/dates';
 import { fetch{{class.name}}ById, create{{class.name}}, update{{class.name}} } from '{{class.relativeParentPrefix}}/api/{{class.packageDirPath}}{{class.name}}Api';
+import assignPath from '{{class.relativeParentPrefix}}/utils/assignPath';
 
 const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) => {
   const [{{lowercase class.name}}, set{{class.name}}] = useState({
@@ -29,7 +80,7 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
 
 
   const handleChange = (name, value) => {
-    set{{class.name}}({ ...{{lowercase class.name}}, [name]: value });
+    set{{class.name}}(assignPath({{lowercase class.name}}, name, value));
   };
 
   const handleSubmit = (e) => {
@@ -43,42 +94,7 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
 
   return (
     <form onSubmit={handleSubmit}>   
-{{#each class.attributes as |attrib|}}      
-{{#if attrib.visibleToForm}}
-      <{{attrib.mantineInputTag}}
-        label="{{attrib.mantineDataLabel}}"
-{{#if (isdefined attrib.type.mantineInputType)}}
-        type="{{attrib.type.mantineInputType}}"
-{{/if}}
-{{#if (isdefined attrib.type.mantineAllowDecimal)}}
-        allowDecimal={ {{attrib.type.mantineAllowDecimal}} }
-{{/if}}
-{{#if (isdefined attrib.type.mantineDecimalScale)}}
-        decimalScale={ {{attrib.type.mantineDecimalScale}} }
-{{/if}}
-{{#if attrib.type.mantineFixedDecimalScale}}
-        fixedDecimalScale
-{{/if}}
-{{#if (isdefined attrib.type.mantineValueFormat)}}
-        valueFormat="{{attrib.type.mantineValueFormat}}"
-{{/if}}
-{{#if (isdefined attrib.type.mantineData)}}
-        data={{{attrib.type.mantineData}}}
-{{/if}}
-{{#if attrib.type.mantineUsedCheckedForValue}}
-        checked={ {{lowercase class.name}}.{{attrib.jsIdentifierName}} }
-{{else}}
-        value={ {{lowercase ../class.name}}.{{attrib.jsIdentifierName}}{{{attrib.mantineValueSuffix}}} }
-        defaultValue={ {{{attrib.mantineDefaultValue}}} }
-  {{#if attrib.isRequired}}        
-        required
-  {{/if}}
-{{/if}}        
-        onChange={ {{{attrib.mantineOnChange}}} }
-      />
-{{/if}}      
-{{/each}}
-
+{{> inputObject attributes=class.attributes classVar=(lowercase class.name)}}
       <Button type="submit" mt="md">
         { {{lowercase class.name}}Id ? 'Update {{class.name}}' : 'Create {{class.name}}' }
       </Button>
