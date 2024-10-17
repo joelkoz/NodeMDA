@@ -44,10 +44,16 @@ npm install
 npm run start
 ```
 
+
+4. Test and modify the code as needed:
+
+Navigate to http://localhost:3000 in your browser to view the application while running in development mode.
+
 If you need to change the schema or service definitions, re-edit the UML model, then run `nodemda gen`
 again.
 
-
+Local Docker Deployment
+------
 Once you are satisfied, you can deploy the application to Docker by executing these commands
 from the root project directory:
 
@@ -66,3 +72,9 @@ docker-compose build backend
 
 docker-compose build frontend
 ```
+
+Remote/Production Docker Deployment
+------
+To deploy the application to production, check code into your source code repostitory. The local .env files used for development are listed in the
+.gitignore file and will not be checked in if using Git.  On the remote machine, check the code out of the repository,
+then run the deploy.sh script.  

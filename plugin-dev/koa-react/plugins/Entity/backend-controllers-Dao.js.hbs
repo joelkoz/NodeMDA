@@ -42,7 +42,8 @@ exports.create{{class.name}} = async (ctx) => {
     ctx.status = 201;
     ctx.body = {{lowercase class.name}};
   } catch (error) {
-    ctx.throw(400, 'Invalid data');
+    console.log(`Error creating {{lowercase class.name}}: ${error}`);
+    ctx.throw(400, `Invalid data: ${error}`);
   }
 };
 
@@ -55,7 +56,8 @@ exports.update{{class.name}} = async (ctx) => {
     }
     ctx.body = {{lowercase class.name}};
   } catch (error) {
-    ctx.throw(400, 'Invalid ID or data');
+    console.log(`Error updating {{lowercase class.name}}: ${error}`);
+    ctx.throw(400, `Invalid ID or data: ${error}`);
   }
 };
 
