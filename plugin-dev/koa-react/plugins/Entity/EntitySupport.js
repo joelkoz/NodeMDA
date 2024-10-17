@@ -96,6 +96,9 @@ var EntitySupport = {};
 					  return this.isTaggedAs('uiTableColumn');
 				   },
 
+				   function useArrayEditor() {
+					   return this.isArray && !this.type.isEnum;
+				   }
 				]},
 
 			],

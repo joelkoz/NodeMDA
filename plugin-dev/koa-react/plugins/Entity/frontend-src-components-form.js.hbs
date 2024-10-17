@@ -35,7 +35,7 @@
 
 {{~#* inline "inputObject" ~}}
 {{#each attributes as |attrib|}}
-{{#if attrib.isArray}}
+{{#if attrib.useArrayEditor}}
 {{../indent}}<{{uppercaseFirst (camelCase (concat ../varPrefix "." (singularOf attrib.jsIdentifierName) ".Array.Editor"))}} />
 
 {{else if attrib.isObject}}
@@ -117,7 +117,7 @@
 
 {{~#* inline "declareArrayEditors" ~}}
 {{#each attributes as |attrib|}}
-{{#if attrib.isArray }}
+{{#if attrib.useArrayEditor }}
 {{> arrayEditor attrib=attrib varName=(concat varPrefix attrib.jsIdentifierName) }}
 {{else if attrib.isObject }}
 {{> declareArrayEditors attributes=attrib.type.metaClass.attributes varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") }}
