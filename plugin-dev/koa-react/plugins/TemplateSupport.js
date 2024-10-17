@@ -178,7 +178,7 @@ var TemplateSupport = {};
    					},
 
 					function mongooseType() {
-						if (this.mongooseRefObject) {
+						if (this.isEntity) {
 							if (this.isArray) {
 								return `{ type: mongoose.ObjectId, ref: '${this.type.metaClass.name}' }`;
 							}
@@ -205,7 +205,7 @@ var TemplateSupport = {};
 						return false;
 					},
 
-                    function mongooseRefObject() {
+                    function isEntity() {
 						if (this.isObject) {
 							let metaClass = this.type.metaClass;
 							return metaClass.isEntity;
@@ -414,6 +414,22 @@ var TemplateSupport = {};
 						return embedded;
 					},
 
+
+					/**
+					* Returns a list of all attributes that have a data type that
+					* is an entity class and multiplicity of at most one
+					*/ 
+					function singleEntityAttribs() {
+
+						let attribs = [];
+
+						this.attributes.forEach(function (attrib) {
+							if (attrib.isEntity && attrib.isOne) {
+								attribs.push(attrib);
+							}
+						});
+						return attribs;
+					},
 
 
 					/**

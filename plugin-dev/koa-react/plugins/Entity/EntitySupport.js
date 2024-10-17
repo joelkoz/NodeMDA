@@ -102,6 +102,28 @@ var EntitySupport = {};
 
 		}); // end mixin
 
+		// Make sure there are attributes in each Entity class that are tagged as
+		// "uiTableColumn".  If NO attributes have the explicit tag, then ALL
+		// attributes get the tag.
+		model.classes.forEach(function (metaClass) {
+			if (metaClass.stereotypeName === 'Entity') {
+
+				// Count the visibleToTable attributes
+				let visibleCount = 0;
+				metaClass.attributes.forEach(function (attrib) {
+					if (attrib.visibleToTable) {
+						visibleCount++;
+					}
+				});
+
+				if (visibleCount === 0) {
+					metaClass.attributes.forEach(function (attrib) {
+						attrib.addTag(new NodeMDA.Meta.Tag("uiTableColumn", true));
+					});
+				}
+			}
+		});
+
 	};
 
 	

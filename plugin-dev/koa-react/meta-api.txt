@@ -27,6 +27,8 @@ attribute
   .schemaDbProperties  // falsey, or JSON string of _schemaDbProp
   .mongooseSubDoc // TRUE if attribute represents a POJO object to be defined as a sub document
   ._schemaDbProp // { persistence: 'embed', foreignKeyField: 'myNameForThatInstance' }
+  .isEntity // True if this attribute is an entity object
+
 
 operation
   .jsReturnType
@@ -63,6 +65,7 @@ class
   .isEntity // True if this class is an isEntity
   .isUserEntity // True if this class is the special entity named 'User'
 
+  .entityAttribs // Returns an array of this classes attributes that have an Entity as its data type
 
 An enumertion named "SystemRole" is automatically defined.  The elements of the enumeration are the names of any Actor objects
 defined in the UML model that are suffixed with "Role".  "Role" will be removed from the element name. For example,
