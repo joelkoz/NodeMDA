@@ -80,7 +80,7 @@
         </Group>        
 {{/if}}        
       { form.getValues().{{varName}}.map((item, index) => (
-          <Group key={item.key} mt="xs" {{#if attrib.isObject}}grow preventGrowOverflow={false} wrap="nowrap"{{/if}}>
+          <Group key={`group.${index}`} mt="xs" {{#if attrib.isObject}}grow preventGrowOverflow={false} wrap="nowrap"{{/if}}>
 {{#if attrib.isObject}}      
 {{> inputObject attributes=attrib.type.metaClass.attributes varPrefix=(concat varName ".${index}.") indent="            " tickChar="`" labelAttrib="placeholder"}}
 {{else}}
