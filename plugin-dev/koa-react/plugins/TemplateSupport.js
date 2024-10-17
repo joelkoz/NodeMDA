@@ -417,14 +417,14 @@ var TemplateSupport = {};
 
 					/**
 					* Returns a list of all attributes that have a data type that
-					* is an entity class and multiplicity of at most one
+					* is an entity class
 					*/ 
-					function singleEntityAttribs() {
+					function entityAttribs() {
 
 						let attribs = [];
 
 						this.attributes.forEach(function (attrib) {
-							if (attrib.isEntity && attrib.isOne) {
+							if (attrib.isEntity) {
 								attribs.push(attrib);
 							}
 						});

@@ -3,7 +3,7 @@
 // Do not modify this file.
 //
 const {{class.name}} = require('{{class.relativeParentPrefix}}/models/{{class.packageDirPath}}{{lowercase class.name}}');
-{{#each class.singleEntityAttribs as |attrib|}}
+{{#each class.entityAttribs as |attrib|}}
 const {{attrib.type.metaClass.name}} = require('{{../class.relativeParentPrefix}}/models/{{attrib.type.metaClass.packageDirPath}}{{lowercase attrib.type.metaClass.name}}');
 {{/each}}
 
@@ -28,8 +28,8 @@ exports.getAll{{class.pluralName}} = async (ctx) => {
 exports.get{{class.name}}ById = async (ctx) => {
   try {
     const {{lowercase class.name}} = await {{class.name}}.findById(ctx.params.id)
-{{~#if class.singleEntityAttribs.length~}}
-{{~#each class.singleEntityAttribs as |attrib|~}}
+{{~#if class.entityAttribs.length~}}
+{{~#each class.entityAttribs as |attrib|~}}
       .populate('{{lowercase attrib.name}}')
 {{~/each~}}
 {{~/if~}}    
@@ -43,31 +43,49 @@ exports.get{{class.name}}ById = async (ctx) => {
   }
 };
 
-{{#if class.singleEntityAttribs.length}}
+{{#if class.entityAttribs.length}}
 exports.normalize{{class.name}} = async (ctx) => {
 
   let {{lowercase class.name}}Data = { ...ctx.request.body };
 
-  {{#each class.singleEntityAttribs as |attrib|}}
+  {{#each class.entityAttribs as |attrib|}}
+  {{#if attrib.isArray}}
+  let {{attrib.name}}Array = [];
+  if ({{lowercase ../class.name}}Data.{{attrib.name}} && Array.isArray({{lowercase ../class.name}}Data.{{attrib.name}})) {
+    for (const {{attrib.singularName}}Data of {{lowercase ../class.name}}Data.{{attrib.name}}) {
+        let {{attrib.singularName}} = null;
+        if ({{attrib.singularName}}Data._id) {
+          // Update an existing {{lowercase attrib.type.metaClass.name}}
+          {{attrib.singularName}} = await {{attrib.type.metaClass.name}}.findByIdAndUpdate({{attrib.singularName}}Data._id, {{attrib.singularName}}Data, { new: true, upsert: true });
+        }
+        else {
+          // Create a new {{lowercase attrib.type.metaClass.name}}
+          {{attrib.singularName}} = new {{attrib.type.metaClass.name}}({{attrib.singularName}}Data);
+          await {{attrib.singularName}}.save();
+        }        
+        {{attrib.name}}Array.push({{attrib.singularName}}._id);
+    }
+  }
+  {{lowercase ../class.name}}Data.{{attrib.name}} = {{attrib.name}}Array;  
+  {{else}}
   let {{attrib.name}}Id = null;    
   if ({{lowercase ../class.name}}Data.{{attrib.name}} && typeof {{lowercase ../class.name}}Data.{{attrib.name}} === 'object') {
       const {{attrib.name}}Data = {{lowercase ../class.name}}Data.{{attrib.name}};
-
-      // Try to find an existing {{lowercase attrib.type.metaClass.name}}
       let {{attrib.name}} = null;
-
       if ({{attrib.name}}Data._id) {
+         // Update an existing {{lowercase attrib.type.metaClass.name}}
          {{attrib.name}} = await {{attrib.type.metaClass.name}}.findByIdAndUpdate({{attrib.name}}Data._id, {{attrib.name}}Data, { new: true, upsert: true });
       }
       else {
+         // Create a new {{lowercase attrib.type.metaClass.name}}
          {{attrib.name}} = new {{attrib.type.metaClass.name}}({{attrib.name}}Data);
          await {{attrib.name}}.save();
       }
-
-      // Use the _id of the existing or newly created {{lowercase attrib.type.metaClass.name}}
       {{attrib.name}}Id = {{attrib.name}}._id;
   }
+  // Replace {{attrib.name}} with it's document Id
   {{lowercase ../class.name}}Data.{{attrib.name}} = {{attrib.name}}Id;
+  {{/if}}
 
   {{/each}}
   return {{lowercase class.name}}Data;
@@ -79,7 +97,7 @@ exports.normalize{{class.name}} = async (ctx) => {
 exports.create{{class.name}} = async (ctx) => {
   try {
     const {{lowercase class.name}}Data = 
-{{~#if class.singleEntityAttribs.length}}
+{{~#if class.entityAttribs.length}}
  await exports.normalize{{class.name}}(ctx);
 {{else}}
  ctx.request.body;
@@ -98,7 +116,7 @@ exports.create{{class.name}} = async (ctx) => {
 exports.update{{class.name}} = async (ctx) => {
   try {
     const {{lowercase class.name}}Data = 
-{{~#if class.singleEntityAttribs.length}}
+{{~#if class.entityAttribs.length}}
  await exports.normalize{{class.name}}(ctx);
 {{else}}
  ctx.request.body;
