@@ -153,6 +153,9 @@ var TemplateSupport = {};
 						return this.name;
    					},
 
+ 				    function singularName() {
+						return pluralize(this.name, 1);
+					},
 
    					function schemaDbProperties() {
 
@@ -280,7 +283,6 @@ var TemplateSupport = {};
 					function pluralName() {
 						return pluralize(this.name);
 					},
-
 
 					function defaultExternalAccess() {
    						// By default, entities's Dao's are internal,

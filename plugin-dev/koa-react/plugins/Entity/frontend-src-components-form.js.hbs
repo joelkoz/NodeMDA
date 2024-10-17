@@ -1,32 +1,32 @@
 ##output overwrite {{@root.output}}/frontend/src/components/{{class.packageDirPath}}{{class.name}}Form.js
 {{#* inline "inputTag" ~}}
 {{#ifBoth attrib.visibleToForm attrib.mantineInputTag}}
-      <{{attrib.mantineInputTag}}
-        label="{{attrib.mantineDataLabel}}"
+{{indent}}<{{attrib.mantineInputTag}}
+{{indent}}    {{defaultTo labelAttrib "label"}}="{{attrib.mantineDataLabel}}"
 {{#if (isdefined attrib.type.mantineAllowDecimal)}}
-        allowDecimal={ {{attrib.type.mantineAllowDecimal}} }
+{{indent}}    allowDecimal={ {{attrib.type.mantineAllowDecimal}} }
 {{/if}}
 {{#if (isdefined attrib.type.mantineDecimalScale)}}
-        decimalScale={ {{attrib.type.mantineDecimalScale}} }
+{{indent}}    decimalScale={ {{attrib.type.mantineDecimalScale}} }
 {{/if}}
 {{#if attrib.type.mantineFixedDecimalScale}}
-        fixedDecimalScale
+{{indent}}    fixedDecimalScale
 {{/if}}
 {{#if (isdefined attrib.type.mantineValueFormat)}}
-        valueFormat="{{attrib.type.mantineValueFormat}}"
+{{indent}}    valueFormat="{{attrib.type.mantineValueFormat}}"
 {{/if}}
 {{#if (isdefined attrib.type.mantineData)}}
-        data={{{attrib.type.mantineData}}}
+{{indent}}    data={{{attrib.type.mantineData}}}
 {{/if}}
   {{#if attrib.isRequired}}        
-        required
+{{indent}}    required
   {{/if}}
-        key={ form.key('{{varPrefix}}{{varName}}') }
-        { ...form.getInputProps('{{varPrefix}}{{varName}}'
-           {{~#if (isdefined attrib.type.mantineInputType)~}}
-             , { type: '{{attrib.type.mantineInputType}}' }
-            {{~/if}}) }
-      />
+{{indent}}    key={ form.key({{{defaultTo tickChar "'"}}}{{varPrefix}}{{varName}}{{{defaultTo tickChar "'"}}}) }
+{{indent}}    { ...form.getInputProps({{{defaultTo tickChar "'"}}}{{varPrefix}}{{varName}}{{{defaultTo tickChar "'"}}}
+                   {{~#if (isdefined attrib.type.mantineInputType)~}}
+                      , { type: '{{attrib.type.mantineInputType}}' }
+                   {{~/if}}) }
+{{indent}}/>
 
 {{/ifBoth}}
 {{/inline~}}
@@ -35,25 +35,30 @@
 
 {{~#* inline "inputObject" ~}}
 {{#each attributes as |attrib|}}
-{{#if attrib.isObject}}
-     <Fieldset legend="{{attrib.mantineDataLabel}}">
-{{> inputObject attributes=attrib.type.metaClass.attributes varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".")}}
-     </Fieldset>
+{{#if attrib.isArray}}
+{{../indent}}<{{uppercaseFirst (camelCase (concat ../varPrefix "." (singularOf attrib.jsIdentifierName) ".Array.Editor"))}} />
+
+{{else if attrib.isObject}}
+{{../indent}}<Fieldset legend="{{attrib.mantineDataLabel}}">
+{{> inputObject attributes=attrib.type.metaClass.attributes varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") indent=(concat ../indent "      ") tickChar=../tickChar  labelAttrib=../labelAttrib}}
+{{../indent}}</Fieldset>
 
 {{else}}
-{{> inputTag attrib=attrib varPrefix=../varPrefix varName=attrib.jsIdentifierName}}
+{{> inputTag attrib=attrib varPrefix=../varPrefix varName=attrib.jsIdentifierName indent=../indent tickChar=../tickChar labelAttrib=../labelAttrib}}
 {{/if}}
 {{/each}}
 {{/inline~}}
+
+
 
 
 {{~#* inline "initialValues" ~}}
 {{#each attributes as |attrib|}}
 {{#if attrib.visibleToForm}}
 {{#if attrib.isObject}}
-{{../indent}}{{prefix}}{{attrib.jsIdentifierName}}: {
+{{../indent}}{{prefix}}{{attrib.jsIdentifierName}}: {{#if attrib.isArray}}[ {{/if}}{
 {{> initialValues attributes=attrib.type.metaClass.attributes prefix=(concat ../prefix attrib.jsIdentifierName ".") indent=(concat ../indent "    ")}}
-{{../indent}} },
+{{../indent}} }{{#if attrib.isArray}} ]{{/if}},
 {{else}}
 {{../indent}}{{prefix}}{{attrib.jsIdentifierName}}: {{{attrib.mantineDefaultValue}}},
 {{/if}}
@@ -61,11 +66,72 @@
 {{/each}}
 {{/inline~}}
 
+
+
+{{~#* inline "arrayEditor" ~}}
+ function {{uppercaseFirst (camelCase (concat (singularOf varName) ".Array.Editor"))}}() {
+     return (
+      <Fieldset legend="{{attrib.mantineDataLabel}}">
+{{#if attrib.isObject}}      
+        <Group mb="xs" grow preventGrowOverflow={false} wrap="nowrap">
+{{#each attrib.type.metaClass.attributes as |attrib|}}          
+          <Text size="sm">{{attrib.mantineDataLabel}}</Text>
+{{/each}}          
+        </Group>        
+{{/if}}        
+      { form.getValues().{{varName}}.map((item, index) => (
+          <Group key={item.key} mt="xs" {{#if attrib.isObject}}grow preventGrowOverflow={false} wrap="nowrap"{{/if}}>
+{{#if attrib.isObject}}      
+{{> inputObject attributes=attrib.type.metaClass.attributes varPrefix=(concat varName ".${index}.") indent="            " tickChar="`" labelAttrib="placeholder"}}
+{{else}}
+{{> inputTag attrib=attrib varPrefix="" varName=(concat varName ".${index}") indent="            " tickChar="`" labelAttrib="placeholder"}}
+{{/if}}
+            <ActionIcon color="red" onClick={() => form.removeListItem('{{varName}}', index)}>
+              <IconTrash size="1em" />
+            </ActionIcon>
+          </Group>
+        ))}
+
+        <Group justify="center" mt="md">
+          <Button
+            onClick={ () =>
+              form.insertListItem('{{varName}}',
+{{~#if attrib.isObject~}}
+{
+{{> initialValues attributes=attrib.type.metaClass.attributes indent="                " prefix=""}}
+              }
+{{~else~}}
+              {{{defaultTo attrib.defaultValue attrib.type.globalDefaultValue}}}
+{{~/if~}}
+              ) }>
+             Add {{attrib.singularName}}
+          </Button>
+        </Group>        
+      </Fieldset>
+     );
+}
+
+
+{{/inline~}}
+
+
+{{~#* inline "declareArrayEditors" ~}}
+{{#each attributes as |attrib|}}
+{{#if attrib.isArray }}
+{{> arrayEditor attrib=attrib varName=(concat varPrefix attrib.jsIdentifierName) }}
+{{else if attrib.isObject }}
+{{> declareArrayEditors attributes=attrib.type.metaClass.attributes varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") }}
+{{/if}}
+{{/each}}
+{{/inline~}}
+
+
 // This file was generated with NodeMDA. It will be overwritten if generated again.
 // Do not modify this file.
 //
-import React, { useState, useEffect } from 'react';
-import { TextInput, NumberInput, PasswordInput, Checkbox, Select, MultiSelect, Button, Fieldset } from '@mantine/core';
+import React, { useEffect } from 'react';
+import { TextInput, NumberInput, PasswordInput, Checkbox, Select, MultiSelect, Button, Fieldset, Group, Text, ActionIcon, Textarea } from '@mantine/core';
+import { IconTrash } from '@tabler/icons-react';
 import { DateInput, TimeInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { fetch{{class.name}}ById, create{{class.name}}, update{{class.name}} } from '{{class.relativeParentPrefix}}/api/{{class.packageDirPath}}{{class.name}}Api';
@@ -102,9 +168,10 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
   };
 
 
+{{> declareArrayEditors attributes=class.attributes varPrefix="" }}
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>   
-{{> inputObject attributes=class.attributes varPrefix=""}}
+{{> inputObject attributes=class.attributes varPrefix="" indent="      "}}
       <Button type="submit" mt="md">
         { {{lowercase class.name}}Id ? 'Update {{class.name}}' : 'Create {{class.name}}' }
       </Button>
