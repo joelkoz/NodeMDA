@@ -152,6 +152,11 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
     if ({{lowercase class.name}}Id) {
       // Load {{lowercase class.name}} data for editing
       fetch{{class.name}}ById({{lowercase class.name}}Id).then((data) => { 
+{{#each class.attributes as |attrib|}}
+{{#if attrib.type.mantineTransformPre}}
+        data.{{attrib.name}} = {{{eval attrib.type.mantineTransformPre (concat "data." attrib.name)}}};
+{{/if}}
+{{/each}}        
         form.setValues(data);
         form.resetDirty(data);        
       });
@@ -160,6 +165,11 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
 
 
   const handleSubmit = (values) => {
+{{#each class.attributes as |attrib|}}
+{{#if attrib.type.mantineTransformPost}}
+    values.{{attrib.name}} = {{{eval attrib.type.mantineTransformPost (concat "values." attrib.name)}}};
+{{/if}}
+{{/each}}        
     if ({{lowercase class.name}}Id) {
       update{{class.name}}({{lowercase class.name}}Id, values).then(onSave);
     } else {

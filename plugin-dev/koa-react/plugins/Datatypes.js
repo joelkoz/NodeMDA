@@ -103,7 +103,7 @@ function initDataTypes(model) {
 	defineDataSpec('String', { jsTypeName: 'string', globalDefaultValue: '\'\'', mongooseType: 'String', mantineInputTag: 'TextInput'});
 	defineDataSpec('Number', { jsTypeName: 'number', globalDefaultValue: '0', mongooseType: 'Number', mantineInputTag: 'NumberInput', mantineAllowDecimal: true});
 	defineDataSpec('Boolean', { jsTypeName: 'boolean', globalDefaultValue: false, mongooseType: 'Boolean', mantineInputTag: 'Checkbox', mantineInputType: 'checkbox' });
-	defineObjectType('DateTime', 'Date', { globalDefaultValue: 'new Date()', mongooseType: 'Date', mantineInputTag: 'DateInput', mantineValueFormat: 'MM-DD-YYYY HH:mm' });
+	defineObjectType('DateTime', 'Date', { globalDefaultValue: 'new Date()', mongooseType: 'Date', mantineInputTag: 'DateInput', mantineValueFormat: 'MM-DD-YYYY HH:mm', mantineTransformPre: (varName) => { return `new Date(${varName})` } });
     
 	
 	function defineStringType(name, props) {
@@ -165,8 +165,13 @@ function initDataTypes(model) {
 
 	// Common enumerations...
 	defineBooleanEnumType('YesNo', [ 'No', 'Yes']);
+	Types.YesNo.mantineTransformPre = (varName) => { return `(${varName} ? 'Yes' : 'No')` };
+	Types.YesNo.mantineTransformPost = (varName) => { return `(${varName} === 'Yes')` };
+
 	defineEnumerationType('Sex', ['Male', 'Female', 'Other'] );
 	defineBooleanEnumType('OnOff', [ 'Off', 'On']);
+	Types.OnOff.mantineTransformPre = (varName) => { return `(${varName} ? 'On' : 'Off')` };
+	Types.OnOff.mantineTransformPost = (varName) => { return `(${varName} === 'On')` };
 
     // Save the enumeration definition functions for modeled enumerations
 	model.defineEnumerationType = defineEnumerationType;
