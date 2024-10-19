@@ -56,8 +56,11 @@ UML Profile that comes with this plugin, or another class you define in your mod
 
 1. Entity attributes that have a visibility other than "public" will be considered "for internal use", and thus will not be present in the CRUD user interface code.  Attributes marked as "protected" are available to leave the system via the REST interface, but attributes marked as "private" will be filtered out by the backend before the REST request responds.
 
-1. The tag `uiTableColumn` should be added to one or more entities to indicate which attributes are to be included
-in the CRUD selection table. At least one column in each `Entity` should be tagged with uiTableColumn.
+1. The tag `uiTableColumn` with a value of "true" can be added to one or more of an Entity's attributes to indicate
+which attributes are to be included in the frontend's CRUD selection table. If no attribute is explicitly tagged
+with "uiTableColumn", then ALL attributes that would otherwise be included on a form (see "visibility" above) are 
+assumed to also be desired as table columns.  This fact can be handy for entities with a small number of attributes, 
+as it saves you time when modeling.
 
 1. `Entity` attributes can be marked as "unique" to add the "unique" index to the mongo database. They
 can be tagged with the `dbIndex` tag to create an index on that field.
