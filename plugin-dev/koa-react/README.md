@@ -17,16 +17,41 @@ Workflow
 ------
 The general workflow for using NodeMDA with this plugin is as follows:
 
-1. Using StarUML (or any other UML modler NodeMDA has a reader for), create or modify the *model* of your 
-software architecture. A UML Profile exists with pre-defined Stereotypes to quickly model database entities
-and services, as well as security requirements for access to both.
+1. Create a new Koa-React project by installing and running NodeMDA:
 
-2. The model is processed using NodeMDA to generate source code and other project artifacts. In general, NodeMDA generates
+```
+## The core NodeMDA system is best installed globally
+npm install -g nodemda
+npm install -g nodemda-staruml
+npm install -g nodemda-koa-react
+
+## Create a new directory for your application
+
+mkdir example-project
+
+cd example-project
+
+## Create and generate a project:
+
+nodemda init
+```
+
+2. Using StarUML (or any other UML modler NodeMDA has a reader for), create or modify the *model* of your 
+software architecture. A UML Profile exists with pre-defined Stereotypes to quickly model database entities
+and services, as well as security requirements for access to both. The default project places a default
+StarUML model file in the `model` subdirectory of your project.
+
+3. The model is processed using NodeMDA to generate source code and other project artifacts. In general, NodeMDA generates
 all of the boilerplate code and stubs for things such as your services and persistence entities.
 
-3. Where necessary, code stubs are filled in by hand to supply the business logic or add other functionality.
+```
+nodemda gen
+```
 
-4. The resulting code is tested with manual testing.  If additions or 
+4. Where necessary, code stubs are filled in by hand to supply the business logic or add other functionality.
+
+5. The resulting code is tested with manual testing.  See the README file created in your project directory after
+code generation for details on running the app. If additions or 
 changes are required, the process returns to step #1 where the *model* is modified and the entire cycle is repeated.
 
 

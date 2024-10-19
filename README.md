@@ -1,6 +1,16 @@
 NodeMDA.js
 ==========
 
+*NOTE: This README covers the NodeMDA code generation engine. If you are not interest in writing your own
+code generation plugins and instead want to use NodeMDA to generate a complete NodeJS application stack
+using Koa, Mongoose, and MongoDB for the back end and React + Mantine for the front end, all
+deployable using Docker, see the README
+for the [koa-react plugin](https://github.com/joelkoz/NodeMDA/tree/master/plugin-dev/koa-react) in the plugin-dev directory.*
+
+
+Introduction
+------------
+
 NodeMDA is a node.js library used for generating software source code for any project or language using the 
 *Model Driven Architecture* approach. This approach allows you to create large portions of code 
 for your software projects by using a UML tool to diagram software concepts.
@@ -12,7 +22,7 @@ While the NodeMDA engine and its plugins are written in Javascript and is execut
 by Node.js, the resulting code does NOT need to be Javascript.  In fact, plugins can be created to generate artifacts for
 any language or software stack.
 
-The current version of NodeMDA focuses on generating server side code from UML *Class Diagrams*.  
+The current version of NodeMDA focuses on generating code from UML *Class Diagrams*.  
 From this one diagram type, NodeMDA can create virtually all of the boilerplate code to get a 
 backend system up and running, including database creation and client service interfaces. 
 The goal of NodeMDA is to limit the programming required after 
@@ -185,7 +195,7 @@ Plugin Conventions
 
 1. Plugins are organized by *platform*.  A *platform* is a particular software stack that the 
 plugins are designed to generate code for. A plugin platform may be as generic as
-"Javascript and SQL" or as specific as "Express with Feathers service layer and React plus Material-UI for the client".
+"Javascript and SQL" or as specific as "Koa plus MongoDB back end and React plus Mantine for the front end".
 
 1.  A plugin is an npm package that has the name "nodemda-<platformId>" where platformId is
 a platform identifier that makes a valid module name.  The plugin package is expected to have a directory
