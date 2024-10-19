@@ -103,6 +103,32 @@ var EntitySupport = {};
 
 			],
 
+			onClass: { 
+				get: [
+					/**
+					* Returns a list of all attributes should be included
+					* on any input forms generated for this class.
+					*/ 
+					function formAttribs() {
+						let attribs = [];
+
+						this.attributes.forEach(function (attrib) {
+							if (attrib.visibleToForm) {
+								attribs.push(attrib);
+							}
+						});
+
+						this.virtuals.forEach(function (attrib) {
+							if (attrib.visibleToForm) {
+								attribs.push(attrib);
+							}
+						});
+
+						return attribs;
+					},
+				] 
+			},
+
 		}); // end mixin
 
 		// Make sure there are attributes in each Entity class that are tagged as

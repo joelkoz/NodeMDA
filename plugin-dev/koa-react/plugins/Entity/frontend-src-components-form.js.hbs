@@ -35,16 +35,18 @@
 
 {{~#* inline "inputObject" ~}}
 {{#each attributes as |attrib|}}
+{{#if attrib.visibleToForm}}
 {{#if attrib.useArrayEditor}}
 {{../indent}}<{{uppercaseFirst (camelCase (concat ../varPrefix "." (singularOf attrib.jsIdentifierName) ".Array.Editor"))}} />
 
 {{else if attrib.isObject}}
 {{../indent}}<Fieldset legend="{{attrib.mantineDataLabel}}">
-{{> inputObject attributes=attrib.type.metaClass.attributes varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") indent=(concat ../indent "      ") tickChar=../tickChar  labelAttrib=../labelAttrib}}
+{{> inputObject attributes=attrib.type.metaClass.formAttribs varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") indent=(concat ../indent "      ") tickChar=../tickChar  labelAttrib=../labelAttrib}}
 {{../indent}}</Fieldset>
 
 {{else}}
 {{> inputTag attrib=attrib varPrefix=../varPrefix varName=attrib.jsIdentifierName indent=../indent tickChar=../tickChar labelAttrib=../labelAttrib}}
+{{/if}}
 {{/if}}
 {{/each}}
 {{/inline~}}
@@ -57,7 +59,7 @@
 {{#if attrib.visibleToForm}}
 {{#if attrib.isObject}}
 {{../indent}}{{prefix}}{{attrib.jsIdentifierName}}: {{#if attrib.isArray}}[ {{/if}}{
-{{> initialValues attributes=attrib.type.metaClass.attributes prefix=(concat ../prefix attrib.jsIdentifierName ".") indent=(concat ../indent "    ")}}
+{{> initialValues attributes=attrib.type.metaClass.formAttribs prefix=(concat ../prefix attrib.jsIdentifierName ".") indent=(concat ../indent "    ")}}
 {{../indent}} }{{#if attrib.isArray}} ]{{/if}},
 {{else}}
 {{../indent}}{{prefix}}{{attrib.jsIdentifierName}}: {{{attrib.mantineDefaultValue}}},
@@ -74,15 +76,17 @@
       <Fieldset legend="{{attrib.mantineDataLabel}}">
 {{#if attrib.isObject}}      
         <Group mb="xs" grow preventGrowOverflow={false} wrap="nowrap">
-{{#each attrib.type.metaClass.attributes as |attrib|}}          
+{{#each attrib.type.metaClass.formAttribs as |attrib|}}
+{{#if attrib.visibleToForm}}       
           <Text size="sm">{{attrib.mantineDataLabel}}</Text>
+{{/if}}
 {{/each}}          
         </Group>        
 {{/if}}        
       { form.getValues().{{varName}}.map((item, index) => (
           <Group key={`group.${index}`} mt="xs" {{#if attrib.isObject}}grow preventGrowOverflow={false} wrap="nowrap"{{/if}}>
 {{#if attrib.isObject}}      
-{{> inputObject attributes=attrib.type.metaClass.attributes varPrefix=(concat varName ".${index}.") indent="            " tickChar="`" labelAttrib="placeholder"}}
+{{> inputObject attributes=attrib.type.metaClass.formAttribs varPrefix=(concat varName ".${index}.") indent="            " tickChar="`" labelAttrib="placeholder"}}
 {{else}}
 {{> inputTag attrib=attrib varPrefix="" varName=(concat varName ".${index}") indent="            " tickChar="`" labelAttrib="placeholder"}}
 {{/if}}
@@ -98,7 +102,7 @@
               form.insertListItem('{{varName}}',
 {{~#if attrib.isObject~}}
 {
-{{> initialValues attributes=attrib.type.metaClass.attributes indent="                " prefix=""}}
+{{> initialValues attributes=attrib.type.metaClass.formAttribs indent="                " prefix=""}}
               }
 {{~else~}}
               {{{defaultTo attrib.defaultValue attrib.type.globalDefaultValue}}}
@@ -120,7 +124,7 @@
 {{#if attrib.useArrayEditor }}
 {{> arrayEditor attrib=attrib varName=(concat varPrefix attrib.jsIdentifierName) }}
 {{else if attrib.isObject }}
-{{> declareArrayEditors attributes=attrib.type.metaClass.attributes varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") }}
+{{> declareArrayEditors attributes=attrib.type.metaClass.formAttribs varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") }}
 {{/if}}
 {{/each}}
 {{/inline~}}
@@ -141,7 +145,7 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
-{{> initialValues attributes=class.attributes indent="        " prefix=""}}
+{{> initialValues attributes=class.formAttribs indent="        " prefix=""}}
     },
     validate: {
     }
@@ -152,7 +156,7 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
     if ({{lowercase class.name}}Id) {
       // Load {{lowercase class.name}} data for editing
       fetch{{class.name}}ById({{lowercase class.name}}Id).then((data) => { 
-{{#each class.attributes as |attrib|}}
+{{#each class.formAttribs as |attrib|}}
 {{#if attrib.type.mantineTransformPre}}
         data.{{attrib.name}} = {{{eval attrib.type.mantineTransformPre (concat "data." attrib.name)}}};
 {{/if}}
@@ -165,7 +169,7 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
 
 
   const handleSubmit = (values) => {
-{{#each class.attributes as |attrib|}}
+{{#each class.formAttribs as |attrib|}}
 {{#if attrib.type.mantineTransformPost}}
     values.{{attrib.name}} = {{{eval attrib.type.mantineTransformPost (concat "values." attrib.name)}}};
 {{/if}}
@@ -178,10 +182,10 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
   };
 
 
-{{> declareArrayEditors attributes=class.attributes varPrefix="" }}
+{{> declareArrayEditors attributes=class.formAttribs varPrefix="" }}
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>   
-{{> inputObject attributes=class.attributes varPrefix="" indent="      "}}
+{{> inputObject attributes=class.formAttribs varPrefix="" indent="      "}}
       <Button type="submit" mt="md">
         { {{lowercase class.name}}Id ? 'Update {{class.name}}' : 'Create {{class.name}}' }
       </Button>

@@ -61,6 +61,9 @@ let MetaModel = {};
 			this.tags.push(metaTag);
 		}
 
+		addTagValue(tagName, tagValue) {
+			this.addTag(new meta.Tag(tagName, tagValue));
+		}
 
 		getClassName() {
 	        return Object.getPrototypeOf(this).constructor.name;

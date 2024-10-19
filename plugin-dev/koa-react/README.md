@@ -26,7 +26,7 @@ all of the boilerplate code and stubs for things such as your services and persi
 
 3. Where necessary, code stubs are filled in by hand to supply the business logic or add other functionality.
 
-4. The resulting code is tested using the mocha unit tests, or manual testing.  If additions or 
+4. The resulting code is tested with manual testing.  If additions or 
 changes are required, the process returns to step #1 where the *model* is modified and the entire cycle is repeated.
 
 
@@ -39,7 +39,7 @@ For complete documentation on using NodeMDA, see the [NodeMDA readme file](https
 Modeling Conventions
 --------------------
 
-Code generation by NodeMDA is currently based on three key UML artifacts: Classes, Datatypes, and Stereotypes. The general strategy for creating your model is as follows:
+Code generation by NodeMDA for this Koa React plugin is currently based on four key UML artifacts: Classes, Datatypes, Stereotypes, and Actors. The general strategy for creating your model is as follows:
 
 1. Create one or more Class diagrams.
 
@@ -73,25 +73,27 @@ setting the lower limit of the multiplicity to one (e.g. "1" or "1..*").
 parameter to a value that is greater than one (e.g. "0..*").
 
 
-1. You can draw an association between an `Entity` class and another class that is marked as an `Entity`.  An association between an `Entity` and a non-entity (`POJO`) implies an
+Special handling of associations
+--------------------------------
+
+1. You can draw an association between any two classes. A navigable association has the same effect as adding
+an attribute to the class that has a data type of the associated class. An association is considered "navigable"
+if it is explicitly marked as "navigable" in the UML, or if has been given an explicit name.  If an association
+is marked as navigable but has not been given an explicit name, a default name will be provided. An association
+end that is explictly marked "not navigable" will not be navigable even if it has been given a name.
+
+1. An association between an `Entity` and a non-entity (`POJO`) implies an
 embedded class (i.e. that data of the POJO is stored inside the `Entity` document in the database).
 An association between one `Entity` and another `Entity` implies a "reference" type relationship between
-two different database documents.  The relationships can be "zero to one", "one to one", "zero to many",
-or "one to many." A "Many to many" relationship gets stored as an array of references in both entity
+two different database documents.  
+
+1. In an association, the relationships can be "zero to one", "one to one", "zero to many",
+or "one to many." A "Many to many" relationship gets stored as an array of references in BOTH entity
 documents and requires that you manually manage the array values. For this reason, using "many to many"
 is not recommended.
 
-1. As an alternative way of specifying associtations, you can use classes in your model as the data type
-of an Attribute in an `Entity` class.  For example, class "Person" could have an attribute named "addresses", which is an array of "Address" POJO classes.
-
-1. Both "assocations" and "attributes with type *some class*" in practice generates the same code for Entities
-as they have the same semantics. It is recommended that you model "embedded" documents as "attributes of type
-*another class*", and model "references to other documents" as associations to keep the peristence method in 
+1. Since adding an association has the same effect as adding an attribute of that type, you can use classes in your model as the data type of an Attribute in an `Entity` class.  For example, class "Person" could have an attribute named "addresses", which is an array of "Address" POJO classes. Both "assocations" and "attributes with data type of *some class*" in practice generates the same code as they have the same semantics. It is recommended that you model "embedded" documents as "attributes", and model "references to other documents" as associations to keep the peristence method in 
 your models clear.
-
-1. You can draw a dependency from a service to an entity to indicate the service would like easy
-access to the data access service interface of the entity.  You can also draw dependencies to other services
-and utilize those in your implementation.
 
 
 Future Features on Roadmap 

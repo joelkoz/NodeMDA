@@ -6,6 +6,9 @@ const {{class.name}} = require('{{class.relativeParentPrefix}}/models/{{class.pa
 {{#each class.entityAttribs as |attrib|}}
 const {{attrib.type.metaClass.name}} = require('{{../class.relativeParentPrefix}}/models/{{attrib.type.metaClass.packageDirPath}}{{lowercase attrib.type.metaClass.name}}');
 {{/each}}
+{{#if class.entityAttribs.length}}
+const mongoose = require('mongoose');
+{{/if}}   
 
 // Get all {{lowercase class.pluralName}} with pagination
 exports.getAll{{class.pluralName}} = async (ctx) => {
@@ -53,6 +56,9 @@ exports.normalize{{class.name}} = async (ctx) => {
   let {{attrib.name}}Array = [];
   if ({{lowercase ../class.name}}Data.{{attrib.name}} && Array.isArray({{lowercase ../class.name}}Data.{{attrib.name}})) {
     for (const {{attrib.singularName}}Data of {{lowercase ../class.name}}Data.{{attrib.name}}) {
+{{#if attrib._schemaDbProp.foreignKeyField}}
+        {{attrib.singularName}}Data.{{attrib._schemaDbProp.foreignKeyField}} = {{lowercase ../class.name}}Data._id;
+{{/if}}      
         let {{attrib.singularName}} = null;
         if ({{attrib.singularName}}Data._id) {
           // Update an existing {{lowercase attrib.type.metaClass.name}}
@@ -96,6 +102,9 @@ exports.normalize{{class.name}} = async (ctx) => {
 // Create a new {{lowercase class.name}}
 exports.create{{class.name}} = async (ctx) => {
   try {
+{{#if class.entityAttribs.length}}
+    ctx.request.body._id = new mongoose.Types.ObjectId();
+{{/if}}    
     const {{lowercase class.name}}Data = 
 {{~#if class.entityAttribs.length}}
  await exports.normalize{{class.name}}(ctx);

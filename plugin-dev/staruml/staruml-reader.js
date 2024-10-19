@@ -506,7 +506,7 @@ var winston = require('winston');
 		var metaEnd = new MetaModel.AssociationEnd();
 		metaEnd._name = umlEnd.name;
 		metaEnd._multiplicity = umlEnd.multiplicity;
-		metaEnd._navigable = (umlEnd.navigable === 'navigable') || (umlEnd.name && umlEnd.name.length > 0);
+		metaEnd._navigable = (umlEnd.navigable === 'navigable') || (!(umlEnd.navigable === 'notNavigable') && umlEnd.name);
 		metaEnd._aggregation = (umlEnd.aggregation === "shared");
 		metaEnd._composition = (umlEnd.aggregation === "composite");
 		metaEnd._visibility = umlEnd.visibility;

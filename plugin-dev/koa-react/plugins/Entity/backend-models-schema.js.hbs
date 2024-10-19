@@ -52,7 +52,14 @@ const {{lowercase class.name}}Schema = new mongoose.Schema({
 
      , required: {{attrib.isRequired}} },
 {{/each}}  
-});
+}
+{{~#if class.virtuals.length~}}
+, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+}
+{{~/if~}}
+);
 
 {{#each class.virtuals as |vAttrib|}} 
 {{lowercase ../class.name}}Schema.virtual('{{vAttrib.name}}', {

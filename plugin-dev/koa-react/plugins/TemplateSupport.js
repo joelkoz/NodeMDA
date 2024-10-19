@@ -38,56 +38,50 @@ var TemplateSupport = {};
 	    	   let myEnd = metaAssoc.myEnd;
 	    	   let otherEnd = metaAssoc.otherEnd; 
 	    	   if (otherEnd.isNavigable) {
+				   if (!otherEnd.name) {
+					  // Fix up an explicit navigable association by giving it a default
+					  // name
+					  otherEnd.name = otherEnd.type.metaClass.jsIdentifierName.toLowerCase();
+				   }
+
+				   // Build an attribute that represents the "other end" of the association
 	    		   let attrib = new NodeMDA.Meta.Attribute(otherEnd.name, otherEnd.type);
 	    		   attrib._multiplicity = otherEnd._multiplicity;
 	    		   attrib._public = otherEnd._public;
 	    		   attrib._comment = otherEnd._comment;
 
 	    		   if (otherEnd.type instanceof NodeMDA.Meta.ObjectDatatype) {
+
 	    		   		let otherClass = otherEnd.type.metaClass;
 	    		   		if (otherClass.stereotypeName === 'ValueObject' || otherClass.stereotypeName === 'POJO') {
 	    		   			attrib.setSchemaDbProperty('persistence', 'embed');
 	    		   		}
 
-	    		   		if (otherClass.stereotypeName === 'Entity') {
-	    		   			if (myEnd.isNavigable && myEnd.isOne && otherEnd.isMany) {
-	    		   				// This is a one to many relationship - configure
-	    		   				// as a foreign key...
-	    		   				attrib.setSchemaDbProperty('foreignKeyField', myEnd.name);
-	    		   			}
-	    		   		}
-	    		   }
-
-				   if (myEnd.type.metaClass.isEntity && otherEnd.type.metaClass.isEntity) {
-					    // Two associated Entity properties have special handling depending on the multiplicity
-						if (otherEnd.isOne) {
-								// For One to Many relationships, the "one" side holds
-								// an actual reference to the other object Id as a real
-								// property. The "many" side can use a virtual property and simply query
-								// the database to gather the many members. Here, the "other" end
-								// is a "one", so we make an actual attribute to hold the reference.
-								attribs.push(attrib);
-						}
-						else if (myEnd.isMany && otherEnd.isMany) {
-								// Many to Many relationship are modeled by an array that holds
-								// a reference to the object Ids of the other objects. As with the
-								// "one" side, we make an actual attribute to hold the references.
-								// It will be generated as an array attribute since it is "many".
-								attribs.push(attrib);
+						if (otherClass.stereotypeName === 'Entity' &&
+							myEnd.isNavigable && myEnd.isOne && otherEnd.isMany) {
+							// This is the special case where we can create a virtual attribute
+							// by using the database to look up all of the entries instead
+							// of having to manually manage an array of objects as a real
+							// attribute.
+							attrib.setSchemaDbProperty('foreignKeyField', myEnd.name);
+							virtuals.push(attrib);
 						}
 						else {
-								// If we are here, the other end is a many, but myEnd is a "one".
-								// You can gather the other objects by querying the database using the
-								// "one" side. Thus, we make this attribute a virtual property on
-								// the entity.
-								virtuals.push(attrib);
+							if (myEnd.isNavigable && myEnd.isMany && otherEnd.isOne) {
+								// This is the opposite end of the special "virtuals" case above.
+								// Make sure we do NOT add a UI field for this reverse case
+								// to prevent the circular reference.
+								attrib._visibility = 'protected';
+								attrib.isForeignKey = true;
+console.log(`Setting ForeignKey: ${metaClass.name}.${attrib.name}`)								
+							}
+
+							// All other cases requires we represent this association an an
+							// actual attribute in our class.
+							attribs.push(attrib);
 						}
-					}
-					else {
-						// If any side is NOT an entity, just handle it as any other attribute.
-						attribs.push(attrib);
-					}
-	    	   }
+	    		   }
+	    	    }
 	    	});
 	    	return { attribs, virtuals };
 	    };
@@ -428,6 +422,13 @@ var TemplateSupport = {};
 								attribs.push(attrib);
 							}
 						});
+
+						this.virtuals.forEach(function (attrib) {
+							if (attrib.isEntity) {
+								attribs.push(attrib);
+							}
+						});
+
 						return attribs;
 					},
 
