@@ -73,7 +73,6 @@ var TemplateSupport = {};
 								// to prevent the circular reference.
 								attrib._visibility = 'protected';
 								attrib.isForeignKey = true;
-console.log(`Setting ForeignKey: ${metaClass.name}.${attrib.name}`)								
 							}
 
 							// All other cases requires we represent this association an an

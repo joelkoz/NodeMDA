@@ -16,6 +16,9 @@ exports.getAll{{class.pluralName}} = async (ctx) => {
 
   try {
     const {{lowercase class.pluralName}} = await {{class.name}}.find()
+{{#if class.mongooseSelect }}
+      .select({{{class.mongooseSelect}}})
+{{/if}}
       .skip((page - 1) * limit)
       .limit(parseInt(limit, 10));
 

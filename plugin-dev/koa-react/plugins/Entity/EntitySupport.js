@@ -33,35 +33,6 @@ var EntitySupport = {};
 						}
 					},
 
-					/**
-					 * mantineOnChange returns the code fragment to to as the value
-					 * of the onChange attribute in a Mantine input compontent.
-					 */
-					function mantineOnChange() {
-						if (this.type.mantineInputTag == 'NumberInput') {
-							return `(value) => handleChange('${this.jsIdentifierName}', value)`;
-						}
-						else if (this.type.mantineInputTag == 'DateInput') {
-							return `(value) => handleChange('${this.jsIdentifierName}', value)`;
-						}
-						else if (this.type.mantineInputTag == 'Checkbox') {
-							return `(e) => handleChange('${this.jsIdentifierName}', e.currentTarget.checked)`;
-						}
-						else if (this.type.name == 'YesNo') {
-							return `(value) => handleChange('${this.jsIdentifierName}', value === 'Yes')`;
-						}
-						else if (this.type.name == 'OnOff') {
-							return `(value) => handleChange('${this.jsIdentifierName}', value === 'On')`;
-						}
-						else if (this.type.mantineInputTag == 'Select') {
-							return `(value) => handleChange('${this.jsIdentifierName}', value)`;
-						}
-						else {
-							return `(e) => handleChange('${this.jsIdentifierName}', e.target.value)`;
-						}
-
-   					},
-
 				   function mantineDataLabel() {
 						return camelToWords(this.name);
 				   },
@@ -126,6 +97,55 @@ var EntitySupport = {};
 
 						return attribs;
 					},
+
+					/**
+					* Returns a list of all attributes should be included
+					* on any table generated for this class.
+					*/
+					function tableAttribs() {
+						let attribs = [];
+
+						this.attributes.forEach(function (attrib) {
+							if (attrib.visibleToTable) {
+								attribs.push(attrib);
+							}
+						});
+
+						return attribs;
+					},
+
+					/**
+					 * Returns a string to be passed to the select() method of a
+					 * Mongoose query when retrieving a group of records in the getAllXX()
+					 * REST handler.  null is returned if no query is needed.
+					 */
+					function mongooseSelect() {
+						if (this.tableColumnsInvisible > 0) {
+							// We need to select a subset of columns...
+							let columns = [];
+							if (this.tableColumnsVisible <= this.tableColumnsInvisible) {
+								// Be explicit about which columns to include...
+								columns.push('_id');
+								this.attributes.forEach(function (attrib) {
+									if (attrib.visibleToTable) {
+										columns.push(attrib.jsIdentifierName);
+									}
+								});
+							}
+							else {
+
+								// Be explicit about which columns to exclude...
+								this.attributes.forEach(function (attrib) {
+									if (!attrib.visibleToTable) {
+										columns.push(`-${attrib.jsIdentifierName}`);
+									}
+								});
+							}
+
+							return `'${columns.join(' ')}'`;
+						}
+						return null;
+					}
 				] 
 			},
 
@@ -139,17 +159,34 @@ var EntitySupport = {};
 
 				// Count the visibleToTable attributes
 				let visibleCount = 0;
+				let invisibleCount = 0;
 				metaClass.attributes.forEach(function (attrib) {
 					if (attrib.visibleToTable) {
 						visibleCount++;
 					}
+					else {
+						invisibleCount++;
+					}
 				});
 
+				// If there are NO explicit visibleToTable attributes, then
+				// default to ALL primative types with multiplicity of 1 that
+				// are visibleToForm
 				if (visibleCount === 0) {
+					invisibleCount = 0;
 					metaClass.attributes.forEach(function (attrib) {
-						attrib.addTag(new NodeMDA.Meta.Tag("uiTableColumn", true));
+						if (attrib.visibleToForm && !attrib.isMany && !attrib.isObject) {
+							attrib.addTag(new NodeMDA.Meta.Tag("uiTableColumn", true));
+							visibleCount++;
+						}
+						else {
+							invisibleCount++;
+						}
 					});
 				}
+
+				metaClass.tableColumnsVisible = visibleCount;
+				metaClass.tableColumnsInvisible = invisibleCount;
 			}
 		});
 

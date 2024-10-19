@@ -46,10 +46,8 @@ const {{class.name}}Table = ({ onEdit }) => {
     <DataTable
       records={ {{lowercase class.pluralName}} }
       columns={[
-{{#each class.attributes as |attrib|}}
-{{#if attrib.visibleToTable}}
+{{#each class.tableAttribs as |attrib|}}
         { accessor: '{{attrib.jsIdentifierName}}', title: '{{attrib.mantineDataLabel}}' },
-{{/if}}        
 {{/each}}
         {
           accessor: 'actions',
