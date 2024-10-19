@@ -105,12 +105,14 @@ var winston = require('winston');
 	var getOwnedElementsOfType = function(umlElement, umlTypeName) {
 		var results = [];
 		var ownedElements = umlElement.ownedElements;
-		ownedElements.forEach(function(umlOwned) {
-			var typeId = umlOwned._type;
-			if (typeId === umlTypeName) {
-				results.push(umlOwned);
-			}
-		});
+		if (ownedElements) {
+			ownedElements.forEach(function(umlOwned) {
+				var typeId = umlOwned._type;
+				if (typeId === umlTypeName) {
+					results.push(umlOwned);
+				}
+			});
+		}
 		
 		return results;
 	};
@@ -211,9 +213,15 @@ var winston = require('winston');
 	    	   let tagVal;
 	    	   if (tag.kind === 'boolean') {
 	    	   	 tagVal = tag.checked;
+				 if (!tagVal) {
+					tagVal = false;
+				 }
 	    	   }
 	    	   else if (tag.kind === 'number') {
 	    	   	 tagVal = tag.number;
+				 if (!tagVal) {
+					tagVal = 0;
+				 }
 	    	   }
 	    	   else {
 	    	   	 tagVal = tag.value;
@@ -498,7 +506,7 @@ var winston = require('winston');
 		var metaEnd = new MetaModel.AssociationEnd();
 		metaEnd._name = umlEnd.name;
 		metaEnd._multiplicity = umlEnd.multiplicity;
-		metaEnd._navigable = umlEnd.navigable;
+		metaEnd._navigable = (umlEnd.navigable === 'navigable') || (!(umlEnd.navigable === 'notNavigable') && umlEnd.name);
 		metaEnd._aggregation = (umlEnd.aggregation === "shared");
 		metaEnd._composition = (umlEnd.aggregation === "composite");
 		metaEnd._visibility = umlEnd.visibility;

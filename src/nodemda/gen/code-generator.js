@@ -57,6 +57,7 @@ const winston = require('winston');
         let pattern = dirPath + '/*' + ext;
 
 		var files = glob.sync(pattern);
+		files.sort();
 		return files;
 	};
 

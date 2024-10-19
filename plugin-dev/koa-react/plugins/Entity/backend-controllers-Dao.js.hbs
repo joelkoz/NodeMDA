@@ -1,0 +1,158 @@
+##output overwrite {{@root.output}}/backend/controllers/{{class.packageDirPath}}{{class.name}}Dao.js
+// This file was generated with NodeMDA. It will be overwritten if generated again.
+// Do not modify this file.
+//
+const {{class.name}} = require('{{class.relativeParentPrefix}}/models/{{class.packageDirPath}}{{lowercase class.name}}');
+{{#each class.entityAttribs as |attrib|}}
+const {{attrib.type.metaClass.name}} = require('{{../class.relativeParentPrefix}}/models/{{attrib.type.metaClass.packageDirPath}}{{lowercase attrib.type.metaClass.name}}');
+{{/each}}
+{{#if class.entityAttribs.length}}
+const mongoose = require('mongoose');
+{{/if}}   
+
+// Get all {{lowercase class.pluralName}} with pagination
+exports.getAll{{class.pluralName}} = async (ctx) => {
+  const { page = 1, limit = 10 } = ctx.query;
+
+  try {
+    const {{lowercase class.pluralName}} = await {{class.name}}.find()
+{{#if class.mongooseSelect }}
+      .select({{{class.mongooseSelect}}})
+{{/if}}
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit, 10));
+
+    const total = await {{class.name}}.countDocuments();
+
+    ctx.body = { {{lowercase class.pluralName}}, total, page: parseInt(page, 10), limit: parseInt(limit, 10) };
+  } catch (error) {
+    ctx.throw(500, 'Error fetching {{lowercase class.pluralName}}');
+  }
+};
+
+// Get a {{lowercase class.name}} by ID
+exports.get{{class.name}}ById = async (ctx) => {
+  try {
+    const {{lowercase class.name}} = await {{class.name}}.findById(ctx.params.id)
+{{~#if class.entityAttribs.length~}}
+{{~#each class.entityAttribs as |attrib|~}}
+      .populate('{{lowercase attrib.name}}')
+{{~/each~}}
+{{~/if~}}    
+;
+    if (!{{lowercase class.name}}) {
+      ctx.throw(404, '{{class.name}} not found');
+    }
+    ctx.body = {{lowercase class.name}};
+  } catch (error) {
+    ctx.throw(400, 'Invalid ID');
+  }
+};
+
+{{#if class.entityAttribs.length}}
+exports.normalize{{class.name}} = async (ctx) => {
+
+  let {{lowercase class.name}}Data = { ...ctx.request.body };
+
+  {{#each class.entityAttribs as |attrib|}}
+  {{#if attrib.isArray}}
+  let {{attrib.name}}Array = [];
+  if ({{lowercase ../class.name}}Data.{{attrib.name}} && Array.isArray({{lowercase ../class.name}}Data.{{attrib.name}})) {
+    for (const {{attrib.singularName}}Data of {{lowercase ../class.name}}Data.{{attrib.name}}) {
+{{#if attrib._schemaDbProp.foreignKeyField}}
+        {{attrib.singularName}}Data.{{attrib._schemaDbProp.foreignKeyField}} = {{lowercase ../class.name}}Data._id;
+{{/if}}      
+        let {{attrib.singularName}} = null;
+        if ({{attrib.singularName}}Data._id) {
+          // Update an existing {{lowercase attrib.type.metaClass.name}}
+          {{attrib.singularName}} = await {{attrib.type.metaClass.name}}.findByIdAndUpdate({{attrib.singularName}}Data._id, {{attrib.singularName}}Data, { new: true, upsert: true });
+        }
+        else {
+          // Create a new {{lowercase attrib.type.metaClass.name}}
+          {{attrib.singularName}} = new {{attrib.type.metaClass.name}}({{attrib.singularName}}Data);
+          await {{attrib.singularName}}.save();
+        }        
+        {{attrib.name}}Array.push({{attrib.singularName}}._id);
+    }
+  }
+  {{lowercase ../class.name}}Data.{{attrib.name}} = {{attrib.name}}Array;  
+  {{else}}
+  let {{attrib.name}}Id = null;    
+  if ({{lowercase ../class.name}}Data.{{attrib.name}} && typeof {{lowercase ../class.name}}Data.{{attrib.name}} === 'object') {
+      const {{attrib.name}}Data = {{lowercase ../class.name}}Data.{{attrib.name}};
+      let {{attrib.name}} = null;
+      if ({{attrib.name}}Data._id) {
+         // Update an existing {{lowercase attrib.type.metaClass.name}}
+         {{attrib.name}} = await {{attrib.type.metaClass.name}}.findByIdAndUpdate({{attrib.name}}Data._id, {{attrib.name}}Data, { new: true, upsert: true });
+      }
+      else {
+         // Create a new {{lowercase attrib.type.metaClass.name}}
+         {{attrib.name}} = new {{attrib.type.metaClass.name}}({{attrib.name}}Data);
+         await {{attrib.name}}.save();
+      }
+      {{attrib.name}}Id = {{attrib.name}}._id;
+  }
+  // Replace {{attrib.name}} with it's document Id
+  {{lowercase ../class.name}}Data.{{attrib.name}} = {{attrib.name}}Id;
+  {{/if}}
+
+  {{/each}}
+  return {{lowercase class.name}}Data;
+}
+
+{{/if~}}
+
+// Create a new {{lowercase class.name}}
+exports.create{{class.name}} = async (ctx) => {
+  try {
+{{#if class.entityAttribs.length}}
+    ctx.request.body._id = new mongoose.Types.ObjectId();
+{{/if}}    
+    const {{lowercase class.name}}Data = 
+{{~#if class.entityAttribs.length}}
+ await exports.normalize{{class.name}}(ctx);
+{{else}}
+ ctx.request.body;
+{{/if}}
+    const {{lowercase class.name}} = new {{class.name}}({{lowercase class.name}}Data);
+    await {{lowercase class.name}}.save();
+    ctx.status = 201;
+    ctx.body = {{lowercase class.name}};
+  } catch (error) {
+    console.log(`Error creating {{lowercase class.name}}: ${error}`);
+    ctx.throw(400, `Invalid data: ${error}`);
+  }
+};
+
+// Update a {{lowercase class.name}} by ID
+exports.update{{class.name}} = async (ctx) => {
+  try {
+    const {{lowercase class.name}}Data = 
+{{~#if class.entityAttribs.length}}
+ await exports.normalize{{class.name}}(ctx);
+{{else}}
+ ctx.request.body;
+{{/if}}    
+    const {{lowercase class.name}} = await {{class.name}}.findByIdAndUpdate(ctx.params.id, {{lowercase class.name}}Data, { new: true });
+    if (!{{lowercase class.name}}) {
+      ctx.throw(404, '{{class.name}} not found');
+    }
+    ctx.body = {{lowercase class.name}};
+  } catch (error) {
+    console.log(`Error updating {{lowercase class.name}}: ${error}`);
+    ctx.throw(400, `Invalid ID or data: ${error}`);
+  }
+};
+
+// Delete a {{lowercase class.name}} by ID
+exports.delete{{class.name}} = async (ctx) => {
+  try {
+    const {{lowercase class.name}} = await {{class.name}}.findByIdAndDelete(ctx.params.id);
+    if (!{{lowercase class.name}}) {
+      ctx.throw(404, '{{class.name}} not found');
+    }
+    ctx.status = 204;
+  } catch (error) {
+    ctx.throw(400, 'Invalid ID');
+  }
+};
