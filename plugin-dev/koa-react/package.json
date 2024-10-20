@@ -1,7 +1,7 @@
 {
   "name": "nodemda-koa-react",
   "version": "1.0",
-  "description": "NodeMDA plugin to generate a full stack NodeJS app using Koa, React, and Mantine",
+  "description": "NodeMDA plugin to generate a full stack NodeJS app using Koa, Mongoose, MongoDB, React, and Mantine",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
