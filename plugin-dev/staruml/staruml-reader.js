@@ -54,7 +54,12 @@ var winston = require('winston');
 	 */
 	var metaDatatypes = {};
 	
-	
+	/**
+	 * Will hold the meta datatype that represents the String type once the UML
+	 * Datatypes have been processed.
+	 */
+	var dtString = null;
+
 	/**
 	 * Map that translates uml class ids into NodeMDA class meta objects.
 	 */
@@ -255,6 +260,9 @@ var winston = require('winston');
 		let dtList = getOwnedElementsOfType(umlParentElement, "UMLDataType");
 		dtList.forEach(function (umlDatatype) {
 			metaDatatypes[umlDatatype._id] = new MetaModel.Datatype(umlDatatype.name);
+			if (umlDatatype.name === 'String') {
+				dtString = metaDatatypes[umlDatatype._id];
+			}
 		});
 	}
 
@@ -311,7 +319,19 @@ var winston = require('winston');
 			    metaClass.addAttribute(metaAttribute);
 			});
 		}
-		
+
+		// In case this was an enumeration object, gather the enumeration literals...
+		if ("literals" in umlClass) {
+			umlClass.literals.forEach(function(umlAttribute) {
+			    var attrType = dtString;
+			    var metaAttribute = new MetaModel.Attribute(umlAttribute.name, attrType);
+			    metaAttribute._visibility = umlAttribute.visibility;
+			    checkForComment(umlAttribute, metaAttribute);
+			    checkForTags(umlAttribute, metaAttribute);
+			    metaClass.addAttribute(metaAttribute);
+			});
+		}
+
 		// Now, gather the operations...
 		if ("operations" in umlClass) {
 			umlClass.operations.forEach(function(umlOperation) {
@@ -392,8 +412,12 @@ var winston = require('winston');
 			metaClass.setPackage(metaPackage);
 		}
 
-
 		metaClass._visibility = umlClass.visibility;
+
+		// VP: Check if this class represents enumeration, then add enumeration stereotype to it
+		if(umlClass._type === "UMLEnumeration") {
+			metaClass.addStereotype(metaStereotypes["umlEnumeration"]);
+		}
 
 		if ("stereotype" in umlClass) {
 		
@@ -441,6 +465,11 @@ var winston = require('winston');
 			readClass(metaPackage, umlClass);
 		});
 
+		// VP: Adding support for reading enumeration types
+		var enumerationList = getOwnedElementsOfType(umlPackage, "UMLEnumeration");
+		enumerationList.forEach(function(umlEnumerationClass) {
+			readClass(metaPackage, umlEnumerationClass);
+		});		
 		
 		// Recursively process any child packages...
 		var packageList = getOwnedElementsOfType(umlPackage, "UMLPackage");
@@ -465,6 +494,12 @@ var winston = require('winston');
 			readClass(null, umlClass);
 		});
 		
+		// VP: Adding support for reading enumeration types
+		var enumerationList = getOwnedElementsOfType(umlModel, "UMLEnumeration");
+		enumerationList.forEach(function(umlEnumerationClass) {
+			readClass(metaPackage, umlEnumerationClass);
+		});
+
 	};
 	
 	
@@ -574,6 +609,9 @@ var winston = require('winston');
 			readProfile(umlProfile);
 		});
 		
+		// VP: Adding enumeration stereotype
+		metaStereotypes["umlEnumeration"] = new MetaModel.Stereotype("enumeration");
+
 		metaClassMap = {};
 		processedMetaClasses = [];
 

@@ -77,6 +77,11 @@ are marked with the `Entity` stereotype, and service interfaces are marked with 
 your attributes and method parameters.  Datatypes used MUST be one of the data types defined in the
 UML Profile that comes with this plugin, or another class you define in your model.
 
+1. You can add an Enumeration datatype to your model in one of two ways: A. Add an "Enumeration" object that
+is native to your UML modeling system, and populate it with Enumeration Literals; B. Add a class to your
+model and use the "Enumeration" stereotype. In this case, each attribute you define will be used as one
+of the possible enumeration literal values.
+
 1. There is no semantic meaning for attributes on a `Service` class. This plugin also does not currently support methods on an `Entity` class.  
 
 1. Entity attributes that have a visibility other than "public" will be considered "for internal use", and thus will not be present in the CRUD user interface code.  Attributes marked as "protected" are available to leave the system via the REST interface, but attributes marked as "private" will be filtered out by the backend before the REST request responds.
