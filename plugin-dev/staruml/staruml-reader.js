@@ -460,6 +460,8 @@ var winston = require('winston');
 		
 		metaPackage._visibility = umlPackage.visibility;
 
+		readActors(umlPackage);		
+
 		var classList = getOwnedElementsOfType(umlPackage, "UMLClass");
 		classList.forEach(function(umlClass) {
 			readClass(metaPackage, umlClass);
@@ -482,6 +484,8 @@ var winston = require('winston');
 	
 	
 	var readModel = function(umlModel) {
+
+		readActors(umlModel);
 		
 		var packageList = getOwnedElementsOfType(umlModel, "UMLPackage");
 		packageList.forEach(function (umlPackage) {
@@ -499,7 +503,6 @@ var winston = require('winston');
 		enumerationList.forEach(function(umlEnumerationClass) {
 			readClass(metaPackage, umlEnumerationClass);
 		});
-
 	};
 	
 	
@@ -512,7 +515,9 @@ var winston = require('winston');
 			var metaMe = resolveClassReference(umlDependency.source);
 			if (metaMe !== null) {
 			    var metaOther = resolveDataTypeReference(umlDependency.target);
-			    metaMe.addDependency(new MetaModel.Dependency(metaOther));
+				let metaDependency = new MetaModel.Dependency(metaOther);
+			    metaMe.addDependency(metaDependency);
+				checkForTags(umlDependency, metaDependency);
 			}
 		});
 	};
