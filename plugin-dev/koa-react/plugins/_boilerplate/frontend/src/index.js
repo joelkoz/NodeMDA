@@ -6,12 +6,20 @@ import reportWebVitals from './reportWebVitals';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import 'mantine-datatable/styles.css';
+import { hasRole } from './auth';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 
 // Create a global store to that perssists in sessionStorage
 const savedStore = sessionStorage.getItem('globalStore');
-window.globalStore = savedStore ? JSON.parse(savedStore) : { user: { username: 'guest', roles: ['guest'] }};
+if (savedStore) {
+  window.globalStore = JSON.parse(savedStore);
+} 
+if (!savedStore.globalStore.user) {
+  window.globalStore.user = { username: 'guest', roles: ['guest'] };
+}
+window.globalStore.user.hasRole = hasRole.bind(window.globalStore.user);
+
 
 // A method to save the global store in sessionStorage
 // whenever it is updated

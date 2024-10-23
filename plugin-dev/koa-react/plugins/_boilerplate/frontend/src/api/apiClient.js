@@ -59,4 +59,14 @@ apiClient.isAuthenticated = () => {
     return !!token; // Returns true if token exists, otherwise false
 };
 
+// Method to check if the user is authenticated
+apiClient.hasRole = (allowedRoles, ownerRole) => {
+
+  if (apiClient.isAuthenticated() && window.globalStore.user) {
+    return window.globalStore.user.hasRole(allowedRoles, ownerRole);
+  }
+  return false;
+
+};
+
 export default apiClient;

@@ -10,8 +10,9 @@ import {{entity.name}}Page from './pages/{{entity.packageDirPath}}{{entity.name}
 {{/if}}
 {{/each}}
 import LoginPage from './pages/LoginPage';
-import PrivateRoute from './components/PrivateRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 import apiClient from './api/apiClient';
+import { hasRole } from './auth';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(apiClient.isAuthenticated());
@@ -23,22 +24,14 @@ function App() {
 
          // Look up the current user
          const user = await apiClient.fetchCurrentUser();
-
-         // Add a method to the user object to check if the user has one of the specified roles
-         user.hasRole = function(allowedRoles, ownerRole) {
-            let authorized = this.roles.some(role => allowedRoles.includes(role));
-            if (!authorized && allowedRoles.includes('owner')) {
-              authorized = this.roles.includes(ownerRole);
-            }
-            return authorized;
-         };
+         user.hasRole = hasRole.bind(user);
 
          // Save the user in the global store
          window.globalStore.user = user;
          window.saveGlobalStore();
       }
       else {
-        window.globalStore.user = { username: 'guest', roles: ['guest'] };
+        window.globalStore.user = { username: 'guest', roles: ['guest'], hasRole: () => false };
         window.saveGlobalStore();
       }
 
@@ -56,10 +49,9 @@ function App() {
   return (
       <Router>
         <nav style={ { padding: '10px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #ddd' } }>
-          {isAuthenticated && (
-            <>
 {{#each model.entities as |entity|}}
 {{#if entity.genCRUD}}
+              { window.globalStore.user.hasRole({{{entity.readPermissions}}}, {{{entity.ownPermission}}}) && (
               <NavLink
                 to="/{{lowercase entity.pluralName}}"
                 style={ { margin: '0 10px', textDecoration: 'none', color: '#007bff' } }
@@ -67,10 +59,9 @@ function App() {
               >
                 {{entity.pluralName}}
               </NavLink>
+              )}
 {{/if}}              
 {{/each}}              
-             </>
-          )}
           {!isAuthenticated && (
             <NavLink
               to="/login"
@@ -88,9 +79,9 @@ function App() {
           <Route
             path="/{{lowercase entity.pluralName}}"
             element={
-              <PrivateRoute>
+              <ProtectedRoute allowedRoles={ {{{entity.readPermissions}}} } ownerRole={{{entity.ownPermission}}}>
                 <{{entity.name}}Page />
-              </PrivateRoute>
+              </ProtectedRoute>
             }
           />
 {{/if}}          
