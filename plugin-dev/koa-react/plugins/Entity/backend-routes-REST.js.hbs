@@ -1,4 +1,4 @@
-##output overwrite {{@root.output}}/backend/routes/{{class.packageDirPath}}{{lowercase class.name}}.js
+##output {{#if class.genREST}}overwrite{{else}}ignore{{/if}} {{@root.output}}/backend/routes/{{class.packageDirPath}}{{lowercase class.name}}.js
 // This file was generated with NodeMDA. It will be overwritten if generated again.
 // Do not modify this file.
 //

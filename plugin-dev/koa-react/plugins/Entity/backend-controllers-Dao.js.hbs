@@ -1,4 +1,4 @@
-##output overwrite {{@root.output}}/backend/controllers/{{class.packageDirPath}}{{class.name}}Dao.js
+##output {{#if class.genREST}}overwrite{{else}}ignore{{/if}} {{@root.output}}/backend/controllers/{{class.packageDirPath}}{{class.name}}Dao.js
 // This file was generated with NodeMDA. It will be overwritten if generated again.
 // Do not modify this file.
 //

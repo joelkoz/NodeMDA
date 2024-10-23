@@ -94,7 +94,9 @@ app.use(async (ctx, next) => {
 // Prefix API routes with /api/v1
 app.use(loginRoutes.routes()).use(loginRoutes.allowedMethods());
 {{#each model.entities as |entity|}}
+{{#if entity.genREST}}
 app.use({{lowercase entity.name}}Routes.routes()).use({{lowercase entity.name}}Routes.allowedMethods());
+{{/if}}
 {{/each}}
 
 // Start the server on port 4000
