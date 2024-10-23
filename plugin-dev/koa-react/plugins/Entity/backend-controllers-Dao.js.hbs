@@ -10,12 +10,37 @@ const {{attrib.type.metaClass.name}} = require('{{../class.relativeParentPrefix}
 const mongoose = require('mongoose');
 {{/if}}   
 
+{{#if class.isUserOwned}}
+function addQueryRestrictions(ctx, allowedRoles, ownerRole, query = {}) {
+   
+   const q = { ...query };
+   let authorized = ctx.state.user.roles.some(role => allowedRoles.includes(role));
+   if (!authorized && 
+       allowedRoles.includes('owner') &&
+       ctx.state.user.roles.includes(ownerRole)) {
+       // Owner is authorized, but is restricted to their own {{lowercase class.pluralName}}
+       q._owner = ctx.state.user.id;
+   }   
+
+   return q;
+}
+{{/if}}
+
 // Get all {{lowercase class.pluralName}} with pagination
 exports.getAll{{class.pluralName}} = async (ctx) => {
-  const { page = 1, limit = 10 } = ctx.query;
+  const { page = 1, limit = 10, q = {} } = ctx.query;
 
+{{#if class.isUserOwned}}
+  const qFilter = addQueryRestrictions(ctx, {{{class.readPermissions}}}, "{{class.permissions.own}}", q);
+{{/if}}
   try {
-    const {{lowercase class.pluralName}} = await {{class.name}}.find()
+    const {{lowercase class.pluralName}} = await {{class.name}}.find(
+{{~#if class.isUserOwned~}}
+  qFilter
+{{~else~}}
+  q
+{{~/if~}}
+    )
 {{#if class.mongooseSelect }}
       .select({{{class.mongooseSelect}}})
 {{/if}}
@@ -32,8 +57,14 @@ exports.getAll{{class.pluralName}} = async (ctx) => {
 
 // Get a {{lowercase class.name}} by ID
 exports.get{{class.name}}ById = async (ctx) => {
+
+{{#if class.isUserOwned }}
+  let q = addQueryRestrictions(ctx, {{{class.readPermissions}}}, "{{class.permissions.own}}", { _id: ctx.params.id });
+{{else}}
+  let q = { _id: ctx.params.id };  
+{{/if}}
   try {
-    const {{lowercase class.name}} = await {{class.name}}.findById(ctx.params.id)
+    const {{lowercase class.name}} = await {{class.name}}.findOne(q)
 {{~#if class.entityAttribs.length~}}
 {{~#each class.entityAttribs as |attrib|~}}
       .populate('{{lowercase attrib.name}}')
@@ -61,15 +92,25 @@ exports.normalize{{class.name}} = async (ctx) => {
     for (const {{attrib.singularName}}Data of {{lowercase ../class.name}}Data.{{attrib.name}}) {
 {{#if attrib._schemaDbProp.foreignKeyField}}
         {{attrib.singularName}}Data.{{attrib._schemaDbProp.foreignKeyField}} = {{lowercase ../class.name}}Data._id;
-{{/if}}      
+{{/if}}
         let {{attrib.singularName}} = null;
         if ({{attrib.singularName}}Data._id) {
           // Update an existing {{lowercase attrib.type.metaClass.name}}
-          {{attrib.singularName}} = await {{attrib.type.metaClass.name}}.findByIdAndUpdate({{attrib.singularName}}Data._id, {{attrib.singularName}}Data, { new: true, upsert: true });
+{{#if attrib.type.metaClass.isUserOwned}}
+          // Do not alow changing the owner id
+          delete {{attrib.singularName}}Data._owner;
+          const q = addQueryRestrictions(ctx, {{{attrib.type.metaClass.writePermissions}}}, "{{attrib.type.metaClass.permissions.own}}", { _id: {{attrib.singularName}}Data._id });
+{{else}}
+          const q = { _id: {{attrib.singularName}}Data._id };
+{{/if}}
+          {{attrib.singularName}} = await {{attrib.type.metaClass.name}}.findOneAndUpdate(q, {{attrib.singularName}}Data, { new: true });
         }
         else {
           // Create a new {{lowercase attrib.type.metaClass.name}}
           {{attrib.singularName}} = new {{attrib.type.metaClass.name}}({{attrib.singularName}}Data);
+{{#if attrib.type.metaClass.isUserOwned}}
+          {{attrib.singularName}}._owner = {{lowercase ../class.name}}Data._owner;
+{{/if}}
           await {{attrib.singularName}}.save();
         }        
         {{attrib.name}}Array.push({{attrib.singularName}}._id);
@@ -80,14 +121,25 @@ exports.normalize{{class.name}} = async (ctx) => {
   let {{attrib.name}}Id = null;    
   if ({{lowercase ../class.name}}Data.{{attrib.name}} && typeof {{lowercase ../class.name}}Data.{{attrib.name}} === 'object') {
       const {{attrib.name}}Data = {{lowercase ../class.name}}Data.{{attrib.name}};
+
       let {{attrib.name}} = null;
       if ({{attrib.name}}Data._id) {
          // Update an existing {{lowercase attrib.type.metaClass.name}}
-         {{attrib.name}} = await {{attrib.type.metaClass.name}}.findByIdAndUpdate({{attrib.name}}Data._id, {{attrib.name}}Data, { new: true, upsert: true });
+{{#if attrib.type.metaClass.isUserOwned}}
+         // Do not alow changing the owner id
+         delete {{attrib.singularName}}Data._owner;
+         const q = addQueryRestrictions(ctx, {{{attrib.type.metaClass.writePermissions}}}, "{{attrib.type.metaClass.permissions.own}}", { _id: {{attrib.name}}Data._id });
+{{else}}
+         const q = { _id: {{attrib.name}}Data._id };
+{{/if}}
+         {{attrib.name}} = await {{attrib.type.metaClass.name}}.findOneAndUpdate(q, {{attrib.name}}Data, { new: true });
       }
       else {
          // Create a new {{lowercase attrib.type.metaClass.name}}
          {{attrib.name}} = new {{attrib.type.metaClass.name}}({{attrib.name}}Data);
+{{#if attrib.type.metaClass.isUserOwned}}
+         {{attrib.name}}._owner = {{lowercase ../class.name}}Data._owner;
+{{/if}}
          await {{attrib.name}}.save();
       }
       {{attrib.name}}Id = {{attrib.name}}._id;
@@ -107,7 +159,10 @@ exports.create{{class.name}} = async (ctx) => {
   try {
 {{#if class.entityAttribs.length}}
     ctx.request.body._id = new mongoose.Types.ObjectId();
-{{/if}}    
+{{/if}}
+{{#if class.isUserOwned}}
+    ctx.request.body._owner = ctx.state.user.id;
+{{/if}}
     const {{lowercase class.name}}Data = 
 {{~#if class.entityAttribs.length}}
  await exports.normalize{{class.name}}(ctx);
@@ -133,7 +188,14 @@ exports.update{{class.name}} = async (ctx) => {
 {{else}}
  ctx.request.body;
 {{/if}}    
-    const {{lowercase class.name}} = await {{class.name}}.findByIdAndUpdate(ctx.params.id, {{lowercase class.name}}Data, { new: true });
+{{#if class.isUserOwned }}
+    const q = addQueryRestrictions(ctx, {{{class.writePermissions}}}, "{{class.permissions.own}}", { _id: ctx.params.id });
+    // Do not alow changing the owner Id
+    delete {{lowercase class.name}}Data._owner;
+{{else}}
+    const q = { _id: ctx.params.id };  
+{{/if}}
+    const {{lowercase class.name}} = await {{class.name}}.findOneAndUpdate(q, {{lowercase class.name}}Data, { new: true });
     if (!{{lowercase class.name}}) {
       ctx.throw(404, '{{class.name}} not found');
     }
@@ -147,7 +209,12 @@ exports.update{{class.name}} = async (ctx) => {
 // Delete a {{lowercase class.name}} by ID
 exports.delete{{class.name}} = async (ctx) => {
   try {
-    const {{lowercase class.name}} = await {{class.name}}.findByIdAndDelete(ctx.params.id);
+{{#if class.isUserOwned }}
+    const q = addQueryRestrictions(ctx, {{{class.writePermissions}}}, "{{class.permissions.own}}", { _id: ctx.params.id });
+{{else}}
+    const q = { _id: ctx.params.id };  
+{{/if}}
+    const {{lowercase class.name}} = await {{class.name}}.findOneAndDelete(q);
     if (!{{lowercase class.name}}) {
       ctx.throw(404, '{{class.name}} not found');
     }

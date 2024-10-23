@@ -51,7 +51,10 @@ const {{lowercase class.name}}Schema = new mongoose.Schema({
      {{~/if~}}
 
      , required: {{attrib.isRequired}} },
-{{/each}}  
+{{/each}}
+{{#if class.isUserOwned}}
+  _owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+{{/if}}
 }
 {{~#if class.virtuals.length~}}
 , {
