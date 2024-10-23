@@ -20,8 +20,18 @@ const {{class.name}}Table = ({ onEdit }) => {
   useEffect(() => {
     const load{{class.pluralName}} = async () => {
       setLoading(true);
-      const data = await fetch{{class.pluralName}}(page, recordsPerPage);
-      
+{{#if class.isUserOwned}}
+
+      // Since {{lowercase class.pluralName}} are owned by users with the {{{class.ownPermission}}} role, limit
+      // the query to their own records. Users NOT in the {{{class.ownPermission}}} role are only here
+      // because their have "read" access to the table, so they can see everything
+{{/if}}
+      const data = await fetch{{class.pluralName}}(page, recordsPerPage
+{{~#if class.isUserOwned~}}
+, window.globalStore.user.hasRole([{{{class.ownPermission}}}]) ? { _ownerId: window.globalStore.user._id } : undefined 
+{{~/if~}}      
+);
+
       // Format display columns...
       const formatted{{class.pluralName}} = data.{{lowercase class.pluralName}}.map({{lowercase class.name}} => ({
         ...{{lowercase class.name}},
