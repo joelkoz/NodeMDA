@@ -1,4 +1,4 @@
-##output preserve {{@root.output}}/frontend/src/api/{{class.packageDirPath}}{{class.name}}Api.js
+##output {{#if class.genREST}}preserve{{else}}ignore{{/if}} {{@root.output}}/frontend/src/api/{{class.packageDirPath}}{{class.name}}Api.js
 import apiClient from '{{class.relativeParentPrefix}}/api/apiClient';
 
 export const fetch{{class.pluralName}} = async (page = 1, limit = 10, q) => {
