@@ -8,6 +8,17 @@ import '@mantine/core/styles.css';
 import 'mantine-datatable/styles.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
+// Create a global store to that perssists in sessionStorage
+const savedStore = sessionStorage.getItem('globalStore');
+window.globalStore = savedStore ? JSON.parse(savedStore) : { user: { username: 'guest', roles: ['guest'] }};
+
+// A method to save the global store in sessionStorage
+// whenever it is updated
+window.saveGlobalStore = () => {
+  sessionStorage.setItem('globalStore', JSON.stringify(window.globalStore));
+};
+
 root.render(
   <React.StrictMode>
     <MantineProvider withGlobalStyles withNormalizeCSS>

@@ -1,4 +1,4 @@
-##output overwrite {{@root.output}}/frontend/src/components/{{class.packageDirPath}}{{class.name}}Table.js
+##output {{#if class.genCRUD}}overwrite{{else}}ignore{{/if}} {{@root.output}}/frontend/src/components/{{class.packageDirPath}}{{class.name}}Table.js
 // This file was generated with NodeMDA. It will be overwritten if generated again.
 // Do not modify this file.
 //
@@ -14,6 +14,8 @@ const {{class.name}}Table = ({ onEdit }) => {
   const [total{{class.pluralName}}, setTotal{{class.pluralName}}] = useState(0);
   const [page, setPage] = useState(1);
   const recordsPerPage = 20;
+  const readPermission = window.globalStore.user.hasRole({{{class.readPermissions}}}, {{{class.ownPermission}}});
+  const deletePermission = window.globalStore.user.hasRole({{{class.deletePermissions}}}, {{{class.ownPermission}}});
 
   useEffect(() => {
     const load{{class.pluralName}} = async () => {
@@ -54,12 +56,17 @@ const {{class.name}}Table = ({ onEdit }) => {
           title: 'Actions',
           render: ({{lowercase class.name}}) => (
             <Group spacing="xs">
+              { readPermission && (
               <ActionIcon size="xs" color="blue" variant="subtle" onClick={() => onEdit({{lowercase class.name}}._id)}>
                  <IconEdit size={16} />
               </ActionIcon>
+              )}
+
+              { deletePermission && (
               <ActionIcon size="xs" color="red" variant="subtle" onClick={() => handleDelete({{lowercase class.name}}._id)}>
                  <IconTrash size={16} />
               </ActionIcon>
+              )}
             </Group>
           ),
         },

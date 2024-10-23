@@ -1,4 +1,4 @@
-##output overwrite {{@root.output}}/frontend/src/components/{{class.packageDirPath}}{{class.name}}Form.js
+##output {{#if class.genCRUD}}overwrite{{else}}ignore{{/if}} {{@root.output}}/frontend/src/components/{{class.packageDirPath}}{{class.name}}Form.js
 {{#* inline "inputTag" ~}}
 {{#ifBoth attrib.visibleToForm attrib.mantineInputTag}}
 {{indent}}<{{attrib.mantineInputTag}}
@@ -22,6 +22,7 @@
 {{indent}}    required
   {{/if}}
 {{indent}}    key={ form.key({{{defaultTo tickChar "'"}}}{{varPrefix}}{{varName}}{{{defaultTo tickChar "'"}}}) }
+{{indent}}    disabled={ form.readOnly }
 {{indent}}    { ...form.getInputProps({{{defaultTo tickChar "'"}}}{{varPrefix}}{{varName}}{{{defaultTo tickChar "'"}}}
                    {{~#if (isdefined attrib.type.mantineInputType)~}}
                       , { type: '{{attrib.type.mantineInputType}}' }
@@ -90,13 +91,16 @@
 {{else}}
 {{> inputTag attrib=attrib varPrefix="" varName=(concat varName ".${index}") indent="            " tickChar="`" labelAttrib="placeholder"}}
 {{/if}}
+            { !form.readOnly && (
             <ActionIcon color="red" onClick={() => form.removeListItem('{{varName}}', index)}>
               <IconTrash size="1em" />
             </ActionIcon>
+            )}
           </Group>
         ))}
 
         <Group justify="center" mt="md">
+          { !form.readOnly && (
           <Button
             onClick={ () =>
               form.insertListItem('{{varName}}',
@@ -110,6 +114,7 @@
               ) }>
              Add {{attrib.singularName}}
           </Button>
+          )}
         </Group>        
       </Fieldset>
      );
@@ -148,7 +153,8 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
 {{> initialValues attributes=class.formAttribs indent="        " prefix=""}}
     },
     validate: {
-    }
+    },
+    readOnly: !window.globalStore.user.hasRole({{{class.writePermissions}}}, {{{class.ownPermission}}})
   });
 
 
@@ -186,9 +192,11 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>   
 {{> inputObject attributes=class.formAttribs varPrefix="" indent="      "}}
+      { !form.readOnly && (
       <Button type="submit" mt="md">
         { {{lowercase class.name}}Id ? 'Update {{class.name}}' : 'Create {{class.name}}' }
       </Button>
+      )}
       <Button type="button" mt="md" ml="md" variant="outline" onClick={onCancel}>
         Cancel
       </Button>
