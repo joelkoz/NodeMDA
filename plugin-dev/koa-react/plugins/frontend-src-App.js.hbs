@@ -2,7 +2,7 @@
 // This file was generated with NodeMDA. It will be overwritten if generated again.
 // Do not modify this file.
 //
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { BrowserRouter as Router, Route, Routes, NavLink } from 'react-router-dom';
 {{#each model.entities as |entity|}}
 {{#if entity.genCRUD}}
@@ -11,47 +11,17 @@ import {{entity.name}}Page from './pages/{{entity.packageDirPath}}{{entity.name}
 {{/each}}
 import LoginPage from './pages/LoginPage';
 import ProtectedRoute from './components/ProtectedRoute';
-import apiClient from './api/apiClient';
-import { hasRole } from './auth';
+import { UserContext } from './auth/UserContext';
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(apiClient.isAuthenticated());
-
-  useEffect(() => {
-    const handleAuthChange = async () => {
-
-      if (apiClient.isAuthenticated()) {
-
-         // Look up the current user
-         const user = await apiClient.fetchCurrentUser();
-         user.hasRole = hasRole.bind(user);
-
-         // Save the user in the global store
-         window.globalStore.user = user;
-         window.saveGlobalStore();
-      }
-      else {
-        window.globalStore.user = { username: 'guest', roles: ['guest'], hasRole: () => false };
-        window.saveGlobalStore();
-      }
-
-      setIsAuthenticated(apiClient.isAuthenticated());
-    };
-
-    // Listen for authentication change events
-    window.addEventListener('authChanged', handleAuthChange);
-
-    return () => {
-      window.removeEventListener('authChanged', handleAuthChange);
-    };
-  }, []);
+  const { user, isAuthenticated } = useContext(UserContext);
 
   return (
       <Router>
         <nav style={ { padding: '10px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #ddd' } }>
 {{#each model.entities as |entity|}}
 {{#if entity.genCRUD}}
-              { window.globalStore.user.hasRole({{{entity.readPermissions}}}, {{{entity.ownPermission}}}) && (
+              { user.hasRole({{{entity.readPermissions}}}, {{{entity.ownPermission}}}) && (
               <NavLink
                 to="/{{lowercase entity.pluralName}}"
                 style={ { margin: '0 10px', textDecoration: 'none', color: '#007bff' } }

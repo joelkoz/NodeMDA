@@ -138,14 +138,16 @@
 // This file was generated with NodeMDA. It will be overwritten if generated again.
 // Do not modify this file.
 //
-import React, { useEffect } from 'react';
+import React, { useEffect, useContext } from 'react';
 import { TextInput, NumberInput, PasswordInput, Checkbox, Select, MultiSelect, Button, Fieldset, Group, Text, ActionIcon, Textarea } from '@mantine/core';
 import { IconTrash } from '@tabler/icons-react';
 import { DateInput, TimeInput } from '@mantine/dates';
 import { useForm } from '@mantine/form';
 import { fetch{{class.name}}ById, create{{class.name}}, update{{class.name}} } from '{{class.relativeParentPrefix}}/api/{{class.packageDirPath}}{{class.name}}Api';
+import { UserContext } from '{{class.relativeParentPrefix}}/auth/UserContext';
 
 const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) => {
+  const { user } = useContext(UserContext);
 
   const form = useForm({
     mode: 'uncontrolled',
@@ -154,7 +156,7 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
     },
     validate: {
     },
-    readOnly: !window.globalStore.user.hasRole({{{class.writePermissions}}}, {{{class.ownPermission}}})
+    readOnly: !user.hasRole({{{class.writePermissions}}}, {{{class.ownPermission}}})
   });
 
 

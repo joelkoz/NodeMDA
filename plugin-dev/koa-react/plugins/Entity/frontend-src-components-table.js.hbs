@@ -2,20 +2,22 @@
 // This file was generated with NodeMDA. It will be overwritten if generated again.
 // Do not modify this file.
 //
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { DataTable } from 'mantine-datatable';
 import { fetch{{class.pluralName}}, delete{{class.name}} } from '{{class.relativeParentPrefix}}/api/{{class.packageDirPath}}{{class.name}}Api';
 import { ActionIcon, Group } from '@mantine/core';
 import { IconEdit,  IconTrash  } from '@tabler/icons-react';
+import { UserContext } from '{{class.relativeParentPrefix}}/auth/UserContext';
 
 const {{class.name}}Table = ({ onEdit }) => {
   const [{{lowercase class.pluralName}}, set{{class.pluralName}}] = useState([]);
+  const { user } = useContext(UserContext);
   const [loading, setLoading] = useState(false);
   const [total{{class.pluralName}}, setTotal{{class.pluralName}}] = useState(0);
   const [page, setPage] = useState(1);
   const recordsPerPage = 20;
-  const readPermission = window.globalStore.user.hasRole({{{class.readPermissions}}}, {{{class.ownPermission}}});
-  const deletePermission = window.globalStore.user.hasRole({{{class.deletePermissions}}}, {{{class.ownPermission}}});
+  const readPermission = user.hasRole({{{class.readPermissions}}}, {{{class.ownPermission}}});
+  const deletePermission = user.hasRole({{{class.deletePermissions}}}, {{{class.ownPermission}}});
 
   useEffect(() => {
     const load{{class.pluralName}} = async () => {
@@ -28,7 +30,7 @@ const {{class.name}}Table = ({ onEdit }) => {
 {{/if}}
       const data = await fetch{{class.pluralName}}(page, recordsPerPage
 {{~#if class.isUserOwned~}}
-, window.globalStore.user.hasRole([{{{class.ownPermission}}}]) ? { _ownerId: window.globalStore.user._id } : undefined 
+, user.hasRole([{{{class.ownPermission}}}]) ? { _owner: user._id } : undefined 
 {{~/if~}}      
 );
 
