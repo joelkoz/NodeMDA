@@ -1,4 +1,4 @@
-##output overwrite {{@root.output}}/frontend/src/pages/{{class.packageDirPath}}{{class.name}}Page.js
+##output {{#if class.genCRUD}}overwrite{{else}}ignore{{/if}} {{@root.output}}/frontend/src/pages/{{class.packageDirPath}}{{class.name}}Page.js
 // This file was generated with NodeMDA. It will be overwritten if generated again.
 // Do not modify this file.
 //

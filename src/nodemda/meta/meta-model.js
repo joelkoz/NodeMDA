@@ -130,6 +130,15 @@ let MetaModel = {};
 			}
 		}
 		
+		get isProtected() {
+			return this._visibility === "protected";
+		}
+
+		get isPrivate() {
+			return this._visibility === "private";
+		}
+
+
 		/**
 		 * Is this variable visible to other classes inside the package?
 		 */

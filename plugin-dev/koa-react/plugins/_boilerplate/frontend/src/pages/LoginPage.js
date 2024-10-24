@@ -15,7 +15,6 @@ function LoginPage() {
     setError(null);
     try {
       await loginUser(username, password);
-      window.dispatchEvent(new Event('authChanged')); // Trigger the auth change event
       navigate('/'); // Use the navigate function to redirect
     } catch (error) {
       console.error('Error during login:', error);

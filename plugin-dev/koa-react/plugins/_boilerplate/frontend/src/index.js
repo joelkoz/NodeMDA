@@ -6,12 +6,16 @@ import reportWebVitals from './reportWebVitals';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import 'mantine-datatable/styles.css';
+import { AuthProvider } from './auth/UserContext';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
+
 root.render(
   <React.StrictMode>
     <MantineProvider withGlobalStyles withNormalizeCSS>
-       <App />
+       <AuthProvider>      
+           <App />
+       </AuthProvider>
     </MantineProvider>
   </React.StrictMode>
 );

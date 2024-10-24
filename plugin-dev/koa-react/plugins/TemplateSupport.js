@@ -463,10 +463,117 @@ var TemplateSupport = {};
 					function isEnumeration() {
 						return this.stereotypeName === 'Enumeration' ||
 							   this.stereotypeName === 'enumeration';
+					},
+
+					function readPermissions() {
+						return JSON.stringify(this.permissions.read);
+					},
+
+					function writePermissions() {
+						return JSON.stringify(this.permissions.write);
+					},
+
+					function deletePermissions() {
+						return JSON.stringify(this.permissions.delete);
+					},
+
+					function ownPermission() {
+						return JSON.stringify(this.permissions.own);
+					},
+
+					function isUserOwned() {
+						return this.permissions.own != 'admin';
+					},
+
+					// TRUE if the CRUD UI code should be generated
+					function genCRUD() {
+						return this.genREST && !this.getTagValue('noUI');
+					},
+
+					function genREST() {
+						return !this.isPrivate && !this.getTagValue('noREST');
 					}
 
 				],
 
+				func: [
+					function addPermission(perm, roleName) {
+						if (!this.permissions) {
+							this.permissions = {};
+						}
+
+						if (perm === 'own') {
+							this.permissions.own = roleName;
+						}
+						else {
+						   if (!this.permissions[perm].includes(roleName)) {
+								this.permissions[perm].push(roleName);
+						   }
+						}
+					}
+				],
+
+			},
+
+			onDependency: {
+
+				get: [
+					function isActor() {
+						return (this.otherObject instanceof NodeMDA.Meta.Actor);
+					},
+
+					function permissions() {
+						let strPerm = this.getTagValue('permissions');
+						if (strPerm) {
+							// Parse the explicit permissions
+							let wordsArray = strPerm.split(/[ ,.\-\/;:]+/);
+							let perms = [];
+							wordsArray.forEach(function (word) {
+								let lcLetter = word.charAt(0).toLowerCase();
+								let perm = null;
+								switch (lcLetter) {
+									case 'o':
+										perm = 'own';
+										break;
+
+									case 'r':
+										perm = 'read';
+										break;
+
+									case 'w':
+										perm = 'write';
+										break;
+									case 'd':
+										perm = 'delete';
+										break;
+								}								
+  							    if (perm && !perms.includes(perm)) {
+									perms.push(perm);
+								}
+							});
+							return perms;
+
+						}
+						else {
+							// Return the default permissions
+							return ['read', 'write', 'delete'];
+						}
+					},
+				]
+			},
+
+			onActor: {
+				get: [
+					function roleName() {
+						if (this.name.endsWith('Role')) {
+							return _.camelCase(this.name.slice(0, -4));
+						}
+						else {
+							return _.camelCase(this.name);
+						}				
+					},
+
+				]
 			},
 
 			onMetaElement: {
@@ -531,13 +638,54 @@ var TemplateSupport = {};
         // Gather all of the roles defined in the model...
 		model.defineEnumerationType('SystemRole', []);
 		model.actors.forEach(function (actor) {
-			let roleName = actor.name;
-			if (roleName.endsWith('Role')) {
-				roleName = _.camelCase(roleName.slice(0, -4));
-				model.Types.SystemRole.addOption(roleName);				
-			}
+			model.Types.SystemRole.addOption(actor.roleName);
 		});
 
+
+		// Set default permissions for all classes
+		model.classes.forEach(function (metaClass) {
+			// Gather all dependencies that are to Actors
+			let actorDeps = metaClass.dependencies.filter(function (dep) {
+				return dep.isActor;
+			});
+
+			// Set default permissions
+			metaClass.permissions = {
+				own: 'admin',
+				read: ['admin'],
+				write: ['admin'],
+				delete: ['admin']
+			}
+
+			if (actorDeps.length > 0) {
+				// We have explicit actor dependencies
+				actorDeps.forEach(function (dep) {
+					let permissions = dep.permissions;
+					permissions.forEach(function (perm) {
+						let roleName = dep.otherObject.roleName;
+						metaClass.addPermission(perm, roleName);
+						if (perm === 'own' && roleName !== 'admin') {
+							metaClass.addPermission('read', 'owner');
+							metaClass.addPermission('write', 'owner');
+							metaClass.addPermission('delete', 'owner');
+						}
+					});
+				});
+			}
+			else {
+				// Use default permissions for this class
+				if (metaClass.isPublic) {
+					metaClass.addPermission('read', 'guest');
+					metaClass.addPermission('write', 'guest');
+					metaClass.addPermission('delete', 'guest');
+				}
+				else if (metaClass.isProtected) {
+					metaClass.addPermission('read', 'user');
+					metaClass.addPermission('write', 'user');
+					metaClass.addPermission('delete', 'user');
+				}
+			}
+		});
 
 		// Turn all of the classes marked with the Enumeration stereotype into enumerations...
 		model.classes.forEach(function (metaClass) {

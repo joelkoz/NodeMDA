@@ -34,7 +34,9 @@ exports.fetchCurrentUser = async (ctx) => {
   const userId = ctx.state.user.id;
   const user = await User.findById(userId).select('-password'); // Exclude password from the response
   if (!user) {
-    ctx.throw(404, 'User not found');
+    ctx.body = { username: 'guest', roles: ['guest'] }
   }
-  ctx.body = user;
+  else {
+    ctx.body = user;
+  }
 };

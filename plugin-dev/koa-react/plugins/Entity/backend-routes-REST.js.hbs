@@ -1,22 +1,23 @@
-##output overwrite {{@root.output}}/backend/routes/{{class.packageDirPath}}{{lowercase class.name}}.js
+##output {{#if class.genREST}}overwrite{{else}}ignore{{/if}} {{@root.output}}/backend/routes/{{class.packageDirPath}}{{lowercase class.name}}.js
 // This file was generated with NodeMDA. It will be overwritten if generated again.
 // Do not modify this file.
 //
 const Router = require('koa-router');
-const { isAdmin } = require('{{class.relativeParentPrefix}}/config/auth');
+const { hasRole } = require('{{class.relativeParentPrefix}}/config/auth');
 const {{lowercase class.name}}Dao = require('{{class.relativeParentPrefix}}/controllers/{{class.packageDirPath}}{{class.name}}Dao');
 
 const router = new Router({
   prefix: '/api/v1/{{class.packageDirPath}}{{lowercase class.pluralName}}',
 });
 
-// Public routes
-router.get('/', {{lowercase class.name}}Dao.getAll{{class.pluralName}});
-router.get('/:id', {{lowercase class.name}}Dao.get{{class.name}}ById);
+// Read routes
+router.get('/', hasRole({{{class.readPermissions}}}, '{{{class.permissions.own}}}'), {{lowercase class.name}}Dao.getAll{{class.pluralName}});
+router.get('/:id', hasRole({{{class.readPermissions}}}, '{{{class.permissions.own}}}'), {{lowercase class.name}}Dao.get{{class.name}}ById);
 
-// Protected routes (require Admin role)
-router.post('/', isAdmin, {{lowercase class.name}}Dao.create{{class.name}});
-router.put('/:id', isAdmin, {{lowercase class.name}}Dao.update{{class.name}});
-router.delete('/:id', isAdmin, {{lowercase class.name}}Dao.delete{{class.name}});
+// Write routes
+router.post('/', hasRole({{{class.writePermissions}}}, '{{{class.permissions.own}}}'), {{lowercase class.name}}Dao.create{{class.name}});
+router.put('/:id', hasRole({{{class.writePermissions}}}, '{{{class.permissions.own}}}'), {{lowercase class.name}}Dao.update{{class.name}});
+
+router.delete('/:id', hasRole({{{class.deletePermissions}}}, '{{{class.permissions.own}}}'), {{lowercase class.name}}Dao.delete{{class.name}});
 
 module.exports = router;

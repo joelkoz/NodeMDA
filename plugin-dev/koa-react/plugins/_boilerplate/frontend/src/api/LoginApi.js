@@ -1,4 +1,5 @@
 import apiClient from '../api/apiClient';
+import { setUser, setIsAuthenticated } from '../auth/UserContext';
 
 export const loginUser = async (username, password) => {
   try {
@@ -9,6 +10,12 @@ export const loginUser = async (username, password) => {
     
     // Save the authorization token future requests
     apiClient.setAuthToken(response.data.token);
+
+    let user = await fetchCurrentUser();
+
+    // If we get here, we are all good
+    setUser(user);
+    setIsAuthenticated(true);
     
     return response.data;
   } catch (error) {

@@ -80,10 +80,23 @@ app.use(async (ctx, next) => {
   }
 });
 
+app.use(async (ctx, next) => {
+  if (!ctx.state.user) {
+     // No user has been authenticated. Create the "guest" user
+     ctx.state.user = {
+       roles: ['guest']
+     };
+  } 
+  await next();
+});
+
+
 // Prefix API routes with /api/v1
 app.use(loginRoutes.routes()).use(loginRoutes.allowedMethods());
 {{#each model.entities as |entity|}}
+{{#if entity.genREST}}
 app.use({{lowercase entity.name}}Routes.routes()).use({{lowercase entity.name}}Routes.allowedMethods());
+{{/if}}
 {{/each}}
 
 // Start the server on port 4000

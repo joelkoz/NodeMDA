@@ -15,13 +15,30 @@ const isAdmin = async (ctx, next) => {
   await next();
 };
 
+// Middleware to check if the user has one of the allowed roles
+const hasRole = (allowedRoles, ownerRole) => {
+  return async (ctx, next) => {
+
+    let authorized = ctx.state.user.roles.some(role => allowedRoles.includes(role));
+    if (!authorized && allowedRoles.includes('owner')) {
+       authorized = ctx.state.user.roles.includes(ownerRole);
+    }
+
+    if (!authorized) {
+      console.log('Access denied');
+      ctx.throw(403, 'Access denied');
+    }
+    await next();
+  };
+};
 
 // JWT Middleware to protect routes
-const jwtMiddleware = koaJwt({ secret: SECRET_KEY });
+const jwtMiddleware = koaJwt({ secret: SECRET_KEY, passthrough: true });
 
 // Export the necessary modules
 module.exports = {
   SECRET_KEY,
   isAdmin,
+  hasRole,
   jwtMiddleware,
 };
