@@ -61,7 +61,7 @@ a reader for [StarUML](http://staruml.io/).
 ## The core NodeMDA system is best installed globally
 npm install -g nodemda
 npm install -g nodemda-staruml
-npm install -g nodemda-feathers-react
+npm install -g nodemda-koa-react
 npm install -g nodemda-javascript-es6
 
 ## Create a new directory for your application
