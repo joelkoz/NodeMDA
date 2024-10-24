@@ -1,6 +1,6 @@
 {
   "name": "nodemda-staruml",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "NodeMDA meta model reader for StarUML",
   "main": "index.js",
   "scripts": {
