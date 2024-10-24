@@ -164,7 +164,7 @@ and a database schema script that allows the entity to be created in the databas
 
 Project goals
 -------------
-The inspriation for NodeMDA was taken primarily from the Java based open source project [AndroMDA](http://www.andromda.org).
+The inspriation for NodeMDA was taken primarily from the Java based open source project [AndroMDA](https://andromda.sourceforge.net).
 NodeMDA aims to improve upon that project in the following ways:
 
 1. Simplified usage via *[Convention over Configuration](https://en.wikipedia.org/wiki/Convention_over_configuration)*: 
