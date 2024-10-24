@@ -28,17 +28,28 @@ function addQueryRestrictions(ctx, allowedRoles, ownerRole, query = {}) {
 
 // Get all {{lowercase class.pluralName}} with pagination
 exports.getAll{{class.pluralName}} = async (ctx) => {
-  const { page = 1, limit = 10, q = {} } = ctx.query;
+  const { page = 1, limit = 10, q = "{}" } = ctx.query;
 
+  let query = {};
+  if (q) {
+    try {
+      query = JSON.parse(q);
+    } 
+    catch (error) {
+      ctx.status = 400;
+      ctx.body = { error: 'Invalid query parameter' };
+      return;
+    }
+  }
 {{#if class.isUserOwned}}
-  const qFilter = addQueryRestrictions(ctx, {{{class.readPermissions}}}, "{{class.permissions.own}}", q);
+  const qFilter = addQueryRestrictions(ctx, {{{class.readPermissions}}}, "{{class.permissions.own}}", query);
 {{/if}}
   try {
     const {{lowercase class.pluralName}} = await {{class.name}}.find(
 {{~#if class.isUserOwned~}}
   qFilter
 {{~else~}}
-  q
+  query
 {{~/if~}}
     )
 {{#if class.mongooseSelect }}

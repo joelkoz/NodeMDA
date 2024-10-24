@@ -4,7 +4,7 @@ import apiClient from '{{class.relativeParentPrefix}}/api/apiClient';
 export const fetch{{class.pluralName}} = async (page = 1, limit = 10, q) => {
   try {
     const response = await apiClient.get('/{{class.packageDirPath}}{{lowercase class.pluralName}}', {
-      params: { page, limit, q },
+      params: { page, limit, q: q ? JSON.stringify(q) : undefined },
     });
     return response.data;
   } catch (error) {
