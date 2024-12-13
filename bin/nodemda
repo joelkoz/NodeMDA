@@ -300,6 +300,19 @@ program
 	});
 
 
+	program
+	.command('platforms')
+    .description("Lists the available platforms that NodeMDA can use.")
+	.action(function(cmd) {
+
+		let availablePlatforms = getPlugins().platforms;
+		console.log('\nAvailable platforms:');
+		for (let prop in availablePlatforms) {
+			let platform = availablePlatforms[prop];
+			console.log(`o ${platform.name}: ${platform.desc}`);
+		}
+	});
+
 program.parse(process.argv);
 
 
