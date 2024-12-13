@@ -313,6 +313,22 @@ program
 		}
 	});
 
+	
+	program
+	.command('readers')
+    .description("Lists the available file readers that NodeMDA can use.")
+	.action(function(cmd) {
+
+		let availableReaders = getPlugins().readers;
+		console.log('\nAvailable readers:');
+		for (let prop in availableReaders) {
+			let reader = availableReaders[prop];
+			console.log(`o ${reader.name}: ${reader.desc}`);
+		}
+	});
+
+
+
 program.parse(process.argv);
 
 
