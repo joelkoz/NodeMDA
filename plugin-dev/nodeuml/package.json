@@ -13,6 +13,6 @@
   "author": "Joel Kozikowski",
   "license": "MIT",
   "dependencies": {
-    "winston": "^2.3.0"
+   "winston": "^2.4.5"
   }
 }
