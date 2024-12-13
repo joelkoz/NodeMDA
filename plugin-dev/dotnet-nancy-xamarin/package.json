@@ -1,6 +1,6 @@
 {
   "name": "nodemda-dotnet-nancy-xamarin",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "NodeMDA plugin to generate a full stack .NET app using NancyFX, LiteDB, and Xamarin.Forms",
   "main": "index.js",
   "scripts": {
@@ -24,12 +24,9 @@
     "express"
   ],
   "dependencies": {
-    "faker": "^3.1.0",
-    "handlebars": "^4.0.5",
-    "joi": "^9.2.0",
+    "handlebars": "4.5.3",
     "omni-schema": "^2.0.3",
-    "pluralize": "^3.0.0",
-    "winston": "^2.3.0"
+    "pluralize": "^3.1.0"
   },
   "author": "Joel Kozikowski",
   "license": "MIT"

@@ -2,7 +2,6 @@
 
 const NodeMDA = require("nodemda");
 const OmniSchema = require('omni-schema');
-const OmniFaker = require('omni-schema/lib/plugins/mock-faker');
 
 /*
  * Utility functions to support Javascript code generation 
@@ -186,10 +185,6 @@ function initDataTypes(model) {
 		let model = context.model;
 
 		initDataTypes(model);
-
-		// Initialize faker data for use by other templates.
-	    OmniFaker.plugin();
-
 
 		// Add functions to the meta model to assist in code generation...
 		model.mixin({
