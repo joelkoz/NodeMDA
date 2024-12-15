@@ -1,6 +1,6 @@
 {
   "name": "nodemda",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "UML to Source code generation engine",
   "main": "./src/index.js",
   "scripts": {

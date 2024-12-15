@@ -5,7 +5,7 @@ A plugin to generate a full stack SOA application using Koa, Mongoose, React, an
 with Docker files.
 
 NodeMDA is a node.js library used for generating software source code for any project or language using the 
-*Model Driven Architecture* approach. This approach allows you to create large portions of code 
+*Model Driven Architecture* methodology. This methodology allows you to create large portions of code 
 for your software projects by using a UML tool to diagram software concepts.
 
 This package is a plugin for NodeMDA to generate large portions of your application. The code generator supports
@@ -22,7 +22,7 @@ The general workflow for using NodeMDA with this plugin is as follows:
 ```
 ## The core NodeMDA system is best installed globally
 npm install -g nodemda
-npm install -g nodemda-staruml
+npm install -g nodemda-nodeuml
 npm install -g nodemda-koa-react
 
 ## Create a new directory for your application
@@ -36,10 +36,10 @@ cd example-project
 nodemda init
 ```
 
-2. Using StarUML (or any other UML modler NodeMDA has a reader for), create or modify the *model* of your 
+2. Using NodeUML (or any other UML modler NodeMDA has a reader for), create or modify the *model* of your 
 software architecture. A UML Profile exists with pre-defined Stereotypes to quickly model database entities
 and services, as well as security requirements for access to both. The default project places a default
-StarUML model file in the `model` subdirectory of your project.
+NodeUML model file in the `model` subdirectory of your project.
 
 3. The model is processed using NodeMDA to generate source code and other project artifacts. In general, NodeMDA generates
 all of the boilerplate code and stubs for things such as your services and persistence entities.

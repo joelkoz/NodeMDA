@@ -1,6 +1,6 @@
 {
   "name": "nodemda-feathers-react",
-  "version": "0.6.1",
+  "version": "0.6.2",
   "description": "NodeMDA plugin to generate a full stack Javascript app using Feathers, React, and Material-UI",
   "main": "index.js",
   "scripts": {

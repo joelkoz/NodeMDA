@@ -1,7 +1,11 @@
 NodeMDA.js
 ==========
 
-*NOTE: This README covers the NodeMDA code generation engine. If you are not interest in writing your own
+*NOTE: This README covers the NodeMDA code generation engine. 
+
+For a free, open source, and completely integrated UML diagram creation tool with NodeMDA integrated, so the [NodeUML VSCode Extension](https://github.com/joelkoz/NodeUML)
+
+If you are not interest in writing your own
 code generation plugins and instead want to use NodeMDA to generate a complete NodeJS application stack
 using Koa, Mongoose, and MongoDB for the back end and React + Mantine for the front end, all
 deployable using Docker, see the README
@@ -12,7 +16,7 @@ Introduction
 ------------
 
 NodeMDA is a node.js library used for generating software source code for any project or language using the 
-*Model Driven Architecture* approach. This approach allows you to create large portions of code 
+*Model Driven Architecture* methodology. This methodology allows you to create large portions of code 
 for your software projects by using a UML tool to diagram software concepts.
 
 NodeMDA is a code generation *_engine_* that uses "plugin" architecture driven
@@ -53,14 +57,16 @@ Usage
 In order to use NodeMDA, a "reader" must exist to translate your model into 
 NodeMDA's JSON based meta model.  If one can not be 
 found, you will need to write one.  The current version of NodeMDA includes
-a reader for [StarUML](http://staruml.io/).
+a reader for [NodeUML](https://github.com/joelkoz/NodeUML).
+
+There is also a reader for [StarUML](http://staruml.io/).
 
 **_Command line_**
 ```
 
 ## The core NodeMDA system is best installed globally
 npm install -g nodemda
-npm install -g nodemda-staruml
+npm install -g nodemda-nodeuml
 npm install -g nodemda-koa-react
 npm install -g nodemda-javascript-es6
 

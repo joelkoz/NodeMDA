@@ -18,7 +18,7 @@ Workflow
 
 The general workflow for using NodeMDA with this plugin is as follows:
 
-1. Using StarUML (or any other UML modler NodeMDA has a reader for), create or modify the *model* of your 
+1. Using NodeUML (or any other UML modler NodeMDA has a reader for), create or modify the *model* of your 
 software architecture. A UML Profile exists with pre-defined Stereotypes to quickly model database entities
 and services, as well as security requirements for access to both.
 

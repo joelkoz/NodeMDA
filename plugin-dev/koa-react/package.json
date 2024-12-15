@@ -1,6 +1,6 @@
 {
   "name": "nodemda-koa-react",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "NodeMDA plugin to generate a full stack NodeJS app using Koa, Mongoose, MongoDB, React, and Mantine",
   "main": "index.js",
   "scripts": {
