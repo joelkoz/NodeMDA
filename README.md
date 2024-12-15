@@ -3,7 +3,7 @@ NodeMDA.js
 
 *NOTE: This README covers the NodeMDA code generation engine. 
 
-For a free, open source, and completely integrated UML diagram creation tool with NodeMDA integrated, so the [NodeUML VSCode Extension](https://github.com/joelkoz/NodeUML)
+For a free, open source, and completely integrated UML diagram creation tool with NodeMDA integrated, see the [NodeUML VSCode Extension](https://github.com/joelkoz/NodeUML)
 
 If you are not interest in writing your own
 code generation plugins and instead want to use NodeMDA to generate a complete NodeJS application stack
