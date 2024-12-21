@@ -130,8 +130,9 @@ embedded class (i.e. that data of the POJO is stored inside the `Entity` documen
 An association between one `Entity` and another `Entity` implies a "reference" type relationship between
 two different database documents.  
 
-1. In an association, the relationships can be "zero to one", "one to one", "zero to many",
-or "one to many." A "Many to many" relationship gets stored as an array of references in BOTH entity
+1. In an association, you can specify a multiplicity on each end of the association. the relationships can be "one to one", "one to many"
+"one to zero or one", or "one to zero or many",
+A "Many to many" relationship gets stored as an array of references in BOTH entity
 documents and requires that you manually manage the array values. For this reason, using "many to many"
 is not recommended.
 
