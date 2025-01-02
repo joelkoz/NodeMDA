@@ -1,6 +1,6 @@
 {
   "name": "nodemda-nodeuml",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "NodeMDA meta model reader for NodeUML",
   "main": "index.js",
   "scripts": {

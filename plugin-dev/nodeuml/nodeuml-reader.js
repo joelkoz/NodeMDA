@@ -522,14 +522,14 @@ var winston = require('winston');
 	 */
 	var processAssociationQueue = function() {
 		umlAssociationQueue.forEach(function(umlAssociation) {
-			var metaClass1 = resolveClassReference(umlAssociation.end1.node.$ref);
-			var metaClass2 = resolveClassReference(umlAssociation.end2.node.$ref);
+			var metaClass1 = resolveClassReference(umlAssociation.end1.node);
+			var metaClass2 = resolveClassReference(umlAssociation.end2.node);
 			if (metaClass1 !== null && metaClass2 !== null) {
 				var metaEnd1 = makeAssocEnd(umlAssociation.end1);
-				metaEnd1._type = resolveDataTypeReference(umlAssociation.end1.node.$ref);
+				metaEnd1._type = resolveDataTypeReference(umlAssociation.end1.node);
 
 				var metaEnd2 = makeAssocEnd(umlAssociation.end2);
-				metaEnd2._type = resolveDataTypeReference(umlAssociation.end2.node.$ref);
+				metaEnd2._type = resolveDataTypeReference(umlAssociation.end2.node);
 				
 				if (metaEnd2._navigable) {
 					var metaAssoc1 = new MetaModel.Association(metaEnd1, metaEnd2);
