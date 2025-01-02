@@ -403,7 +403,23 @@ let MetaModel = {};
 		}
 		
 		get defaultValue() {
-			return this._defaultValue || this.getTagValue("default") || this.getTagValue("defaultValue");
+			if (this._defaultValue !== undefined) {
+				return this._defaultValue;
+			}
+			else {
+				const def = this.getTagValue("default");
+				if (def !== undefined) {
+					return def;
+				}
+				const defVal = this.getTagValue("defaultValue");
+				if (defVal !== undefined) {
+					return defVal;
+				}
+				else {
+					console.error("No default value found for variable " + this._name);
+					return "";
+				}
+			}
 		}
 		
 
@@ -566,7 +582,7 @@ let MetaModel = {};
          * defined in the model, one is synthesized from the type name.
          */
         get name() {
-        	if (typeof this._name === "string") {
+        	if (typeof this._name === "string" && this._name.length > 0) {
         		return this._name;
         	}
         	else {
