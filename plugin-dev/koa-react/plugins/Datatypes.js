@@ -225,8 +225,14 @@ function initDataTypes(model) {
 
 					function jsDefaultValue() {
 						if (this.hasDefaultValue) {
+							const defaultVal = this.defaultValue;
+							if (typeof defaultVal === "string"  && defaultVal.length === 0) {
+								// A "blank" default value is really a "not specified" value.
+								// Return the "global default" value.
+								return this.type.globalDefaultValue;
+							}
 							if (this.type.omniSchemaType) {
-							   let jsValue = this.type.omniSchemaType.fromString(this.defaultValue);
+							   let jsValue = this.type.omniSchemaType.fromString(defaultVal);
 							   return JSON.stringify(jsValue);
 							}
 							else {

@@ -2,7 +2,7 @@
 
 const NodeMDA = require("nodemda");
 const pluralize = require('pluralize');
-const _ = require('lodash');
+const camelCase = require('./_helpers/camelCase');
 
 
 /*
@@ -38,12 +38,6 @@ var TemplateSupport = {};
 	    	   let myEnd = metaAssoc.myEnd;
 	    	   let otherEnd = metaAssoc.otherEnd; 
 	    	   if (otherEnd.isNavigable) {
-				   if (!otherEnd.name) {
-					  // Fix up an explicit navigable association by giving it a default
-					  // name
-					  otherEnd.name = otherEnd.type.metaClass.jsIdentifierName.toLowerCase();
-				   }
-
 				   // Build an attribute that represents the "other end" of the association
 	    		   let attrib = new NodeMDA.Meta.Attribute(otherEnd.name, otherEnd.type);
 	    		   attrib._multiplicity = otherEnd._multiplicity;
@@ -361,7 +355,7 @@ var TemplateSupport = {};
 						this.dependentActors.forEach(function (actor) {
 							let roleName = actor.name;
 							if (roleName.endsWith('Role')) {
-								roleName = _.camelCase(roleName.slice(0, -4));
+								roleName = camelCase(roleName.slice(0, -4));
 							}
 							roles.push(roleName);
 						});
@@ -566,10 +560,10 @@ var TemplateSupport = {};
 				get: [
 					function roleName() {
 						if (this.name.endsWith('Role')) {
-							return _.camelCase(this.name.slice(0, -4));
+							return camelCase(this.name.slice(0, -4));
 						}
 						else {
-							return _.camelCase(this.name);
+							return camelCase(this.name);
 						}				
 					},
 

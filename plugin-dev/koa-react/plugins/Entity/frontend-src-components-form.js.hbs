@@ -35,14 +35,15 @@
 
 
 {{~#* inline "inputObject" ~}}
-{{#each attributes as |attrib|}}
+{{#renderOnce class}}
+{{#each class.formAttribs as |attrib|}}
 {{#if attrib.visibleToForm}}
 {{#if attrib.useArrayEditor}}
 {{../indent}}<{{uppercaseFirst (camelCase (concat ../varPrefix "." (singularOf attrib.jsIdentifierName) ".Array.Editor"))}} />
 
 {{else if attrib.isObject}}
 {{../indent}}<Fieldset legend="{{attrib.mantineDataLabel}}">
-{{> inputObject attributes=attrib.type.metaClass.formAttribs varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") indent=(concat ../indent "      ") tickChar=../tickChar  labelAttrib=../labelAttrib}}
+{{> inputObject class=attrib.type.metaClass varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") indent=(concat ../indent "      ") tickChar=../tickChar  labelAttrib=../labelAttrib}}
 {{../indent}}</Fieldset>
 
 {{else}}
@@ -50,23 +51,26 @@
 {{/if}}
 {{/if}}
 {{/each}}
+{{/renderOnce}}
 {{/inline~}}
 
 
 
 
 {{~#* inline "initialValues" ~}}
-{{#each attributes as |attrib|}}
+{{#renderOnce class}}
+{{#each class.formAttribs as |attrib|}}
 {{#if attrib.visibleToForm}}
 {{#if attrib.isObject}}
 {{../indent}}{{prefix}}{{attrib.jsIdentifierName}}: {{#if attrib.isArray}}[ {{/if}}{
-{{> initialValues attributes=attrib.type.metaClass.formAttribs prefix=(concat ../prefix attrib.jsIdentifierName ".") indent=(concat ../indent "    ")}}
+{{> initialValues class=attrib.type.metaClass prefix=(concat ../prefix attrib.jsIdentifierName ".") indent=(concat ../indent "    ")}}
 {{../indent}} }{{#if attrib.isArray}} ]{{/if}},
 {{else}}
 {{../indent}}{{prefix}}{{attrib.jsIdentifierName}}: {{{attrib.mantineDefaultValue}}},
 {{/if}}
 {{/if}}
 {{/each}}
+{{/renderOnce}}
 {{/inline~}}
 
 
@@ -87,7 +91,7 @@
       { form.getValues().{{varName}}.map((item, index) => (
           <Group key={`group.${index}`} mt="xs" {{#if attrib.isObject}}grow preventGrowOverflow={false} wrap="nowrap"{{/if}}>
 {{#if attrib.isObject}}      
-{{> inputObject attributes=attrib.type.metaClass.formAttribs varPrefix=(concat varName ".${index}.") indent="            " tickChar="`" labelAttrib="placeholder"}}
+{{> inputObject class=attrib.type.metaClass varPrefix=(concat varName ".${index}.") indent="            " tickChar="`" labelAttrib="placeholder"}}
 {{else}}
 {{> inputTag attrib=attrib varPrefix="" varName=(concat varName ".${index}") indent="            " tickChar="`" labelAttrib="placeholder"}}
 {{/if}}
@@ -106,7 +110,7 @@
               form.insertListItem('{{varName}}',
 {{~#if attrib.isObject~}}
 {
-{{> initialValues attributes=attrib.type.metaClass.formAttribs indent="                " prefix=""}}
+{{> initialValues class=attrib.type.metaClass indent="                " prefix=""}}
               }
 {{~else~}}
               {{{defaultTo attrib.defaultValue attrib.type.globalDefaultValue}}}
@@ -125,13 +129,15 @@
 
 
 {{~#* inline "declareArrayEditors" ~}}
-{{#each attributes as |attrib|}}
+{{#renderOnce class}}
+{{#each class.formAttribs as |attrib|}}
 {{#if attrib.useArrayEditor }}
 {{> arrayEditor attrib=attrib varName=(concat varPrefix attrib.jsIdentifierName) }}
 {{else if attrib.isObject }}
-{{> declareArrayEditors attributes=attrib.type.metaClass.formAttribs varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") }}
+{{> declareArrayEditors class=attrib.type.metaClass varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") }}
 {{/if}}
 {{/each}}
+{{/renderOnce}}
 {{/inline~}}
 
 
@@ -152,7 +158,7 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
   const form = useForm({
     mode: 'uncontrolled',
     initialValues: {
-{{> initialValues attributes=class.formAttribs indent="        " prefix=""}}
+{{> initialValues class=class indent="        " prefix=""}}
     },
     validate: {
     },
@@ -190,10 +196,10 @@ const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) =>
   };
 
 
-{{> declareArrayEditors attributes=class.formAttribs varPrefix="" }}
+{{> declareArrayEditors class=class varPrefix="" }}
   return (
     <form onSubmit={form.onSubmit(handleSubmit)}>   
-{{> inputObject attributes=class.formAttribs varPrefix="" indent="      "}}
+{{> inputObject class=class varPrefix="" indent="      "}}
       { !readOnlyForm && (
       <Button type="submit" mt="md">
         { {{lowercase class.name}}Id ? 'Update {{class.name}}' : 'Create {{class.name}}' }
