@@ -9,15 +9,17 @@ If you are not interest in writing your own
 code generation plugins and instead want to use NodeMDA to generate a complete NodeJS application stack
 using Koa, Mongoose, and MongoDB for the back end and React + Mantine for the front end, all
 deployable using Docker, see the README
-for the [koa-react plugin](https://github.com/joelkoz/NodeMDA/tree/master/plugin-dev/koa-react) in the plugin-dev directory.*
+for the [koa-react plugin](https://github.com/joelkoz/NodeMDA/tree/master/plugin-dev/koa-react) in the plugin-dev directory.
 
 
 Introduction
 ------------
 
-NodeMDA is a node.js library used for generating software source code for any project or language using the 
-*Model Driven Architecture* methodology. This methodology allows you to create large portions of code 
-for your software projects by using a UML tool to diagram software concepts.
+NodeMDA is a node.js library used for generating software source code for any project or language using a 
+simplified version of the *Model Driven Architecture* methodology. By using a small subset of UML - 
+*Class definitions and diagrams* - large sections of your application can be generated automatically. It
+is particularly effective for the generation of backend artififacts like database entities and 
+remote service interfaces.
 
 NodeMDA is a code generation *_engine_* that uses "plugin" architecture driven
 by [Handlebars templates](http://handlebarsjs.com/), allowing you to easily modify 
@@ -26,13 +28,9 @@ While the NodeMDA engine and its plugins are written in Javascript and is execut
 by Node.js, the resulting code does NOT need to be Javascript.  In fact, plugins can be created to generate artifacts for
 any language or software stack.
 
-The current version of NodeMDA focuses on generating code from UML *Class Diagrams*.  
-From this one diagram type, NodeMDA can create virtually all of the boilerplate code to get a 
+NodeMDA focuses on generating code from UML *Class Diagrams*.  From this one diagram type, 
+NodeMDA can create virtually all of the boilerplate code to get a 
 backend system up and running, including database creation and client service interfaces. 
-The goal of NodeMDA is to limit the programming required after 
-the design phase to simply filling in some 
-blanks (i.e. the actual *business logic*).  The design documents serve as actual source code
-in the project, giving you a huge head start on creating something that actually works.
 
 
 Workflow
@@ -40,14 +38,14 @@ Workflow
 
 The general workflow for using NodeMDA is as follows:
 
-1. A *model* of your software architecture is created using some external tool (usually a UML diagraming tool).
+1. A *model* of your entity and service definitions are created using an external UML diagraming tool.
 
 2. The model is processed using NodeMDA to generate source code and other project artifacts. In general, NodeMDA generates
 all of the boilerplate code and stubs for things such as your services and persistence entities.
 
 3. Where necessary, code stubs are filled in by hand to supply the business logic or add other functionality.
 
-4. The resulting code is tested.  If additions or changes are required, the process returns to
+4. The resulting code is tested.  If additions or changes to the schemas or interfaces are required, the process returns to
 step #1 where the *model* is modified and the entire cycle is repeated.
 
 
