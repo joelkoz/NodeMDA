@@ -18,7 +18,7 @@ Introduction
 NodeMDA is a node.js library used for generating software source code for any project or language using a 
 simplified version of the *Model Driven Architecture* methodology. By using a small subset of UML - 
 *Class definitions and diagrams* - large sections of your application can be generated automatically. It
-is particularly effective for the generation of backend artififacts like database entities and 
+is particularly effective for the generation of backend artifacts like database entities and 
 remote service interfaces.
 
 NodeMDA is a code generation *_engine_* that uses "plugin" architecture driven
