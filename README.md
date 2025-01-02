@@ -638,6 +638,11 @@ With the above, any of the code templates can use a simple output format like th
 {{attribute.jsIdentifierName}} = null;  
 ```
 
+---
+### Do you find my work useful?
+
+<a href="https://www.buymeacoffee.com/joelkoz" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+---
 
 NodeMDA Meta Model Reference
 ----------------------------
