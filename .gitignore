@@ -1,8 +1,5 @@
 /output
-/node_modules/nodemda
-/testmda.js
 /node_modules
-/node_modules/*
 *.tgz
 nodemda.json
 .history
