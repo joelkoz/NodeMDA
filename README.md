@@ -39,3 +39,9 @@ deployable using Docker, see the README in the "Full stack code set" below.
 - [Model reader for NodeUML files](./nodemda-nodeuml)
 - [Model reader for StarUML files](./nodemda-staruml)
 - [Full stack code set for React, Koa, and MongoDB](./nodemda-koa-react)
+
+---
+### Do you find my work useful?
+
+<a href="https://www.buymeacoffee.com/joelkoz" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+---
