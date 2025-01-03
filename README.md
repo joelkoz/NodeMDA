@@ -35,7 +35,7 @@ See these sub-projects for complete documentation on the various components avai
 If you are not interest in writing your own code generation plugins and instead want to use NodeMDA to generate a complete NodeJS application stack using Koa, Mongoose, and MongoDB for the back end and React + Mantine for the front end, all
 deployable using Docker, see the README in the "Full stack code set" below.
 
-o [NodeMDA code generation engine](./nodemda)
-o [Model reader for NodeUML files](./nodemda-nodeuml)
-o [Model reader for StarUML files](./nodemda-staruml)
-o [Full stack code set for React, Koa, and MongoDB](./nodemda-koa-react)
+- [NodeMDA code generation engine](./nodemda)
+- [Model reader for NodeUML files](./nodemda-nodeuml)
+- [Model reader for StarUML files](./nodemda-staruml)
+- [Full stack code set for React, Koa, and MongoDB](./nodemda-koa-react)
