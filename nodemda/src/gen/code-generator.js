@@ -744,7 +744,7 @@ class FileEntry {
 				else {
 					// This is a boilerplate file to be copied...
 					const targetFile = getDefaultOutputFileName(mda.Options.output, sourceFile, null);
-					if (!fsx.existsSync(targetFile)) {
+					if (mda.Options.forceOverwrite ||!fsx.existsSync(targetFile)) {
 						winston.info("Creating boilerplate file " + targetFile);
 						checkDirectories(targetFile);
 						fsx.copyFileSync(sourceFile, targetFile);
