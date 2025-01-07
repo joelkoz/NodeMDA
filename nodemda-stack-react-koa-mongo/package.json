@@ -1,0 +1,31 @@
+{
+  "name": "nodemda-stack-react-koa-mongo",
+  "version": "2.0.0",
+  "description": "Full stack application with React front end and Koa + MongoDB backend",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joelkoz/NodeMDA/tree/master/nodemda-stack-react-koa-mongo"
+  },
+  "keywords": [
+    "nodemda",
+    "plugin",
+    "javascript",
+    "nodejs",
+    "React",
+    "Mantine",
+    "code generator"
+  ],
+  "dependencies": {
+    "nodemda-js-mongoose": "^2.0.0",
+    "nodemda-js-rest-koa": "^2.0.0",
+    "nodemda-js-react-mantine": "^2.0.0",
+    "nodemda-js-docker": "^2.0.0",
+    "nodemda-standards": "^2.0.0"
+  },
+  "author": "Joel Kozikowski",
+  "license": "MIT"
+}

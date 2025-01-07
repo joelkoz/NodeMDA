@@ -1,7 +1,7 @@
 
-const NodeMDA = require('./nodemda/nodemda-core.js');
-NodeMDA.Meta = require("./nodemda/meta/meta-model.js");
-require('./nodemda/meta/meta-validator.js');
-require('./nodemda/gen/code-generator.js');
+const NodeMDA = require('./nodemda-core.js');
+NodeMDA.Meta = require("./meta/meta-model.js");
+require('./meta/meta-validator.js');
+require('./gen/code-generator.js');
 
 module.exports = NodeMDA;

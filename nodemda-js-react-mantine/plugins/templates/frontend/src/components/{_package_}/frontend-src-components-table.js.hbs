@@ -1,0 +1,97 @@
+##output {{#if class.genCRUD}}overwrite{{else}}ignore{{/if}} {{@root.output}}/frontend/src/components/{{class.packageDirPath}}{{class.name}}Table.js
+// This file was generated with NodeMDA. It will be overwritten if generated again.
+// Do not modify this file.
+//
+import React, { useState, useEffect, useContext } from 'react';
+import { DataTable } from 'mantine-datatable';
+import { fetch{{class.pluralName}}, delete{{class.name}} } from '{{class.relativeParentPrefix}}/api/{{class.packageDirPath}}{{class.name}}Api';
+import { ActionIcon, Group } from '@mantine/core';
+import { IconEdit,  IconTrash  } from '@tabler/icons-react';
+import { UserContext } from '{{class.relativeParentPrefix}}/auth/UserContext';
+
+const {{class.name}}Table = ({ onEdit }) => {
+  const [{{lowercase class.pluralName}}, set{{class.pluralName}}] = useState([]);
+  const { user } = useContext(UserContext);
+  const [loading, setLoading] = useState(false);
+  const [total{{class.pluralName}}, setTotal{{class.pluralName}}] = useState(0);
+  const [page, setPage] = useState(1);
+  const recordsPerPage = 20;
+  const readPermission = user.hasRole({{{class.readPermissions}}}, {{{class.ownPermission}}});
+  const deletePermission = user.hasRole({{{class.deletePermissions}}}, {{{class.ownPermission}}});
+
+  useEffect(() => {
+    const load{{class.pluralName}} = async () => {
+      setLoading(true);
+{{#if class.isUserOwned}}
+
+      // Since {{lowercase class.pluralName}} are owned by users with the {{{class.ownPermission}}} role, limit
+      // the query to their own records. Users NOT in the {{{class.ownPermission}}} role are only here
+      // because their have "read" access to the table, so they can see everything
+{{/if}}
+      const data = await fetch{{class.pluralName}}(page, recordsPerPage
+{{~#if class.isUserOwned~}}
+, user.hasRole([{{{class.ownPermission}}}]) ? { _owner: user._id } : undefined 
+{{~/if~}}      
+);
+
+      // Format display columns...
+      const formatted{{class.pluralName}} = data.{{lowercase class.pluralName}}.map({{lowercase class.name}} => ({
+        ...{{lowercase class.name}},
+        // Special formatting of individual columns goes here:
+        // published: {{lowercase class.name}}.published ? {{lowercase class.name}}.published.split('T')[0] : ''
+      }));
+      
+      set{{class.pluralName}}(formatted{{class.pluralName}});
+      setTotal{{class.pluralName}}(data.total);
+      setLoading(false);
+    };
+
+    load{{class.pluralName}}();
+  }, [page]);
+
+  const handleDelete = async (id) => {
+    if (window.confirm('Are you sure you want to delete this {{lowercase class.name}}?')) {
+      await delete{{class.name}}(id);
+      set{{class.pluralName}}({{lowercase class.pluralName}}.filter(({{lowercase class.name}}) => {{lowercase class.name}}._id !== id));
+    }
+  };
+
+  return (
+    <DataTable
+      records={ {{lowercase class.pluralName}} }
+      columns={[
+{{#each class.tableAttribs as |attrib|}}
+        { accessor: '{{attrib.jsIdentifierName}}', title: '{{attrib.mantineDataLabel}}' },
+{{/each}}
+        {
+          accessor: 'actions',
+          title: 'Actions',
+          render: ({{lowercase class.name}}) => (
+            <Group spacing="xs">
+              { readPermission && (
+              <ActionIcon size="xs" color="blue" variant="subtle" onClick={() => onEdit({{lowercase class.name}}._id)}>
+                 <IconEdit size={16} />
+              </ActionIcon>
+              )}
+
+              { deletePermission && (
+              <ActionIcon size="xs" color="red" variant="subtle" onClick={() => handleDelete({{lowercase class.name}}._id)}>
+                 <IconTrash size={16} />
+              </ActionIcon>
+              )}
+            </Group>
+          ),
+        },
+      ]}
+      fetching={ loading }
+      page={ page }
+      onPageChange={ setPage }
+      totalRecords={ total{{class.pluralName}} }
+      recordsPerPage={ recordsPerPage }
+      withTableBorder
+      pinLastColumn
+    />
+  );
+};
+
+export default {{class.name}}Table;

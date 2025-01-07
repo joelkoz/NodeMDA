@@ -1,0 +1,215 @@
+##output {{#if class.genCRUD}}overwrite{{else}}ignore{{/if}} {{@root.output}}/frontend/src/components/{{class.packageDirPath}}{{class.name}}Form.js
+{{#* inline "inputTag" ~}}
+{{#ifBoth attrib.visibleToForm attrib.mantineInputTag}}
+{{indent}}<{{attrib.mantineInputTag}}
+{{indent}}    {{defaultTo labelAttrib "label"}}="{{attrib.mantineDataLabel}}"
+{{#if (isdefined attrib.type.mantineAllowDecimal)}}
+{{indent}}    allowDecimal={ {{attrib.type.mantineAllowDecimal}} }
+{{/if}}
+{{#if (isdefined attrib.type.mantineDecimalScale)}}
+{{indent}}    decimalScale={ {{attrib.type.mantineDecimalScale}} }
+{{/if}}
+{{#if attrib.type.mantineFixedDecimalScale}}
+{{indent}}    fixedDecimalScale
+{{/if}}
+{{#if (isdefined attrib.type.mantineValueFormat)}}
+{{indent}}    valueFormat="{{attrib.type.mantineValueFormat}}"
+{{/if}}
+{{#if (isdefined attrib.type.mantineData)}}
+{{indent}}    data={{{attrib.type.mantineData}}}
+{{/if}}
+  {{#if attrib.isRequired}}        
+{{indent}}    required
+  {{/if}}
+{{indent}}    key={ form.key({{{defaultTo tickChar "'"}}}{{varPrefix}}{{varName}}{{{defaultTo tickChar "'"}}}) }
+{{indent}}    readOnly={ readOnlyForm }
+{{indent}}    { ...form.getInputProps({{{defaultTo tickChar "'"}}}{{varPrefix}}{{varName}}{{{defaultTo tickChar "'"}}}
+                   {{~#if (isdefined attrib.type.mantineInputType)~}}
+                      , { type: '{{attrib.type.mantineInputType}}' }
+                   {{~/if}}) }
+{{indent}}/>
+
+{{/ifBoth}}
+{{/inline~}}
+
+
+
+{{~#* inline "inputObject" ~}}
+{{#renderOnce class}}
+{{#each class.formAttribs as |attrib|}}
+{{#if attrib.visibleToForm}}
+{{#if attrib.useArrayEditor}}
+{{../indent}}<{{uppercaseFirst (camelCase (concat ../varPrefix "." (singularOf attrib.jsIdentifierName) ".Array.Editor"))}} />
+
+{{else if attrib.isObject}}
+{{../indent}}<Fieldset legend="{{attrib.mantineDataLabel}}">
+{{> inputObject class=attrib.type.metaClass varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") indent=(concat ../indent "      ") tickChar=../tickChar  labelAttrib=../labelAttrib}}
+{{../indent}}</Fieldset>
+
+{{else}}
+{{> inputTag attrib=attrib varPrefix=../varPrefix varName=attrib.jsIdentifierName indent=../indent tickChar=../tickChar labelAttrib=../labelAttrib}}
+{{/if}}
+{{/if}}
+{{/each}}
+{{/renderOnce}}
+{{/inline~}}
+
+
+
+
+{{~#* inline "initialValues" ~}}
+{{#renderOnce class}}
+{{#each class.formAttribs as |attrib|}}
+{{#if attrib.visibleToForm}}
+{{#if attrib.isObject}}
+{{../indent}}{{prefix}}{{attrib.jsIdentifierName}}: {{#if attrib.isArray}}[ {{/if}}{
+{{> initialValues class=attrib.type.metaClass prefix=(concat ../prefix attrib.jsIdentifierName ".") indent=(concat ../indent "    ")}}
+{{../indent}} }{{#if attrib.isArray}} ]{{/if}},
+{{else}}
+{{../indent}}{{prefix}}{{attrib.jsIdentifierName}}: {{{attrib.mantineDefaultValue}}},
+{{/if}}
+{{/if}}
+{{/each}}
+{{/renderOnce}}
+{{/inline~}}
+
+
+
+{{~#* inline "arrayEditor" ~}}
+ function {{uppercaseFirst (camelCase (concat (singularOf varName) ".Array.Editor"))}}() {
+     return (
+      <Fieldset legend="{{attrib.mantineDataLabel}}">
+{{#if attrib.isObject}}      
+        <Group mb="xs" grow preventGrowOverflow={false} wrap="nowrap">
+{{#each attrib.type.metaClass.formAttribs as |attrib|}}
+{{#if attrib.visibleToForm}}       
+          <Text size="sm">{{attrib.mantineDataLabel}}</Text>
+{{/if}}
+{{/each}}          
+        </Group>        
+{{/if}}        
+      { form.getValues().{{varName}}.map((item, index) => (
+          <Group key={`group.${index}`} mt="xs" {{#if attrib.isObject}}grow preventGrowOverflow={false} wrap="nowrap"{{/if}}>
+{{#if attrib.isObject}}      
+{{> inputObject class=attrib.type.metaClass varPrefix=(concat varName ".${index}.") indent="            " tickChar="`" labelAttrib="placeholder"}}
+{{else}}
+{{> inputTag attrib=attrib varPrefix="" varName=(concat varName ".${index}") indent="            " tickChar="`" labelAttrib="placeholder"}}
+{{/if}}
+            { !readOnlyForm && (
+            <ActionIcon color="red" onClick={() => form.removeListItem('{{varName}}', index)}>
+              <IconTrash size="1em" />
+            </ActionIcon>
+            )}
+          </Group>
+        ))}
+
+        <Group justify="center" mt="md">
+          { !readOnlyForm && (
+          <Button
+            onClick={ () =>
+              form.insertListItem('{{varName}}',
+{{~#if attrib.isObject~}}
+{
+{{> initialValues class=attrib.type.metaClass indent="                " prefix=""}}
+              }
+{{~else~}}
+              {{{defaultTo attrib.defaultValue attrib.type.globalDefaultValue}}}
+{{~/if~}}
+              ) }>
+             Add {{attrib.singularName}}
+          </Button>
+          )}
+        </Group>        
+      </Fieldset>
+     );
+}
+
+
+{{/inline~}}
+
+
+{{~#* inline "declareArrayEditors" ~}}
+{{#renderOnce class}}
+{{#each class.formAttribs as |attrib|}}
+{{#if attrib.useArrayEditor }}
+{{> arrayEditor attrib=attrib varName=(concat varPrefix attrib.jsIdentifierName) }}
+{{else if attrib.isObject }}
+{{> declareArrayEditors class=attrib.type.metaClass varPrefix=(concat ../varPrefix attrib.jsIdentifierName ".") }}
+{{/if}}
+{{/each}}
+{{/renderOnce}}
+{{/inline~}}
+
+
+// This file was generated with NodeMDA. It will be overwritten if generated again.
+// Do not modify this file.
+//
+import React, { useEffect, useContext } from 'react';
+import { TextInput, NumberInput, PasswordInput, Checkbox, Select, MultiSelect, Button, Fieldset, Group, Text, ActionIcon, Textarea } from '@mantine/core';
+import { IconTrash } from '@tabler/icons-react';
+import { DateInput, TimeInput } from '@mantine/dates';
+import { useForm } from '@mantine/form';
+import { fetch{{class.name}}ById, create{{class.name}}, update{{class.name}} } from '{{class.relativeParentPrefix}}/api/{{class.packageDirPath}}{{class.name}}Api';
+import { UserContext } from '{{class.relativeParentPrefix}}/auth/UserContext';
+
+const {{class.name}}Form = ({ {{lowercase class.name}}Id, onSave, onCancel }) => {
+  const { user } = useContext(UserContext);
+
+  const form = useForm({
+    mode: 'uncontrolled',
+    initialValues: {
+{{> initialValues class=class indent="        " prefix=""}}
+    },
+    validate: {
+    },
+  });
+
+  const readOnlyForm = !user.hasRole({{{class.writePermissions}}}, {{{class.ownPermission}}})
+
+  useEffect(() => {
+    if ({{lowercase class.name}}Id) {
+      // Load {{lowercase class.name}} data for editing
+      fetch{{class.name}}ById({{lowercase class.name}}Id).then((data) => { 
+{{#each class.formAttribs as |attrib|}}
+{{#if attrib.type.mantineTransformPre}}
+        data.{{attrib.name}} = {{{eval attrib.type.mantineTransformPre (concat "data." attrib.name)}}};
+{{/if}}
+{{/each}}        
+        form.setValues(data);
+        form.resetDirty(data);        
+      });
+    }
+  }, [{{lowercase class.name}}Id]);
+
+
+  const handleSubmit = (values) => {
+{{#each class.formAttribs as |attrib|}}
+{{#if attrib.type.mantineTransformPost}}
+    values.{{attrib.name}} = {{{eval attrib.type.mantineTransformPost (concat "values." attrib.name)}}};
+{{/if}}
+{{/each}}        
+    if ({{lowercase class.name}}Id) {
+      update{{class.name}}({{lowercase class.name}}Id, values).then(onSave);
+    } else {
+      create{{class.name}}(values).then(onSave);
+    }
+  };
+
+
+{{> declareArrayEditors class=class varPrefix="" }}
+  return (
+    <form onSubmit={form.onSubmit(handleSubmit)}>   
+{{> inputObject class=class varPrefix="" indent="      "}}
+      { !readOnlyForm && (
+      <Button type="submit" mt="md">
+        { {{lowercase class.name}}Id ? 'Update {{class.name}}' : 'Create {{class.name}}' }
+      </Button>
+      )}
+      <Button type="button" mt="md" ml="md" variant="outline" onClick={onCancel}>
+        Cancel
+      </Button>
+    </form>
+  );
+};
+
+export default {{class.name}}Form;

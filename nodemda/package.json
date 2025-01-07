@@ -1,6 +1,6 @@
 {
   "name": "nodemda",
-  "version": "1.2.2",
+  "version": "2.0.0",
   "description": "UML to Source code generation engine",
   "main": "./src/index.js",
   "scripts": {
@@ -17,8 +17,8 @@
   "keywords": [
     "uml",
     "mda",
-    "javascript",
-    "staruml"
+    "code generator",
+    "nodejs"
   ],
   "bin": {
     "nodemda": "./bin/nodemda"

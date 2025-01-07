@@ -1,0 +1,27 @@
+{
+  "name": "nodemda-standards",
+  "version": "2.0.0",
+  "description": "Implement NodeMDA standards such as basic data types, Association to Array Attribute conversion, and enumerations",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joelkoz/NodeMDA/tree/master/nodemda-REST-koa-js"
+  },
+  "keywords": [
+    "nodemda",
+    "plugin",
+    "javascript",
+    "nodejs",
+    "code generator"
+  ],
+  "dependencies": {
+    "handlebars": "4.5.3",
+    "omni-schema": "^2.0.3",
+    "pluralize": "^3.1.0"
+  },
+  "author": "Joel Kozikowski",
+  "license": "MIT"
+}

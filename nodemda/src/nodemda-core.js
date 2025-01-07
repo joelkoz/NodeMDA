@@ -6,13 +6,11 @@ let NodeMDA = {};
 
 NodeMDA.Options = NodeMDA.Options || {};
 
-NodeMDA.Options.platform = "javascript-es6";
-
 NodeMDA.Options.output = ".";
 
 NodeMDA.Options.forceOverwrite = false;
 
-NodeMDA.Options.readerName = 'nodemda-staruml';
+NodeMDA.Options.stack = [];
 
 NodeMDA.Options.packageDelimeter = ":";
 
