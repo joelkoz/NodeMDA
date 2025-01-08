@@ -352,6 +352,16 @@ var StandardSupport = {};
 
 					function isUserOwned() {
 						return this.permissions.own != 'admin';
+					},
+
+					// TRUE if the CRUD UI code should be generated
+					function genCRUD() {
+						return this.genREST && !this.getTagValue('noUI');
+					},
+
+					// TRUE if REST API code should be generated
+					function genREST() {
+						return !this.isPrivate && !this.getTagValue('noREST');
 					}
 
 				],
