@@ -1,6 +1,7 @@
 "use strict";
 
 const NodeMDA = require("nodemda");
+const winston = require("winston");
 
 /*
  * Utility functions to support Javascript code generation 
@@ -26,7 +27,7 @@ function configDataTypes(model) {
 	MongooseDatatypes.initPlatform = function(context) {
 
 		let model = context.model;
-		console.log("Configuring data types for Mongoose...");
+		winston.info("Configuring data types for Mongoose...");
 		configDataTypes(model);
 	};
 })();

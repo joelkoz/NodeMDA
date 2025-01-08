@@ -1,6 +1,7 @@
 "use strict";
 
 const NodeMDA = require("nodemda");
+const winston = require("winston");
 
 
 /*
@@ -53,7 +54,7 @@ function configDataTypes(model) {
 
 	MantineDatatypes.initPlatform = function(context) {
 		let model = context.model;
-		console.log("Configuring data types for Mantine UI...");
+		winston.info("Configuring data types for Mantine UI...");
 		configDataTypes(model);
 	};
 	

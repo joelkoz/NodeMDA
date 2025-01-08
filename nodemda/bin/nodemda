@@ -18,16 +18,61 @@ var pluginDefs;
 */
 function getPlugins() {
 
+	function discoverPlugins() {
+		const prefix = 'nodemda-';
 
-	function discoverPlugins(filePath) {
-		var fileList = glob.sync(filePath);
+		if (!prefix || typeof prefix !== 'string') {
+			throw new Error("Prefix must be a non-empty string");
+		}
+	
+		// Get the node_modules directories based on Node.js require resolution paths
+		const modulePaths = require.resolve.paths('') || [];
+	
+		const plugins = new Set();
+	
+		modulePaths.forEach(modulePath => {
+
+		   // Fix bug where some directories end in simply "node" and not node_modules...
+		   if (modulePath.endsWith('node')) {
+			   modulePath = modulePath + "_modules";
+		   }
+
+			if (!fsx.existsSync(modulePath)) {
+				return; // Skip non-existent paths
+			}
+	
+			// Read the contents of the node_modules directory
+			const entries = fsx.readdirSync(modulePath, { withFileTypes: true });
+	
+			// Filter and collect plugins
+			entries.forEach(entry => {
+				if (entry.name.startsWith(prefix)) {
+					plugins.add(entry.name);
+				}
+			});
+		});
+	
+		// Return plugins as a sorted array for consistency
+		return Array.from(plugins).sort();
+	}
+	
+
+	function parsePlugins(fileList) {
 		fileList.forEach(function (fileName) {
 			let plugin = require(fileName);
-			if (plugin.type === 'platform') {
-				pluginDefs.platforms[plugin.name] = plugin;
-			}
-			else if (plugin.type === 'reader') {
-				pluginDefs.readers[plugin.name] = plugin;
+			if (plugin.version && plugin.version >= 2.0) {
+				if (plugin.type === 'templates') {
+					pluginDefs.templates[plugin.name] = plugin;
+				}
+				else if (plugin.type === 'mixin') {
+					pluginDefs.mixins[plugin.name] = plugin;
+				}
+				else if (plugin.type === 'stack') {
+					pluginDefs.stacks[plugin.name] = plugin;
+				}
+				else if (plugin.type === 'reader') {
+					pluginDefs.readers[plugin.name] = plugin;
+				}
 			}
 		});
 	};
@@ -36,37 +81,41 @@ function getPlugins() {
 	if (typeof pluginDefs === 'undefined') {
 
 		pluginDefs = {};
-		pluginDefs.platforms = {};
+		pluginDefs.templates = {};
+		pluginDefs.mixins = {};
+		pluginDefs.stacks = {};
 		pluginDefs.readers = {};
 
-		let localPath = process.cwd() + '/node_modules/nodemda-*';
-		discoverPlugins(localPath);
-
-		let nodeMDADir = NodeMDA.getNodeMDADir();
-		let nmi = nodeMDADir.indexOf('node_modules');
-		if (nmi >= 0) {
-			nodeMDADir = nodeMDADir.slice(0, nmi+12);
-		}
-
-		discoverPlugins(nodeMDADir + '/nodemda-*');
+        const pluginList = discoverPlugins();
+		parsePlugins(pluginList);
 	}
 
 	return pluginDefs;
 }
 
 
+function cmdListToPlugins(cmdList) {
+    if (!cmdList || typeof cmdList !== 'string') {
+        throw new Error("cmdList must be a non-empty string");
+    }
+
+    return cmdList
+        .split(',')
+        .map(entry => `${entry.trim()}`); // trim whitespace
+}
+
 
 program
-   .version('1.2.0');
+   .version('2.0.0');
 
 program
    .command('generate')
    .alias("gen")
    .usage("nodemda generate [options]")
    .description("Generate code from the specified model file")
-   .option('-p, --platform <platformName>','Name of the platform plugin to use')
+   .option('-s, --stack <plugin1>,<plugin2>...','Name of the platform plugin(s) to use (without "nodemda-" prefix)')
    .option('-o, --output <outputDirectory>','The output directory')
-   .option('-r, --reader <readerModuleName>','Name of a module that will act as the NodeMDA.Reader')
+   .option('-r, --reader <readerModuleName>','Name of a module that will act as the NodeMDA.Reader (without "nodemda-" prefix)')
    .option('-m, --model <modelFileName>', 'The name of the UML model to process')
    .option('-l, --log <logLevel>', 'The name of the Winston log level to display during code generation')
    .option('--forceOverwrite','Causes NodeMDA to overwrite ALL files as if the project were new')
@@ -74,8 +123,8 @@ program
 
    				NodeMDA.loadOptions();
 
-                if (cmd.platform) {
-                    NodeMDA.Options.platform = cmd.platform; 
+                if (cmd.stack) {
+                    NodeMDA.Options.stack = cmdListToPlugins(cmd.stack); 
 				}
 				
 				if (cmd.output) {
@@ -86,7 +135,7 @@ program
 					NodeMDA.Options.readerName = cmd.reader;
 				}
 
-				if (cmd.model) {
+				if (cmd.model) {					
 					NodeMDA.Options.modelFileName = cmd.model;
 				}
 
@@ -98,7 +147,12 @@ program
 					winston.level = cmd.logLevel;				
 				}
 
-				NodeMDA.Meta.Reader = require(NodeMDA.Options.readerName).reader;			
+				let readerPluginName = NodeMDA.Options.readerName;
+				if (!readerPluginName?.startsWith('nodemda-')) {
+					readerPluginName = 'nodemda-' + readerPluginName;
+
+				}
+				NodeMDA.Meta.Reader = require(readerPluginName).reader;
 				
     			NodeMDA.gen(NodeMDA.Options.modelFileName);
 			});
@@ -106,9 +160,9 @@ program
 program
 	.command('init')
     .description("Initialize current directory for project development")
-    .option('-p, --platform <platformName>','Name of the platform plugin to use')
+	.option('-s, --stack <plugin1>,<plugin2>...','Name of the platform plugin(s) to use (without "nodemda-" prefix)')
     .option('-o, --output <outputDirectory>','The output directory')
-    .option('-r, --reader <readerModuleName>','Name of a module that will act as the NodeMDA.Reader')
+	.option('-r, --reader <readerModuleName>','Name of a module that will act as the NodeMDA.Reader (without "nodemda-" prefix)')
     .option('-m, --model <modelFileName>')
 	.action(function(cmd) {
 
@@ -121,11 +175,11 @@ program
 			projectName = answer;
 		}
 
-        if (cmd.platform) {
-            NodeMDA.Options.platform = cmd.platform; 
+		if (cmd.stack) {
+			NodeMDA.Options.stack = cmdListToPlugins(cmd.stack); 
 		}
 		else {
-			let availablePlatforms = getPlugins().platforms;
+			let availablePlatforms = getPlugins().stacks;
 			let platforms = [];
 			let i = 0;
 			console.log('\nAvailable platforms:');
@@ -142,17 +196,17 @@ program
 			}
 			else if (platforms.length === 1) {
 				// Only one platform to chose from - use it...
-				NodeMDA.Options.platform = platforms[0].name;
+				NodeMDA.Options.stack = [ platforms[0].name ];
 			}
 			else {
 				let answer = prompt('\nPlatform to generate: ');
 				let choice = parseInt(answer, 0);
-				NodeMDA.Options.platform = platforms[choice-1].name;
+				NodeMDA.Options.stack = [ platforms[choice-1].name ];
 			}
 
 		}
 
-		console.log('\nUsing platform ' + NodeMDA.Options.platform);
+		console.log('\nUsing stack ' + NodeMDA.Options.stack);
 
 		
 		if (cmd.output) {
@@ -160,7 +214,7 @@ program
 		}
 
 		if (cmd.reader) {
-			NodeMDA.Options.readerName = 'nodemda-' + cmd.reader;
+			NodeMDA.Options.readerName = cmd.reader;
 		}
 		else {
 			let availableReaders = getPlugins().readers;
@@ -180,12 +234,12 @@ program
 			}
 			else if (readers.length === 1) {
 				// Only one platform to chose from - use it...
-				NodeMDA.Options.readerName = 'nodemda-' + readers[0].name;
+				NodeMDA.Options.readerName = readers[0].name;
 			}
 			else {
 				let answer = prompt('\nPlatform to generate: ');
 				let choice = parseInt(answer, 0);
-				NodeMDA.Options.readerName = 'nodemda-' + readers[choice-1].name;
+				NodeMDA.Options.readerName = readers[choice-1].name;
 			}
 
 		}
@@ -197,47 +251,58 @@ program
 		   NodeMDA.getPlatformDir();
 		}
 		catch (error) {
-			console.log(`\n\n**Init failed** - can not use platform plugin ${NodeMDA.Options.platform}: ${error.message}\n\n`);
+			console.log(`\n\n**Init failed** - can not use stack plugins ${NodeMDA.Options.stack}: ${error.message}\n\n`);
 			return;
 		}
 
-		// See if a model file exists...
-		let modelTemplateDir = NodeMDA.getPlatformDir() + '/_model';
-		if (fsx.existsSync(modelTemplateDir)) {
-			// Copy to the project directory...
-			let modelProjectDir = './model';
-			fsx.ensureDirSync(modelProjectDir);
+		if (cmd.model) {
+			if (fsx.existsSync(cmd.model)) {
+			    NodeMDA.Options.modelFileName = cmd.model;
+			}
+			else {
+				console.log(`\n\n**Init failed** - model file ${cmd.model} does not exist.\n\n`);
+				return;
+			}
+		}
+		else {
+			// See if a model file exists...
+			let modelTemplateDir = NodeMDA.getPlatformDir() + 'plugins/_uml';
+			if (fsx.existsSync(modelTemplateDir)) {
+				// Copy to the project directory...
+				let modelProjectDir = './uml';
+				fsx.ensureDirSync(modelProjectDir);
 
-			let sourceFileList = glob.sync(modelTemplateDir + '/*');
-			let sourceFile = sourceFileList[0];
+				let sourceFileList = glob.sync(modelTemplateDir + '/*');
+				let sourceFile = sourceFileList[0];
 
-			let sourceParts = path.parse(sourceFile);
+				let sourceParts = path.parse(sourceFile);
 
-			let modelFile = _.camelCase(projectName)
-			let targeFile = modelProjectDir + '/' + modelFile + sourceParts.ext;
+				let modelFile = _.camelCase(projectName)
+				let targeFile = modelProjectDir + '/' + modelFile + sourceParts.ext;
 
-			// Use Handlebars to copy over the file model, merging in the
-			// project name if necessary.
-			let modelContents = fsx.readFileSync(sourceFile, "utf8");
-	    	let render;
-	    	let result;
-	    	try {
-	    	   render = Handlebars.compile(modelContents);
-	    	   result = render({ AppName: _.upperFirst(_.camelCase(projectName)) });
-	    	}
-	    	catch (error) {
-	    		winston.error(`Render error in model file ${sourceFile}:\n--- ${error.message}`);
-	    		process.exit(-1);
-	    	}			
-        	fsx.writeFileSync(targeFile, result);
+				// Use Handlebars to copy over the file model, merging in the
+				// project name if necessary.
+				let modelContents = fsx.readFileSync(sourceFile, "utf8");
+				let render;
+				let result;
+				try {
+				render = Handlebars.compile(modelContents);
+				result = render({ AppName: _.upperFirst(_.camelCase(projectName)) });
+				}
+				catch (error) {
+					winston.error(`Render error in model file ${sourceFile}:\n--- ${error.message}`);
+					process.exit(-1);
+				}			
+				fsx.writeFileSync(targeFile, result);
 
-			NodeMDA.Options.modelFileName = targeFile;
+				NodeMDA.Options.modelFileName = targeFile;
+			}
 		}
 
 		NodeMDA.writeOptions();
 		console.log('\nOptions saved to nodemda.json');
 		if (NodeMDA.Options.modelFileName !== null) {
-		    console.log('\nUML model file was created at ' + NodeMDA.Options.modelFileName);
+		    console.log('\nUML model file is ' + NodeMDA.Options.modelFileName);
 		}
 	});
 
@@ -245,15 +310,15 @@ program
 program
 	.command('dirs')
     .description("Shows the absolute paths to the directories that NodeMDA will use when generating code.")
-    .option('-p, --platform <platformName>','Name of the platform plugin to use')
+	.option('-s, --stack <plugin1>,<plugin2>...','Name of the platform plugin(s) to use (without "nodemda-" prefix)')
     .option('-o, --output <outputDirectory>','The output directory')
     .option('-m, --model <modelFileName>')
 	.action(function(cmd) {
 
 		NodeMDA.loadOptions();
 
-        if (cmd.platform) {
-            NodeMDA.Options.platform = cmd.platform; 
+		if (cmd.stack) {
+			NodeMDA.Options.stack = cmdListToPlugins(cmd.stack); 
 		}
 
 		if (cmd.output) {
@@ -270,10 +335,10 @@ program
 		console.log(`NodeMDA is running from ${NodeMDA.getNodeMDADir()}`);
 
 		try {
-		   console.log(`The platform ${NodeMDA.Options.platform} is located at ${NodeMDA.getPlatformDir()}`);
+		   console.log(`The platform stack ${NodeMDA.Options.stack} is located at ${NodeMDA.getPlatformDir()}`);
 		}
 		catch (error) {
-			console.log(`\n\n**ERROR** - can not use platform plugin ${NodeMDA.Options.platform}: ${error.message}\n\n`);
+			console.log(`\n\n**ERROR** - can not use platform stack plugin ${NodeMDA.Options.stack}: ${error.message}\n\n`);
 		}
 
 		if (NodeMDA.Options.modelFileName) {
@@ -301,11 +366,12 @@ program
 
 
 	program
-	.command('platforms')
-    .description("Lists the available platforms that NodeMDA can use.")
+	.command('plugins')
+    .description("Lists the available plugins that NodeMDA can have listed as an entry in the 'stack' parameter.")
 	.action(function(cmd) {
 
-		let availablePlatforms = getPlugins().platforms;
+		const plugins = getPlugins();
+		let availablePlatforms = { ...plugins.stacks, ...plugins.mixins, ...plugins.templates };
 		console.log('\nAvailable platforms:');
 		for (let prop in availablePlatforms) {
 			let platform = availablePlatforms[prop];

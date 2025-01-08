@@ -2,7 +2,7 @@
 
 const NodeMDA = require("nodemda");
 const pluralize = require('pluralize');
-const camelCase = require('./_helpers/camelCase');
+const camelCase = require('../_helpers/camelCase');
 
 
 /*

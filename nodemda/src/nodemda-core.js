@@ -20,8 +20,8 @@ NodeMDA.Options.modelFileName = null;
 let nodemdaDir;
 let platformDir;
 
-NodeMDA.getPlatform = function() {
-	return NodeMDA.Options.platform;
+NodeMDA.getStack = function() {
+	return NodeMDA.Options.stack;
 };
 
 
@@ -42,7 +42,10 @@ NodeMDA.getPlatformDir = function() {
 
 	if (typeof(platformDir) === 'undefined') {
 
-		let pluginName = 'nodemda-' + NodeMDA.getPlatform();
+		let pluginName = NodeMDA.getStack()[0];
+		if (!pluginName.startsWith('nodemda-')) {
+			pluginName = 'nodemda-' + pluginName;
+		}
 
 		// First, see if we have a 'node_modules' dir in the cwd...
 		let pluginPath = process.cwd() + '/node_modules/' + pluginName;

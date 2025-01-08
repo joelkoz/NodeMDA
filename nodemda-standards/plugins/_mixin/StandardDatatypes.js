@@ -2,6 +2,7 @@
 
 const NodeMDA = require("nodemda");
 const OmniSchema = require('omni-schema');
+const winston = require("winston");
 
 /*
  * Utility functions to support Javascript code generation 
@@ -185,7 +186,7 @@ function initDataTypes(model) {
 
 		let model = context.model;
 
-		console.log("Initializing Standard Data Types...")
+		winston.info("Initializing Standard Data Types...")
 		initDataTypes(model);
 
 		// Add functions to the meta model to assist in code generation...

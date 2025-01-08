@@ -2,7 +2,8 @@
 
 const NodeMDA = require("nodemda");
 const _ = require('lodash');
-const camelToWords = require('nodemda-standards/_helpers/camelToWords');
+const camelToWords = require('nodemda-standards/plugins/_helpers/camelToWords');
+const winston = require("winston");
 
 /*
  * MantineSupport.js
@@ -20,7 +21,7 @@ var MantineSupport = {};
 		}
 		let model = context.model;
 
-		console.log("Configuring Entities for Mantine UI...");
+		winston.info("Configuring Entities for Mantine UI...");
 
 		model.mixin({
 

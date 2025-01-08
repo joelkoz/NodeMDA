@@ -31,6 +31,7 @@ const path = require('path');
 const Handlebars = require('handlebars');
 const glob = require('glob');
 const winston = require('winston');
+const pluralize = require('pluralize');
 
 
 /**
@@ -56,7 +57,7 @@ class FileEntry {
 	constructor(virtualPath, absolutePath, fromModule) {
 		this.virtualPath = virtualPath;
 		this.absolutePath = absolutePath;
-		this.fromModule = moduleObject;
+		this.fromModule = fromModule;
 	}
 }
 
@@ -94,8 +95,12 @@ class FileEntry {
 			processedPlugins.add(pluginName);
 
 			try {
-				const moduleObject = require(pluginName);
-				const packageJson = loadPackageJson(pluginName);
+				let pluginFileName = pluginName;
+				if (!pluginName.startsWith('nodemda-')) {
+					pluginFileName = 'nodemda-' + pluginName;
+				}
+				const moduleObject = require(pluginFileName);
+				const packageJson = loadPackageJson(pluginFileName);
 
 				if (!moduleObject || !packageJson) return;
 
@@ -112,8 +117,8 @@ class FileEntry {
 					return;
 				}
 
-				const packagePath = require.resolve(pluginName);
-				const pluginDefinition = new PluginDefinition(pluginName, packagePath, moduleObject);
+				const packagePath = require.resolve(pluginFileName);
+				const pluginDefinition = new PluginDefinition(pluginFileName, packagePath, moduleObject);
 
 				// Add contributions
 				if (Array.isArray(moduleObject.contributes)) {
@@ -125,7 +130,7 @@ class FileEntry {
 					ctxGen.requires.push(...moduleObject.requires);
 				}
 
-				winston.info("   Using plugin: " + pluginName);
+				winston.info("   Using plugin: " + pluginFileName);
 
 				// If type is "stack", process its dependencies
 				if (moduleObject.type === 'stack' && packageJson.dependencies) {
@@ -135,7 +140,7 @@ class FileEntry {
 				// Add plugin to ctxGen
 				ctxGen.plugins.push(pluginDefinition);
 			} catch (error) {
-				console.warn(`Warning: Error processing ${pluginName}. Skipping.`);
+				console.warn(`Warning: Error processing ${pluginName}: ${error}`);
 			}
 		}
 
@@ -222,13 +227,13 @@ class FileEntry {
 		// Create a mapping of plugin to its topological order
 		const pluginOrder = new Map();
 		sortedPlugins.reverse().forEach((plugin, index) => pluginOrder.set(plugin, index));
-	
+
 		// Sort file entries
 		return fileEntries.sort((a, b) => {
 			const pluginAOrder = pluginOrder.get(a.fromModule);
 			const pluginBOrder = pluginOrder.get(b.fromModule);
 			if (pluginAOrder !== pluginBOrder) {
-				return pluginAOrder - pluginBOrder;
+				return pluginBOrder - pluginAOrder;
 			}
 			return a.virtualPath.localeCompare(b.virtualPath);
 		});
@@ -328,28 +333,6 @@ class FileEntry {
 		files.sort();
 		return files;
 	};
-
-
-	function getFilesWithoutStereotype(dirPath, ext) {
-		if (!ext) {
-			console.error("File extension must be specified.");
-			return [];
-		}
-	
-		const targetPath = `plugins/${dirPath}`;
-
-		// Regular expression to detect files with `{...}` in the file name slot
-		const stereotypeRegex = /\/[^/]*\{[a-zA-Z0-9_]+?\}[^/]*$/;
-	
-		return allFiles
-			.filter(file => {
-				const { virtualPath } = file;
-	
-				// Check if the file has the correct extension and does not match the stereotype pattern
-				return virtualPath.startsWith(targetPath) && virtualPath.endsWith(ext) && !stereotypeRegex.test(virtualPath);
-			})
-			.map(file => file.absolutePath);
-	}
 
 
 	/**
@@ -484,7 +467,7 @@ class FileEntry {
     	context["class"] = metaClass ;
     	context.output = mda.Options.output;
     	
-    	winston.debug("Processing " + (metaClass !== null ? metaClass.getName() : "project") + " with template " + templateFile);
+    	winston.info("     Processing " + (metaClass !== null ? metaClass.getName() : "project") + " with template " + templateFile);
 
     	var render;
     	var result;
@@ -663,7 +646,6 @@ class FileEntry {
 
 		winston.info("Discovering plugin contents...");
 		getPluginFiles();
-
 
 		winston.info("Reading meta model...");
 		var metaModel = MetaModel.Reader.getMeta(modelFileName);

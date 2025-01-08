@@ -84,3 +84,30 @@ If any entry in this list is "stack", it will be replaced with the "dependencies
 More needs:
 1. A way for individual plugins to do their own additional validation on the model (e.g. Check for "User" entity with required attributes)
 
+
+
+
+
+
+
+
+
+
+allFiles example:
+[
+  {
+    "virtualPath": "plugins/_helpers/camelCase.js",
+    "absolutePath": "/Users/Joel/Workspaces/nodejs/NodeMDA/nodemda-standards/plugins/_helpers/camelCase.js",
+    "fromModule": {
+      "type": "mixin",
+      "name": "standards",
+      "desc": "Implement NodeMDA standards such as basic data types, Association to Array Attribute conversion, and enumerations",
+      "version": 2,
+      "contributes": [
+        "NodeMDA-Standards"
+      ],
+      "requires": []
+    }
+  }
+]
+
