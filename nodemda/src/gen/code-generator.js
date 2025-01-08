@@ -424,20 +424,20 @@ class FileEntry {
 
 	function getDefaultOutputFileName(rootOutputPath, templateFile, metaClass) {
 		// Constants
-		const templateStart = 'plugins/templates';
+		const templatePrefix = 'plugins/templates';
 		const hbsExtension = '.hbs';
 	
 		// Ensure the templateFile ends with '.hbs'
 		let isHbsFile = templateFile.endsWith(hbsExtension);
 	
 		// Find the start of the relevant path in the templateFile
-		const startIndex = templateFile.indexOf(templateStart);
+		const startIndex = templateFile.indexOf(templatePrefix);
 		if (startIndex === -1) {
-			throw new Error(`Template file must include '${templateStart}'`);
+			throw new Error(`Template file must include '${templatePrefix}'`);
 		}
 	
 		// Extract the relative path after 'plugins/templates'
-		let relativePath = templateFile.slice(startIndex + templateStart.length);
+		let relativePath = templateFile.slice(startIndex + templatePrefix.length);
 	
 		// Perform substitutions if metaClass is provided
 		if (metaClass) {
@@ -467,7 +467,7 @@ class FileEntry {
     	context["class"] = metaClass ;
     	context.output = mda.Options.output;
     	
-    	winston.info("     Processing " + (metaClass !== null ? metaClass.getName() : "project") + " with template " + templateFile);
+    	winston.debug("      Processing " + (metaClass !== null ? metaClass.getName() : "project") + " with template " + templateFile);
 
     	var render;
     	var result;
@@ -498,7 +498,7 @@ class FileEntry {
     		}
     	}
     	else {
-    		console.log("WARNING - No output directive found in tempalte file " + templateFile);
+    		winston.warn("WARNING - No output directive found in tempalte file " + templateFile);
     	}
 
     	
@@ -507,7 +507,11 @@ class FileEntry {
    		    outputFileName = getDefaultOutputFileName(mda.Options.output, templateFile, metaClass);
     	}
     	
-    	winston.info("Generating code with output mode " + outputMode + " to " + outputFileName);
+		const templatePrefix = 'plugins/templates';
+		const startIndex = templateFile.indexOf(templatePrefix);
+		const abbrevTemplate = templateFile.slice(startIndex + templatePrefix.length);
+
+    	winston.info(`      Generating ${outputFileName} from ${abbrevTemplate} with output mode "${outputMode}"`);
     	if (outputMode.toLowerCase() === "overwrite") {
         	checkDirectories(outputFileName);
         	fsx.writeFileSync(outputFileName, result);
@@ -523,6 +527,9 @@ class FileEntry {
     		   checkDirectories(outputFileName);
     		   fsx.writeFileSync(outputFileName, result);
     	   }
+		   else {
+    			winston.info("      >>> Preserved previous contents - Nothing saved.");
+		   }
     	}
     	else if (outputMode.toLowerCase() === "aggregate") {
         	checkDirectories(outputFileName);
@@ -538,7 +545,7 @@ class FileEntry {
     	}
     	else if (outputMode.toLowerCase() === "ignore") {
     		// Do nothing...
-    		winston.info("   >>> Nothing saved to file.");
+    		winston.info("      >>> Nothing saved to file.");
      	}
     	else {
     		throw new Error("Unknown output directive '" + outputMode + "' in template " + templateFile);
@@ -681,6 +688,7 @@ class FileEntry {
 		// Process each class...
 		winston.info("Processing classes...");
 		metaModel.classes.forEach(function(metaClass) {
+			winston.info(`   Processing class ${metaClass.name}:`);
 			metaClass.stereotypes.forEach(function(stereotype) {
 				
 				// Process any project scripts...

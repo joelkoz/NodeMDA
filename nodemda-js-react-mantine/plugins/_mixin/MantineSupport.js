@@ -21,7 +21,7 @@ var MantineSupport = {};
 		}
 		let model = context.model;
 
-		winston.info("Configuring Entities for Mantine UI...");
+		winston.info("   Configuring Entities for Mantine UI...");
 
 		model.mixin({
 

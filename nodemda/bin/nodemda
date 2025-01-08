@@ -13,6 +13,8 @@ const prompt = require('prompt-sync')();
 
 var pluginDefs;
 
+const NodeMDA_Version = require('nodemda/package.json').version;
+
 /**
 * Returns a list of all discovered plugins...
 */
@@ -106,7 +108,7 @@ function cmdListToPlugins(cmdList) {
 
 
 program
-   .version('2.0.0');
+   .version(NodeMDA_Version);
 
 program
    .command('generate')
@@ -394,9 +396,10 @@ program
 	});
 
 
+console.log('\nNodeMDA code generator version ' + NodeMDA_Version);
+console.log('===========================================');
 
 program.parse(process.argv);
-
 
 if (!process.argv.slice(2).length) {
    program.outputHelp();
