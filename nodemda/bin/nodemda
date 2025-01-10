@@ -184,7 +184,7 @@ program
 			let availablePlatforms = getPlugins().stacks;
 			let platforms = [];
 			let i = 0;
-			console.log('\nAvailable platforms:');
+			console.log('\nAvailable stacks:');
 			for (let prop in availablePlatforms) {
 				let platform = availablePlatforms[prop];
 				platforms.push(platform);
