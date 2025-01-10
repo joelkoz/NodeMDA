@@ -1,0 +1,32 @@
+##output preserve
+{{model.name}} Backend
+==========
+
+{{model.name}} Backend is a backend REST application for NodeJS.
+
+Development
+------
+
+The first step in the development process is to edit the UML model found in the `uml` directory.
+Create a class diagram according to the NodeMDA standards documented in the NodeMDA README.  Once
+the model has been completed, generate code using with NodeUML by selecting the "Generate code from UML"
+option in VSCode.
+
+Once that is complete, the generated code can be run from the developer desktop like so:
+
+1. Be sure MongoDB is running on your desktop machine.
+
+2. Start the backend server:
+
+```
+cd backend
+
+npm install
+
+npm run dev
+```
+
+The backend server will be served with `nodemon` when started with `npm run dev`, which allows for quick
+hotswap development of backend code.
+
+If you need to change the schema or service definitions, re-edit the UML model, then regenerate the code with NodeMDA.

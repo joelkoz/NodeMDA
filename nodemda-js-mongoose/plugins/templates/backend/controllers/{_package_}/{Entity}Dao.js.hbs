@@ -1,0 +1,236 @@
+##output {{#if class.genREST}}overwrite{{else}}ignore{{/if}}
+// This file was generated with NodeMDA. It will be overwritten if generated again.
+// Do not modify this file.
+//
+const {{class.name}} = require('{{class.relativeParentPrefix}}/models/{{class.packageDirPath}}{{lowercase class.name}}');
+{{#each class.entityAttribs as |attrib|}}
+const {{attrib.type.metaClass.name}} = require('{{../class.relativeParentPrefix}}/models/{{attrib.type.metaClass.packageDirPath}}{{lowercase attrib.type.metaClass.name}}');
+{{/each}}
+{{#if class.entityAttribs.length}}
+const mongoose = require('mongoose');
+{{/if}}   
+
+{{#if class.isUserOwned}}
+function addQueryRestrictions(ctx, allowedRoles, ownerRole, query = {}) {
+   
+   const q = { ...query };
+   let authorized = ctx.state.user.roles.some(role => allowedRoles.includes(role));
+   if (!authorized && 
+       allowedRoles.includes('owner') &&
+       ctx.state.user.roles.includes(ownerRole)) {
+       // Owner is authorized, but is restricted to their own {{lowercase class.pluralName}}
+       q._owner = ctx.state.user.id;
+   }   
+
+   return q;
+}
+{{/if}}
+
+// Get all {{lowercase class.pluralName}} with pagination
+exports.getAll{{class.pluralName}} = async (ctx) => {
+  const { page = 1, limit = 10, q = "{}" } = ctx.query;
+
+  let query = {};
+  if (q) {
+    try {
+      query = JSON.parse(q);
+    } 
+    catch (error) {
+      ctx.status = 400;
+      ctx.body = { error: 'Invalid query parameter' };
+      return;
+    }
+  }
+{{#if class.isUserOwned}}
+  const qFilter = addQueryRestrictions(ctx, {{{class.readPermissions}}}, "{{class.permissions.own}}", query);
+{{/if}}
+  try {
+    const {{lowercase class.pluralName}} = await {{class.name}}.find(
+{{~#if class.isUserOwned~}}
+  qFilter
+{{~else~}}
+  query
+{{~/if~}}
+    )
+{{#if class.mongooseSelect }}
+      .select({{{class.mongooseSelect}}})
+{{/if}}
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit, 10));
+
+    const total = await {{class.name}}.countDocuments();
+
+    ctx.body = { {{lowercase class.pluralName}}, total, page: parseInt(page, 10), limit: parseInt(limit, 10) };
+  } catch (error) {
+    ctx.throw(500, 'Error fetching {{lowercase class.pluralName}}');
+  }
+};
+
+// Get a {{lowercase class.name}} by ID
+exports.get{{class.name}}ById = async (ctx) => {
+
+{{#if class.isUserOwned }}
+  let q = addQueryRestrictions(ctx, {{{class.readPermissions}}}, "{{class.permissions.own}}", { _id: ctx.params.id });
+{{else}}
+  let q = { _id: ctx.params.id };  
+{{/if}}
+  try {
+    const {{lowercase class.name}} = await {{class.name}}.findOne(q)
+{{~#if class.entityAttribs.length~}}
+{{~#each class.entityAttribs as |attrib|~}}
+      .populate('{{lowercase attrib.name}}')
+{{~/each~}}
+{{~/if~}}    
+;
+    if (!{{lowercase class.name}}) {
+      ctx.throw(404, '{{class.name}} not found');
+    }
+    ctx.body = {{lowercase class.name}};
+  } catch (error) {
+    ctx.throw(400, 'Invalid ID');
+  }
+};
+
+{{#if class.entityAttribs.length}}
+exports.normalize{{class.name}} = async (ctx) => {
+
+  let {{lowercase class.name}}Data = { ...ctx.request.body };
+
+  {{#each class.entityAttribs as |attrib|}}
+  {{#if attrib.isArray}}
+  let {{attrib.name}}Array = [];
+  if ({{lowercase ../class.name}}Data.{{attrib.name}} && Array.isArray({{lowercase ../class.name}}Data.{{attrib.name}})) {
+    for (const {{attrib.singularName}}Data of {{lowercase ../class.name}}Data.{{attrib.name}}) {
+{{#if attrib._schemaDbProp.foreignKeyField}}
+        {{attrib.singularName}}Data.{{attrib._schemaDbProp.foreignKeyField}} = {{lowercase ../class.name}}Data._id;
+{{/if}}
+        let {{attrib.singularName}} = null;
+        if ({{attrib.singularName}}Data._id) {
+          // Update an existing {{lowercase attrib.type.metaClass.name}}
+{{#if attrib.type.metaClass.isUserOwned}}
+          // Do not alow changing the owner id
+          delete {{attrib.singularName}}Data._owner;
+          const q = addQueryRestrictions(ctx, {{{attrib.type.metaClass.writePermissions}}}, "{{attrib.type.metaClass.permissions.own}}", { _id: {{attrib.singularName}}Data._id });
+{{else}}
+          const q = { _id: {{attrib.singularName}}Data._id };
+{{/if}}
+          {{attrib.singularName}} = await {{attrib.type.metaClass.name}}.findOneAndUpdate(q, {{attrib.singularName}}Data, { new: true });
+        }
+        else {
+          // Create a new {{lowercase attrib.type.metaClass.name}}
+          {{attrib.singularName}} = new {{attrib.type.metaClass.name}}({{attrib.singularName}}Data);
+{{#if attrib.type.metaClass.isUserOwned}}
+          {{attrib.singularName}}._owner = {{lowercase ../class.name}}Data._owner;
+{{/if}}
+          await {{attrib.singularName}}.save();
+        }        
+        {{attrib.name}}Array.push({{attrib.singularName}}._id);
+    }
+  }
+  {{lowercase ../class.name}}Data.{{attrib.name}} = {{attrib.name}}Array;  
+  {{else}}
+  let {{attrib.name}}Id = null;    
+  if ({{lowercase ../class.name}}Data.{{attrib.name}} && typeof {{lowercase ../class.name}}Data.{{attrib.name}} === 'object') {
+      const {{attrib.name}}Data = {{lowercase ../class.name}}Data.{{attrib.name}};
+
+      let {{attrib.name}} = null;
+      if ({{attrib.name}}Data._id) {
+         // Update an existing {{lowercase attrib.type.metaClass.name}}
+{{#if attrib.type.metaClass.isUserOwned}}
+         // Do not alow changing the owner id
+         delete {{attrib.singularName}}Data._owner;
+         const q = addQueryRestrictions(ctx, {{{attrib.type.metaClass.writePermissions}}}, "{{attrib.type.metaClass.permissions.own}}", { _id: {{attrib.name}}Data._id });
+{{else}}
+         const q = { _id: {{attrib.name}}Data._id };
+{{/if}}
+         {{attrib.name}} = await {{attrib.type.metaClass.name}}.findOneAndUpdate(q, {{attrib.name}}Data, { new: true });
+      }
+      else {
+         // Create a new {{lowercase attrib.type.metaClass.name}}
+         {{attrib.name}} = new {{attrib.type.metaClass.name}}({{attrib.name}}Data);
+{{#if attrib.type.metaClass.isUserOwned}}
+         {{attrib.name}}._owner = {{lowercase ../class.name}}Data._owner;
+{{/if}}
+         await {{attrib.name}}.save();
+      }
+      {{attrib.name}}Id = {{attrib.name}}._id;
+  }
+  // Replace {{attrib.name}} with it's document Id
+  {{lowercase ../class.name}}Data.{{attrib.name}} = {{attrib.name}}Id;
+  {{/if}}
+
+  {{/each}}
+  return {{lowercase class.name}}Data;
+}
+
+{{/if~}}
+
+// Create a new {{lowercase class.name}}
+exports.create{{class.name}} = async (ctx) => {
+  try {
+{{#if class.entityAttribs.length}}
+    ctx.request.body._id = new mongoose.Types.ObjectId();
+{{/if}}
+{{#if class.isUserOwned}}
+    ctx.request.body._owner = ctx.state.user.id;
+{{/if}}
+    const {{lowercase class.name}}Data = 
+{{~#if class.entityAttribs.length}}
+ await exports.normalize{{class.name}}(ctx);
+{{else}}
+ ctx.request.body;
+{{/if}}
+    const {{lowercase class.name}} = new {{class.name}}({{lowercase class.name}}Data);
+    await {{lowercase class.name}}.save();
+    ctx.status = 201;
+    ctx.body = {{lowercase class.name}};
+  } catch (error) {
+    console.log(`Error creating {{lowercase class.name}}: ${error}`);
+    ctx.throw(400, `Invalid data: ${error}`);
+  }
+};
+
+// Update a {{lowercase class.name}} by ID
+exports.update{{class.name}} = async (ctx) => {
+  try {
+    const {{lowercase class.name}}Data = 
+{{~#if class.entityAttribs.length}}
+ await exports.normalize{{class.name}}(ctx);
+{{else}}
+ ctx.request.body;
+{{/if}}    
+{{#if class.isUserOwned }}
+    const q = addQueryRestrictions(ctx, {{{class.writePermissions}}}, "{{class.permissions.own}}", { _id: ctx.params.id });
+    // Do not alow changing the owner Id
+    delete {{lowercase class.name}}Data._owner;
+{{else}}
+    const q = { _id: ctx.params.id };  
+{{/if}}
+    const {{lowercase class.name}} = await {{class.name}}.findOneAndUpdate(q, {{lowercase class.name}}Data, { new: true });
+    if (!{{lowercase class.name}}) {
+      ctx.throw(404, '{{class.name}} not found');
+    }
+    ctx.body = {{lowercase class.name}};
+  } catch (error) {
+    console.log(`Error updating {{lowercase class.name}}: ${error}`);
+    ctx.throw(400, `Invalid ID or data: ${error}`);
+  }
+};
+
+// Delete a {{lowercase class.name}} by ID
+exports.delete{{class.name}} = async (ctx) => {
+  try {
+{{#if class.isUserOwned }}
+    const q = addQueryRestrictions(ctx, {{{class.writePermissions}}}, "{{class.permissions.own}}", { _id: ctx.params.id });
+{{else}}
+    const q = { _id: ctx.params.id };  
+{{/if}}
+    const {{lowercase class.name}} = await {{class.name}}.findOneAndDelete(q);
+    if (!{{lowercase class.name}}) {
+      ctx.throw(404, '{{class.name}} not found');
+    }
+    ctx.status = 204;
+  } catch (error) {
+    ctx.throw(400, 'Invalid ID');
+  }
+};

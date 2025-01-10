@@ -1,9 +1,0 @@
-##output {{#if class.doCrud}}property{{else}}ignore{{/if}} crudListMenuEntries
-
-  	{ onEnter: redirectAnonToLogin,
-  	  path: '/{{class.name}}List',
-  	  component: {{class.name}}List,
-  	  _menuLabel: '{{class.name}} list',
-  	  _displayOnMenu: () => isAuthenticated(){{#if class.isRoleRestricted}} && isInRole({{{class.stringifyRoleList}}}){{/if}},
-  	  _menuKey: '{{class.name}}'
-  	},

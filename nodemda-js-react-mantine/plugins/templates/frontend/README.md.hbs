@@ -1,0 +1,33 @@
+##output preserve
+{{model.name}} Front End
+==========
+
+{{model.name}} Front End is a web front end application written in React using the Mantine interface library.
+
+Development
+------
+
+The first step in the development process is to edit the UML model found in the `uml` directory.
+Create a class diagram according to the NodeMDA standards documented in the NodeMDA README.  Once
+the model has been completed, generate code using with NodeUML by selecting the "Generate code from UML"
+option in VSCode.
+
+Once that is complete, the generated code can be run from the developer desktop like so:
+
+1. Be sure your backend code is running on your desktop machine.
+
+2. Start the frontend server:
+
+```
+cd frontend
+
+npm install
+
+npm run start
+```
+
+
+4. Test and modify the code as needed:
+
+Navigate to http://localhost:3000 in your browser to view the application while running in development mode.
+

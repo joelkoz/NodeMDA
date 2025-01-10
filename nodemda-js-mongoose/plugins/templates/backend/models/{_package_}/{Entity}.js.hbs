@@ -1,0 +1,94 @@
+##output overwrite
+// This file was generated with NodeMDA. It will be overwritten if generated again.
+// Do not modify this file.
+//
+const mongoose = require('mongoose');
+{{#if class.isUserEntity}}
+const bcrypt = require('bcryptjs');
+{{/if}}
+
+{{#if (isNonEmptyArray class.embeddedClasses)}}
+//
+// Embedded classes
+//
+{{#each class.embeddedClasses as |embeddedClass|}}
+const {{lowercase embeddedClass.name}}Schema = new mongoose.Schema({
+{{#each embeddedClass.attributes as |attrib|}}  
+   {{attrib.jsIdentifierName}}: { type: 
+     {{~#if attrib.isArray}} [{{/if}} {{{attrib.mongooseType}}} {{~#if attrib.isArray}} ]{{/if~}}
+
+     {{~#if attrib.type.isEnum}}, enum: {{{attrib.type.jsOptionList}}} {{~/if~}}
+
+     {{~#if attrib.hasMinValue}}, min: {{{attrib.minValue}}} {{~/if~}}
+
+     {{~#if attrib.hasMaxValue}}, max: {{{attrib.maxValue}}} {{~/if~}}
+
+     , required: {{attrib.isRequired}} },
+{{/each}}  
+});
+
+{{/each}}
+{{/if}}
+
+const {{lowercase class.name}}Schema = new mongoose.Schema({
+{{#each class.attributes as |attrib|}}  
+  {{attrib.jsIdentifierName}}: { type: 
+
+     {{~#if attrib.isArray}} [{{/if}} {{{attrib.mongooseType}}} {{~#if attrib.isArray}} ]{{/if~}}
+
+     {{~#if attrib.type.isEnum}}, enum: {{{attrib.type.jsOptionList}}} {{~/if~}}
+
+     {{~#if attrib.hasMinValue}}, min: {{{attrib.minValue}}} {{~/if~}}
+
+     {{~#if attrib.hasMaxValue}}, max: {{{attrib.maxValue}}} {{~/if~}}
+
+     {{~#if attrib.hasIndex~}}
+     , index: true
+     {{~/if~}}
+
+     {{~#if attrib.isUnique~}}
+     , unique: true
+     {{~/if~}}
+
+     , required: {{attrib.isRequired}} },
+{{/each}}
+{{#if class.isUserOwned}}
+  _owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+{{/if}}
+}
+{{~#if class.virtuals.length~}}
+, {
+  toJSON: { virtuals: true },
+  toObject: { virtuals: true }
+}
+{{~/if~}}
+);
+
+{{#each class.virtuals as |vAttrib|}} 
+{{lowercase ../class.name}}Schema.virtual('{{vAttrib.name}}', {
+  ref: '{{vAttrib.type.metaClass.name}}',
+  localField: '_id',
+  foreignField: '{{vAttrib._schemaDbProp.foreignKeyField}}',
+  justOne: {{#if vAttrib.isArray}}false{{else}}true{{/if}}
+});
+
+{{/each}} 
+
+{{#if class.isUserEntity}}
+// Password hash middleware
+userSchema.pre('save', async function(next) {
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 10);
+  }
+  next();
+});
+
+// Method to compare password
+userSchema.methods.comparePassword = function(password) {
+  return bcrypt.compare(password, this.password);
+};
+
+{{/if}}
+const {{class.name}} = mongoose.model('{{class.name}}', {{lowercase class.name}}Schema);
+
+module.exports = {{class.name}};

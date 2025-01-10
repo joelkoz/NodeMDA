@@ -1,0 +1,26 @@
+{
+  "name": "nodemda-js-mongoose",
+  "version": "2.0.0",
+  "description": "NodeMDA plugin to generate persistent Javascript objects using MongooseJS to interface with MongoDB",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joelkoz/NodeMDA/tree/master/nodemda-mongoose-js"
+  },
+  "keywords": [
+    "nodemda",
+    "plugin",
+    "javascript",
+    "nodejs",
+    "mongoose",
+    "mongodb",
+    "code generator"
+  ],
+  "dependencies": {
+  },
+  "author": "Joel Kozikowski",
+  "license": "MIT"
+}

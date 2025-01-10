@@ -1,0 +1,113 @@
+NodeMDA 2.0:
+
+
+New directory structure of plugins:
+
+
+plugins
+|
++-_helpers
+|
++-_partials
+|
++-_mixin
+|
++-templates
+  |
+  +-backend
+    |
+    +-src
+      |
+      +-models
+      | |
+      | +-{_package_}
+      |   |
+      |   +-{Entity}-schema.js._hbs
+      |
+      +-routes
+        |
+        +-{_package_}
+          |
+          +-{Entity}-routes.js._hbs
+
+
+Files in _templates directory:
+  - {_package_} represents the directory path as defined by the UML package
+  - Files ending in "._hbs" are template files to be processed by NodeMDA
+    - The "._hbs" will be dropped from the resulting file name
+    - Characters in between { and } represent the stereotype name. If the name is suffixed with "_s", the "_s" will
+      be dropped to determine the actual stereotype name. All classes with that stereotype will have the
+      template applied.
+    - If the template does not explicitly specify the file location, the default file name will be:
+         {Entity} indicates any class with the {Entity} stereotype should have this template applied. The file name
+         will be the result of substituting {Entity} with "getOutputFileName(usePlural: boolean)" - a method on the 
+         ClassNode of NodeMDA. The default implementation returns the kebob case of the class name. the "usePlural"
+         parameter will be TRUE if the stereotype name was prefixed with "_s".  A mixin can override the definition
+         of getOutputFileName(usePlural).
+
+Add a new method named "pathToGrandma" to context that returns enough "../.." to get from the template's location up past {_package_}
+
+Add a new method named "pathToRoot" to context that returns enough "../.." to get to the root of the output directory
+
+
+----------------------------
+New index.js format of plugin:
+
+module.exports = {
+	type: 'templates',  // options are: templates,mixin,reader,stack
+	name: 'koa-rest',
+	desc: 'Exposes REST interface to Mongoose fronted entities'
+        version: 2.0,
+        contributes: [ "REST", "REST-koa" ],
+        requires: [ "entity-mongoose" ]
+};
+
+o NodeMDA checks for "version" property to be at least greater than 2.0
+o All "contributes" are put in a local array as each plugin is read in, as are the "requires"
+o Once all have been read in, NodeMDA checks to make sure each "requires" entry is found in "contributes"
+o type: "platform" is no longer a valid type. If it is found, it is a NodeMDA 1.0
+o type: "stack" will cause NodeMDA to "require" everything found in "dependencies" entry of package.json
+----------------------------
+
+nodemda-core.js
+
+New NodeMDA.options entry:
+
+NodeMDA.options.stack = [ "nodemda-nodeuml", "nodemda-koa-rest" ]
+
+New parameter to nodemda cli "--stack=nodemda-nodeuml,nodemda-koa-rest,etc"
+
+If any entry in this list is "stack", it will be replaced with the "dependencies" section of the plugin's package.json
+
+
+-----------------
+More needs:
+1. A way for individual plugins to do their own additional validation on the model (e.g. Check for "User" entity with required attributes)
+
+
+
+
+
+
+
+
+
+
+allFiles example:
+[
+  {
+    "virtualPath": "plugins/_helpers/camelCase.js",
+    "absolutePath": "/Users/Joel/Workspaces/nodejs/NodeMDA/nodemda-standards/plugins/_helpers/camelCase.js",
+    "fromModule": {
+      "type": "mixin",
+      "name": "standards",
+      "desc": "Implement NodeMDA standards such as basic data types, Association to Array Attribute conversion, and enumerations",
+      "version": 2,
+      "contributes": [
+        "NodeMDA-Standards"
+      ],
+      "requires": []
+    }
+  }
+]
+

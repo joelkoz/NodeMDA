@@ -1,0 +1,51 @@
+##output {{#if class.genCRUD}}overwrite{{else}}ignore{{/if}}
+// This file was generated with NodeMDA. It will be overwritten if generated again.
+// Do not modify this file.
+//
+import React, { useState } from 'react';
+import {{class.name}}Table from '{{class.relativeParentPrefix}}/components/{{class.packageDirPath}}{{class.name}}Table';
+import {{class.name}}Form from '{{class.relativeParentPrefix}}/components/{{class.packageDirPath}}{{class.name}}Form';
+import { Button } from '@mantine/core';
+
+const {{class.name}}Page = () => {
+  const [selected{{class.name}}Id, setSelected{{class.name}}Id] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+
+  const handleSave = () => {
+    setSelected{{class.name}}Id(null);
+    setShowForm(false);
+  };
+
+  const handleCancel = () => {
+    setSelected{{class.name}}Id(null);
+    setShowForm(false);
+  };
+
+  const handleCreate = () => {
+    setSelected{{class.name}}Id(null);
+    setShowForm(true);
+  };
+
+  const handleEdit = (id) => {
+    setSelected{{class.name}}Id(id);
+    setShowForm(true);
+  };
+
+  return (
+    <div className="CrudPage">
+      <h1>{{class.pluralName}}</h1>
+      {!showForm && (
+        <Button onClick={handleCreate} mb="md">
+          Create New {{class.name}}
+        </Button>
+      )}
+      {showForm ? (
+        <{{class.name}}Form {{lowercase class.name}}Id={selected{{class.name}}Id} onSave={handleSave} onCancel={handleCancel} />
+      ) : (
+        <{{class.name}}Table onEdit={handleEdit} />
+      )}
+    </div>
+  );
+};
+
+export default {{class.name}}Page;

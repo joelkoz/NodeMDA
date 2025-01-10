@@ -1,0 +1,64 @@
+##output overwrite
+// This file was generated with NodeMDA. It will be overwritten if generated again.
+// Do not modify this file.
+//
+import React, { useState, useEffect, useContext } from 'react';
+import { BrowserRouter as Router, Route, Routes, NavLink } from 'react-router-dom';
+{{#each model.entities as |entity|}}
+{{#if entity.genCRUD}}
+import {{entity.name}}Page from './pages/{{entity.packageDirPath}}{{entity.name}}Page';
+{{/if}}
+{{/each}}
+import LoginPage from './pages/LoginPage';
+import ProtectedRoute from './components/ProtectedRoute';
+import { UserContext } from './auth/UserContext';
+
+function App() {
+  const { user, isAuthenticated } = useContext(UserContext);
+
+  return (
+      <Router>
+        <nav style={ { padding: '10px', backgroundColor: '#f8f9fa', borderBottom: '1px solid #ddd' } }>
+{{#each model.entities as |entity|}}
+{{#if entity.genCRUD}}
+              { user.hasRole({{{entity.readPermissions}}}, {{{entity.ownPermission}}}) && (
+              <NavLink
+                to="/{{lowercase entity.pluralName}}"
+                style={ { margin: '0 10px', textDecoration: 'none', color: '#007bff' } }
+                activestyle={ { fontWeight: 'bold', color: 'darkblue' } }
+              >
+                {{entity.pluralName}}
+              </NavLink>
+              )}
+{{/if}}              
+{{/each}}              
+          {!isAuthenticated && (
+            <NavLink
+              to="/login"
+              style={ { margin: '0 10px', textDecoration: 'none', color: '#007bff' } }
+              activestyle={ { fontWeight: 'bold', color: 'darkblue' } }
+            >
+              Login
+            </NavLink>
+          )}
+        </nav>
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+{{#each model.entities as |entity|}}
+{{#if entity.genCRUD}}    
+          <Route
+            path="/{{lowercase entity.pluralName}}"
+            element={
+              <ProtectedRoute allowedRoles={ {{{entity.readPermissions}}} } ownerRole={{{entity.ownPermission}}}>
+                <{{entity.name}}Page />
+              </ProtectedRoute>
+            }
+          />
+{{/if}}          
+{{/each}}          
+        </Routes>
+      </Router>
+  );
+}
+
+export default App;
