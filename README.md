@@ -16,7 +16,7 @@ simplified version of the *Model Driven Architecture* methodology. By using a sm
 is particularly effective for the generation of backend artifacts like database entities and 
 remote service interfaces.
 
-NodeMDA is a code generation *_engine_* that uses "plugin" architecture driven
+NodeMDA is a code generation *_engine_* that uses a "plugin" architecture driven
 by [Handlebars templates](http://handlebarsjs.com/), allowing you to easily modify 
 the code generator results to fit your needs.
 While the NodeMDA engine and its plugins are written in Javascript and is executed
@@ -25,7 +25,8 @@ any language or software stack.
 
 NodeMDA focuses on generating code from UML *Class Diagrams*.  From this one diagram type, 
 NodeMDA can create virtually all of the boilerplate code to get a 
-backend system up and running, including database creation and client service interfaces. 
+backend system up and running, including database creation and client service interfaces,
+as well as front end user interfaces for CRUD editing of the database entities. 
 
 
 Sub-projects in this repository
@@ -38,7 +39,7 @@ deployable using Docker, see the README in the "Full stack code set" below.
 - [NodeMDA code generation engine](./nodemda)
 - [Model reader for NodeUML files](./nodemda-nodeuml)
 - [Model reader for StarUML files](./nodemda-staruml)
-- [Full stack code set for React, Koa, and MongoDB](./nodemda-koa-react)
+- [Full stack code set for React, Koa, and MongoDB](./nodemda-stack-react-koa-mongo)
 
 ---
 ### Do you find my work useful?
