@@ -1,8 +1,0 @@
-node_modules
-npm-debug.log
-Dockerfile
-docker-compose.yml
-.dockerignore
-.history
-.env
-default.env
