@@ -24,7 +24,7 @@
     "nodemda-js-rest-koa": "^2.0.1",
     "nodemda-js-react-mantine": "^2.0.0",
     "nodemda-js-docker": "^2.0.1",
-    "nodemda-standards": "^2.0.0"
+    "nodemda-standards": "^2.0.1"
   },
   "author": "Joel Kozikowski",
   "license": "MIT"
