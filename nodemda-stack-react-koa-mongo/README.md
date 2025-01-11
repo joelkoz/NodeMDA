@@ -24,12 +24,11 @@ It generates a full application stack with the following features:
 
 This stack is built using the following NodeMDA plugins:
 
-- [js-mongoose](https://github.com/joelkoz/NodeMDA/nodemda-js-mongoose/README.md)
-- [js-rest-koa](https://github.com/joelkoz/NodeMDA/nodemda-js-mongoose/README.md)
-- [js-react-mantine](https://github.com/joelkoz/NodeMDA/nodemda-js-mongoose/README.md)
-- [js-docker](https://github.com/joelkoz/NodeMDA/nodemda-js-mongoose/README.md)
-- [standards](https://github.com/joelkoz/NodeMDA/nodemda-js-mongoose/README.md)
-
+- [js-mongoose](https://github.com/joelkoz/NodeMDA/tree/master/nodemda-js-mongoose)
+- [js-rest-koa](https://github.com/joelkoz/NodeMDA/tree/master/nodemda-js-rest-koa)
+- [js-react-mantine](https://github.com/joelkoz/NodeMDA/tree/master/nodemda-js-react-mantine)
+- [js-docker](https://github.com/joelkoz/NodeMDA/tree/master/nodemda-js-docker)
+- [standards](https://github.com/joelkoz/NodeMDA/tree/master/nodemda-standards)
 ---
 ### Do you find my work useful?
 
