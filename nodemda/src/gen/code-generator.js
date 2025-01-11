@@ -73,82 +73,105 @@ class FileEntry {
 		ctxGen = new GeneratorContext();
 		const processedPlugins = new Set();
 
-		// Helper function to load package.json
-		function loadPackageJson(packageName) {
-			try {
-				const packagePath = require.resolve(packageName);
-				const packageDir = path.dirname(packagePath);
-				const packageJsonPath = path.join(packageDir, 'package.json');
-				return JSON.parse(fsx.readFileSync(packageJsonPath, 'utf8'));
-			} catch (error) {
-				console.warn(`Warning: Could not load package.json for ${packageName}. Skipping.`);
+		// Try to resolve `packageName` using fallback search paths
+		function tryResolve(packageName, searchPaths = []) {
+		  // First, try normal resolution from the calling script’s node_modules
+		  try {
+			return require.resolve(packageName);
+		  } catch (err) {
+			// Then, try using Node’s “paths” option if any custom paths are given
+			if (searchPaths.length) {
+			  try {
+				return require.resolve(packageName, { paths: searchPaths });
+			  } catch (err2) {
 				return null;
+			  }
 			}
+			return null;
+		  }
 		}
-
-		// Helper function to process a single plugin
-		function processPlugin(pluginName) {
-			if (processedPlugins.has(pluginName)) {
-				return; // Skip already processed plugins
-			}
-
-			processedPlugins.add(pluginName);
-
-			try {
-				let pluginFileName = pluginName;
-				if (!pluginName.startsWith('nodemda-')) {
-					pluginFileName = 'nodemda-' + pluginName;
-				}
-				const moduleObject = require(pluginFileName);
-				const packageJson = loadPackageJson(pluginFileName);
-
-				if (!moduleObject || !packageJson) return;
-
-				// Validate required properties
-				if (!moduleObject.type || !moduleObject.name || !moduleObject.version) {
-					console.warn(`Warning: ${pluginName} is missing required properties. Skipping.`);
-					return;
-				}
-
-				// Validate type
-				const validTypes = ['templates', 'mixin', 'stack']; // 'reader' not valid for code generation
-				if (!validTypes.includes(moduleObject.type)) {
-					console.warn(`Warning: ${pluginName} has an invalid type "${moduleObject.type}". Skipping.`);
-					return;
-				}
-
-				const packagePath = require.resolve(pluginFileName);
-				const pluginDefinition = new PluginDefinition(pluginFileName, packagePath, moduleObject);
-
-				// Add contributions
-				if (Array.isArray(moduleObject.contributes)) {
-					ctxGen.contributes.push(...moduleObject.contributes);
-				}
-
-				// Add requirements
-				if (Array.isArray(moduleObject.requires)) {
-					ctxGen.requires.push(...moduleObject.requires);
-				}
-
-				winston.info("   Using plugin: " + pluginFileName);
-
-				// If type is "stack", process its dependencies
-				if (moduleObject.type === 'stack' && packageJson.dependencies) {
-					Object.keys(packageJson.dependencies).forEach(processPlugin);
-				}
-
-				// Add plugin to ctxGen
-				ctxGen.plugins.push(pluginDefinition);
-			} catch (error) {
-				console.warn(`Warning: Error processing ${pluginName}: ${error}`);
-			}
+	  
+		// Load a package.json by name + optional extra paths to search
+		function loadPackageJson(packageName, searchPaths = []) {
+		  const resolvedPath = tryResolve(packageName, searchPaths);
+		  if (!resolvedPath) {
+			console.warn(`Warning: Could not resolve ${packageName}. Skipping.`);
+			return null;
+		  }
+		  const packageDir = path.dirname(resolvedPath);
+		  const packageJsonPath = path.join(packageDir, 'package.json');
+	  
+		  try {
+			return JSON.parse(fsx.readFileSync(packageJsonPath, 'utf8'));
+		  } catch (error) {
+			console.warn(`Warning: Could not load package.json at ${packageJsonPath}. Skipping.`);
+			return null;
+		  }
 		}
-
+	  
+		function processPlugin(pluginName, searchPaths = []) {
+		  if (processedPlugins.has(pluginName)) return;
+		  processedPlugins.add(pluginName);
+	  
+		  // Prepend "nodemda-" if missing
+		  let pluginFileName = pluginName.startsWith('nodemda-')
+			? pluginName
+			: 'nodemda-' + pluginName;
+	  
+		  const packageJson = loadPackageJson(pluginFileName, searchPaths);
+		  if (!packageJson) return; // Couldn’t find / read package.json
+	  
+		  // Actually load the module’s main entry
+		  let moduleObject = null;
+		  const resolvedPath = tryResolve(pluginFileName, searchPaths);
+		  if (!resolvedPath) {
+			console.warn(`Warning: Could not require ${pluginFileName}. Skipping.`);
+			return;
+		  }
+		  try {
+			moduleObject = require(resolvedPath);
+		  } catch (error) {
+			console.warn(`Warning: Error requiring ${pluginFileName}: ${error}`);
+			return;
+		  }
+	  
+		  // Validate module
+		  if (!moduleObject.type || !moduleObject.name || !moduleObject.version) {
+			console.warn(`Warning: ${pluginFileName} is missing required properties. Skipping.`);
+			return;
+		  }
+		  const validTypes = ['templates', 'mixin', 'stack'];
+		  if (!validTypes.includes(moduleObject.type)) {
+			console.warn(`Warning: ${pluginFileName} has invalid type "${moduleObject.type}". Skipping.`);
+			return;
+		  }
+	  
+		  const pluginDefinition = new PluginDefinition(pluginFileName, resolvedPath, moduleObject);
+		  if (Array.isArray(moduleObject.contributes)) {
+			ctxGen.contributes.push(...moduleObject.contributes);
+		  }
+		  if (Array.isArray(moduleObject.requires)) {
+			ctxGen.requires.push(...moduleObject.requires);
+		  }
+		  winston.info('   Using plugin: ' + pluginFileName);
+		  ctxGen.plugins.push(pluginDefinition);
+	  
+		  // If type is "stack", process its dependencies
+		  if (moduleObject.type === 'stack' && packageJson.dependencies) {
+			// The path to the plugin’s own node_modules
+			const stackDir = path.dirname(resolvedPath);
+			const nodeModulesDir = path.join(stackDir, 'node_modules');
+			const newSearchPaths = [nodeModulesDir];
+	  
+			for (const dep of Object.keys(packageJson.dependencies)) {
+			  processPlugin(dep, newSearchPaths);
+			}
+		  }
+		}
+	  
 		// Process each plugin in the initial list
-		pluginList.forEach(processPlugin);
-	}
-
-
+		pluginList.forEach(name => processPlugin(name));
+	  }	
 
 	function validateContext() {
 		let isValid = true;
