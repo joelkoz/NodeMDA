@@ -510,9 +510,23 @@ var MySupport = {};
 
 (function() {
 
-  // All four methods specified here are OPTIONAL. A given support script may contain
-  // all, none, or any combination of them.
+    // All five methods specified here are OPTIONAL. A given support script may contain
+    // all, none, or any combination of them.
     
+
+   /**
+    * Called just after the model has been read into the metaModel.
+    * Used to check the metaModel and ensure all modeling conventions
+    * that are required by this plugin have been met.
+    * 
+    * @param {NodeMDA.Meta.Model} metaModel 
+    * @returns {boolean} TRUE if the model passes validation, FALSE otherwise
+    */
+   MySupport.validateModel = function (metaModel) {
+       return true;
+   };
+
+
   /**
    * Called before the specified stereotype is used for
    * the first time.
@@ -520,9 +534,9 @@ var MySupport = {};
    * @param {HandlebarsContext} context
    * @param {NodeMDA.Meta.Stereotype} stereotype
    */
-	MySupport.initStereotype = function(context, stereotype) {
+   MySupport.initStereotype = function(context, stereotype) {
 
-	};
+   };
 
 	
   /**
@@ -531,9 +545,9 @@ var MySupport = {};
    * @param {HandlebarsContext} context
    * @param {NodeMDA.Meta.Class} metaClass
    */
-	MySupport.initClass = function(context, metaClass) {
+   MySupport.initClass = function(context, metaClass) {
 		// 
-	};
+   };
 
 
   /**
@@ -542,9 +556,9 @@ var MySupport = {};
    * 
    * @param {HandlebarsContext} context
    */
-	MySupport.initPlatform = function(context) {
+   MySupport.initPlatform = function(context) {
 	    
-	};
+   };
 	
 	
   /**
@@ -553,9 +567,8 @@ var MySupport = {};
    * 
    * @param {HandlebarsContext} context
    */
-	MySupport.initProjectTemplates = function(context) {
-	};
-	
+   MySupport.initProjectTemplates = function(context) {
+   };
 	
 })();
 

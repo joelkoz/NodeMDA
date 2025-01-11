@@ -3,7 +3,7 @@
 const NodeMDA = require("nodemda");
 const pluralize = require('pluralize');
 const camelCase = require('../_helpers/camelCase');
-
+const winston = require("winston");
 
 /*
  * StandardSupport.js
@@ -101,7 +101,82 @@ var StandardSupport = {};
     		return "";
     	}
     };
-    
+
+
+	StandardSupport.validateModel = function(metaModel) {
+
+		const userClass = metaModel.classes.find((cls) => cls.name === "User");
+		if (!userClass) {
+			winston.error("Model does not contain a User class.");
+			return false;
+		}
+
+		if (userClass.getPackageName()) {
+			winston.error("User class is in a package - it must be in root package.");
+			return false;
+		}
+
+		let hasUsername = false;
+		let hasPassword = false;
+		let hasRoles = false;
+
+		userClass.attributes.forEach((attr) => {
+			if (attr instanceof NodeMDA.Meta.Attribute) {
+				
+				switch (attr.name) {
+					case "username":
+						if (attr.typeName !== "String") {
+							winston.error("User class 'username' attribute must be of type String.");
+							return false;
+						}
+						hasUsername = true;
+						break;
+
+					case "password":
+						if (attr.typeName !== "Password") {
+							winston.error("User class 'password' attribute must be of type Password.");
+							return false;
+						}
+						hasPassword = true;
+						break;
+
+					case "roles":
+						if (attr.typeName !== "SystemRole") {
+							winston.error("User class 'roles' attribute must be of type SystemRole.");
+							return false;
+						}
+						if (!attr.isArray) {
+							winston.error("User class 'roles' attribute must be an array.");
+							return false;
+						}
+						hasRoles = true;
+						break;
+
+					default:
+				} // switch
+			}
+			else {
+				winston.error("User class contains an attribute that is not NodeMDA.Meta.Attribute");
+				return false;
+			}
+		});
+
+		if (!hasUsername) {	
+			winston.error("User class must have a 'username' attribute.");
+			return false;
+		}
+		else if (!hasPassword) {
+			winston.error("User class must have a 'password' attribute.");
+			return false;
+		}
+		else if (!hasRoles) {
+			winston.error("User class must have a 'roles' attribute.");
+			return false;
+		}
+
+		return true;
+	}	
+
 
 	StandardSupport.initPlatform = function(context) {
 

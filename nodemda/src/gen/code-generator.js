@@ -662,6 +662,45 @@ class FileEntry {
 	};
 	
 	
+    var validateModel = function(metaModel, projectScripts) {
+
+		let validationStatus = {
+			warnCount: 0,
+			errorCount: 0
+		}
+
+		// First, model integrity validation...
+		if (NodeMDA.Meta.validate(metaModel, validationStatus)) {
+			// Next, stack convention validation...
+			projectScripts.forEach(function(s) {
+				var script = requireScript(s);
+				if (typeof(script.validateModel) === "function") {
+					if (!script.validateModel(metaModel)) {
+						winston.error("Model failed validation by script " + s);
+						validationStatus.errorCount++;
+					}
+				}
+			});
+		}
+
+		var logLevel;
+		if (validationStatus.errorCount > 0) {
+			logLevel = "error";
+		}
+		else if (validationStatus.warnCount > 0) {
+			logLevel = "warn";
+		}
+		else {
+			logLevel = "info";
+		}
+		
+		winston.log(logLevel, "Validation completed: " + validationStatus.errorCount + " errors, " + validationStatus.warnCount + " warnings");
+
+
+		return (validationStatus.errorCount === 0);
+	}
+
+
 	mda.gen = function(modelFileName) {
 		
 		winston.info("Starting code generation.");
@@ -672,23 +711,30 @@ class FileEntry {
 		if (!validateContext()) {
 			return;
 		}
-		
 
 		winston.info("Discovering plugin contents...");
 		getPluginFiles();
+
+		var scriptCount = 0;
+		var projectScripts = getFilesForPath("_mixin", ".js");
+		winston.info("Loading support scripts...");
+		projectScripts.forEach(function(s) {
+		    scriptCount++;
+			var script = requireScript(s);
+		});	
+
 
 		winston.info("Reading meta model...");
 		var metaModel = MetaModel.Reader.getMeta(modelFileName);
 
 		global._nodemda_runtime_model_ = metaModel;
 
-		if (!mda.Meta.validate(metaModel)) {
-			// We failed validation, just just stop processing.
+
+		winston.info("Validating model...");
+		if (!validateModel(metaModel, projectScripts)) {
 			return;
 		}
-		
-		var handlebarsContext = { model: metaModel, options: NodeMDA.Options };
-		
+
 		// Auto-load any Handlebar partials...
 		winston.debug("Loading helpers...");
 		loadHelpers();
@@ -696,11 +742,10 @@ class FileEntry {
 		winston.debug("Loading partials...");
 		loadPartials();
 
-		winston.info("Loading and initializing platform support scripts...");
-		var scriptCount = 0;
-		var projectScripts = getFilesForPath("_mixin", ".js");
+		var handlebarsContext = { model: metaModel, options: NodeMDA.Options };
+
+		winston.info("Initializing platform support scripts...");
 		projectScripts.forEach(function(s) {
-		    scriptCount++;
 			var script = requireScript(s);
 			if (typeof(script.initPlatform) === "function") {
 			    script.initPlatform(handlebarsContext);

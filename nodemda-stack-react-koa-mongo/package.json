@@ -1,6 +1,6 @@
 {
   "name": "nodemda-stack-react-koa-mongo",
-  "version": "2.0.2",
+  "version": "2.1.0",
   "description": "Full stack application with React front end and Koa + MongoDB backend",
   "main": "index.js",
   "scripts": {
@@ -24,7 +24,7 @@
     "nodemda-js-rest-koa": "^2.0.2",
     "nodemda-js-react-mantine": "^2.0.0",
     "nodemda-js-docker": "^2.0.1",
-    "nodemda-standards": "^2.0.1"
+    "nodemda-standards": "^2.1.0"
   },
   "author": "Joel Kozikowski",
   "license": "MIT"

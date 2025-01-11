@@ -30,30 +30,22 @@ var winston = require('winston');
  * sure the meta model is not missing any critical parts.
  */
 (function(meta){
-
-	var warnCount = 0;
-	var errorCount = 0;
 	
-	meta.validate = function(metaModel) {
+	meta.validate = function(metaModel, validationStatus) {
 
-		warnCount = 0;
-		errorCount = 0;
 		var msg;
-		
-		winston.info("Validating model...");
-	
 		
 		var logWarn = function(typeName, metaObj, msg) {
 			msg = "WARN: " + typeName + " " + metaObj._name + msg;
 			winston.warn(msg);
-			warnCount++;
+			validationStatus.warnCount++;
 		};
 
 		
 		var logError = function(typeName, metaObj, msg) {
 			msg = "ERROR: " + typeName + " " + metaObj._name + msg;
 			winston.error(msg);
-			errorCount++;
+			validationStatus.errorCount++;
 		};
 		
 		
@@ -64,11 +56,6 @@ var winston = require('winston');
 
 		
 		metaModel.classes.forEach(function(metaClass) {
-		
-			if (metaClass.getPackageName().length === 0) {
-				logWarn("Class", metaClass, " has no package specified. Code will be in root of project.");
-			}
-			
 			
 			if (metaClass.stereotypes.length === 0) {
 				logWarn("Class", metaClass, " has no stereotypes. No class code will be generated.");
@@ -95,20 +82,8 @@ var winston = require('winston');
 			
 		});
 
-		var logLevel;
-		if (errorCount > 0) {
-			logLevel = "error";
-		}
-		else if (warnCount > 0) {
-			logLevel = "warn";
-		}
-		else {
-			logLevel = "info";
-		}
-		
-		winston.log(logLevel, "Validation completed: " + errorCount + " errors, " + warnCount + " warnings");
-		
-		return (errorCount === 0);
+	
+		return (validationStatus.errorCount === 0);
 		
 	};
 	
