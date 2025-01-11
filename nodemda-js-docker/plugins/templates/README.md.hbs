@@ -34,10 +34,13 @@ from the root project directory:
 ```
 docker-compose build
 
+cp default.env .env
+
 docker-compose up -d
 ```
+You can then navigate to http://localhost:3000 in your browser to view the application.
 
-The docker version includes it's own copy of MongoDB.  The backend server is served with nginx.
+The docker image includes it's own copy of MongoDB.  The backend server is served with nginx.
 
 You can rebuild just the backend or just the frontend with one of these Docker commands:
 

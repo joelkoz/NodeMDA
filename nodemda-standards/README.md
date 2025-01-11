@@ -70,6 +70,11 @@ The general strategy for creating your model is as follows:
 1. Populate your classes with attributes and/or methods, making sure to specify a Datatype for
 your attributes and method parameters.  Datatypes used MUST be one of the standard data types listed above.
 
+1. There should be one class named `User` with the stereotype `Entity` in the root package of the model (i.e. the class
+   should not be the child of a package). This `User` class must have AT LEAST the following two attributes:
+   - `username` with a data type of `String` and a multiplicity of '1'
+   - `password` with a data type of `Password` and a multiplicity of '1'
+
 1. You can add an Enumeration datatype to your model in one of two ways: 
    - Add an "Enumeration" object that is native to your UML modeling system and populate it with Enumeration Literals
    - Add a class to your model and use the "Enumeration" stereotype. In this case, each attribute you define will be used as one
@@ -121,6 +126,8 @@ your models clear.
 
 
 ## Security
+
+1. It is expected that there is a class named `User` with a stereotype of `Entity` in the root package of the model.
 
 1. Security is handled using a role based system.  There are three implied roles in the system: AdminRole, UserRole, and GuestRole. Any
 authenticated user has the UserRole.  Unauthenticated users have the GuestRole.  The AdminRole is reserved for system administrators.

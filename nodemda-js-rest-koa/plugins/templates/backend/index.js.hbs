@@ -13,7 +13,7 @@ const loginRoutes = require('./routes/login');
 {{#each entityRouteImport as |routeImport|}}
 {{{routeImport}}}
 {{/each}}
-const User = require("./models/user.js")
+const User = require("./models/User.js")
 const { jwtMiddleware } = require('./config/auth');
 
 const app = new Koa();
