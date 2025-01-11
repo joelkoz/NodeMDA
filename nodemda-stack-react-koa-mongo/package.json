@@ -1,6 +1,6 @@
 {
   "name": "nodemda-stack-react-koa-mongo",
-  "version": "2.1.0",
+  "version": "2.1.1",
   "description": "Full stack application with React front end and Koa + MongoDB backend",
   "main": "index.js",
   "scripts": {
