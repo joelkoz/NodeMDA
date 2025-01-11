@@ -2,9 +2,9 @@
 // This file was generated with NodeMDA. It will be overwritten if generated again.
 // Do not modify this file.
 //
-const {{class.name}} = require('{{class.relativeParentPrefix}}/models/{{class.packageDirPath}}{{lowercase class.name}}');
+const {{class.name}} = require('{{class.relativeParentPrefix}}/models/{{class.packageDirPath}}{{class.name}}');
 {{#each class.entityAttribs as |attrib|}}
-const {{attrib.type.metaClass.name}} = require('{{../class.relativeParentPrefix}}/models/{{attrib.type.metaClass.packageDirPath}}{{lowercase attrib.type.metaClass.name}}');
+const {{attrib.type.metaClass.name}} = require('{{../class.relativeParentPrefix}}/models/{{attrib.type.metaClass.packageDirPath}}{{attrib.type.metaClass.name}}');
 {{/each}}
 {{#if class.entityAttribs.length}}
 const mongoose = require('mongoose');

@@ -1,6 +1,6 @@
 {
   "name": "nodemda-js-rest-koa",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "NodeMDA plugin to generate REST access to persistent Javascript entities",
   "main": "index.js",
   "scripts": {
