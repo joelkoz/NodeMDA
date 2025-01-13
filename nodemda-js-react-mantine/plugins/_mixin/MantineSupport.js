@@ -63,14 +63,6 @@ var MantineSupport = {};
 						return this.jsDefaultValue;
 				   },
 
-				   function visibleToForm() {
-					  return this.isPublic && !this.isTaggedAs('uiExclude');
-				   },
-
-				   function visibleToTable() {
-					  return this.isTaggedAs('uiTableColumn');
-				   },
-
 				   function useArrayEditor() {
 					   return this.isArray && !this.type.isEnum;
 				   }
@@ -78,92 +70,9 @@ var MantineSupport = {};
 
 			],
 
-			onClass: { 
-				get: [
-					/**
-					* Returns a list of all attributes should be included
-					* on any input forms generated for this class.
-					*/ 
-					function formAttribs() {
-						let attribs = [];
-
-						this.attributes.forEach(function (attrib) {
-							if (attrib.visibleToForm) {
-								attribs.push(attrib);
-							}
-						});
-
-						this.virtuals.forEach(function (attrib) {
-							if (attrib.visibleToForm) {
-								attribs.push(attrib);
-							}
-						});
-
-						return attribs;
-					},
-
-					/**
-					* Returns a list of all attributes should be included
-					* on any table generated for this class.
-					*/
-					function tableAttribs() {
-						let attribs = [];
-
-						this.attributes.forEach(function (attrib) {
-							if (attrib.visibleToTable) {
-								attribs.push(attrib);
-							}
-						});
-
-						return attribs;
-					},
-
-				] 
-			},
-
 		}); // end mixin
 
-		// Make sure there are attributes in each Entity class that are tagged as
-		// "uiTableColumn".  If NO attributes have the explicit tag, then ALL
-		// attributes get the tag.
-		model.classes.forEach(function (metaClass) {
-			if (metaClass.stereotypeName === 'Entity') {
-
-				// Count the visibleToTable attributes
-				let visibleCount = 0;
-				let invisibleCount = 0;
-				metaClass.attributes.forEach(function (attrib) {
-					if (attrib.visibleToTable) {
-						visibleCount++;
-					}
-					else {
-						invisibleCount++;
-					}
-				});
-
-				// If there are NO explicit visibleToTable attributes, then
-				// default to ALL primative types with multiplicity of 1 that
-				// are visibleToForm
-				if (visibleCount === 0) {
-					invisibleCount = 0;
-					metaClass.attributes.forEach(function (attrib) {
-						if (attrib.visibleToForm && !attrib.isMany && !attrib.isObject) {
-							attrib.addTag(new NodeMDA.Meta.Tag("uiTableColumn", true));
-							visibleCount++;
-						}
-						else {
-							invisibleCount++;
-						}
-					});
-				}
-
-				metaClass.tableColumnsVisible = visibleCount;
-				metaClass.tableColumnsInvisible = invisibleCount;
-			}
-		});
-
 	};
-
 	
 })();
 

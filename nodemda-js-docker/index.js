@@ -1,5 +1,5 @@
 module.exports = {
-	type: 'mixin',
+	type: 'templates',
 	name: 'js-docker',
 	desc: 'Create Dockerfiles for NodeJS frontends and backends',
 	version: 2.0,

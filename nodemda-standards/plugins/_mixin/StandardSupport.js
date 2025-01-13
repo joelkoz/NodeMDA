@@ -214,10 +214,6 @@ var StandardSupport = {};
 						return this.name;
    					},
 
- 				    function singularName() {
-						return pluralize(this.name, 1);
-					},
-
    					function schemaDbProperties() {
 
    						if (this.isObject) {
@@ -267,8 +263,15 @@ var StandardSupport = {};
 						}
 
 						return false;
-   					}
+   					},
 
+					   function visibleToForm() {
+						return this.isPublic && !this.isTaggedAs('uiExclude');
+					 },
+  
+					 function visibleToTable() {
+						return this.isTaggedAs('uiTableColumn');
+					 }
 
 				]},
 			     
@@ -313,10 +316,6 @@ var StandardSupport = {};
 				     */
 					function jsPackageName() {
 	    	   			return StandardSupport.jsPathToIdentifier(this.packageName);
-					},
-
-					function pluralName() {
-						return pluralize(this.name);
 					},
 
 
@@ -437,7 +436,72 @@ var StandardSupport = {};
 					// TRUE if REST API code should be generated
 					function genREST() {
 						return !this.isPrivate && !this.getTagValue('noREST');
-					}
+					},
+
+					/**
+					* Returns a list of all attributes should be included
+					* on any input forms generated for this class.
+					*/ 
+					function formAttribs() {
+						let attribs = [];
+
+						this.attributes.forEach(function (attrib) {
+							if (attrib.visibleToForm) {
+								attribs.push(attrib);
+							}
+						});
+
+						this.virtuals.forEach(function (attrib) {
+							if (attrib.visibleToForm) {
+								attribs.push(attrib);
+							}
+						});
+
+						return attribs;
+					},
+
+					/**
+					* Returns a list of all attributes should be included
+					* on any table generated for this class.
+					*/
+					function tableAttribs() {
+						let attribs = [];
+
+						this.attributes.forEach(function (attrib) {
+							if (attrib.visibleToTable) {
+								attribs.push(attrib);
+							}
+						});
+
+						return attribs;
+					},
+
+					/**
+					* Returns a list of all attributes that have a data type that
+					* is an entity class
+					*/ 
+					function entityAttribs() {
+
+						let attribs = [];
+
+						this.attributes.forEach(function (attrib) {
+							if (attrib.isEntity) {
+								attribs.push(attrib);
+							}
+						});
+
+						this.virtuals.forEach(function (attrib) {
+							if (attrib.isEntity) {
+								attribs.push(attrib);
+							}
+						});
+
+						return attribs;
+					},
+                    
+					function isUserEntity() {
+						return this.stereotypeName === 'Entity' && this.name === 'User';
+					},
 
 				],
 
@@ -564,6 +628,15 @@ var StandardSupport = {};
 				    	
 				    	return lineList;
 					},
+
+					function singularName() {
+						return pluralize(this.name, 1);
+					},
+					
+					function pluralName() {
+						return pluralize(this.name);
+					},
+
 				],
 			},
 		}); // end mixin
@@ -646,12 +719,54 @@ var StandardSupport = {};
 		});
 
 
+		// Make sure there are attributes in each Entity class that are tagged as
+		// "uiTableColumn".  If NO attributes have the explicit tag, then ALL
+		// attributes get the tag.
+		model.classes.forEach(function (metaClass) {
+			if (metaClass.stereotypeName === 'Entity') {
+
+				// Count the visibleToTable attributes
+				let visibleCount = 0;
+				let invisibleCount = 0;
+				metaClass.attributes.forEach(function (attrib) {
+					if (attrib.visibleToTable) {
+						visibleCount++;
+					}
+					else {
+						invisibleCount++;
+					}
+				});
+
+				// If there are NO explicit visibleToTable attributes, then
+				// default to ALL primative types with multiplicity of 1 that
+				// are visibleToForm
+				if (visibleCount === 0) {
+					invisibleCount = 0;
+					metaClass.attributes.forEach(function (attrib) {
+						if (attrib.visibleToForm && !attrib.isMany && !attrib.isObject) {
+							attrib.addTag(new NodeMDA.Meta.Tag("uiTableColumn", true));
+							visibleCount++;
+						}
+						else {
+							invisibleCount++;
+						}
+					});
+				}
+
+				metaClass.tableColumnsVisible = visibleCount;
+				metaClass.tableColumnsInvisible = invisibleCount;
+			}
+		});
+
+
 		// Finally, find every class that is marked with the "Entity" stereotype and
         // change any attrributes that reference the enumeration class into the
-		// enumeration data type.
+		// enumeration data type. Also, make sure the dbSchema values are
+		// properly set.
 		model.classes.forEach(function (metaClass) {
 			if (metaClass.stereotypeName === 'Entity') {
 				metaClass.attributes.forEach(function (attrib) {
+					let _ = attrib.schemaDbProperties; // Call to make sure object values are populated.
 					if (attrib.isObject) {
 						let attribClass = attrib.type.metaClass;
 						if (attribClass && attribClass.isEnumeration) {

@@ -98,35 +98,8 @@ var MongooseSupport = {};
 						});
 
 						return embedded;
-					},
+					}
 
-
-					/**
-					* Returns a list of all attributes that have a data type that
-					* is an entity class
-					*/ 
-					function entityAttribs() {
-
-						let attribs = [];
-
-						this.attributes.forEach(function (attrib) {
-							if (attrib.isEntity) {
-								attribs.push(attrib);
-							}
-						});
-
-						this.virtuals.forEach(function (attrib) {
-							if (attrib.isEntity) {
-								attribs.push(attrib);
-							}
-						});
-
-						return attribs;
-					},
-                    
-					function isUserEntity() {
-						return this.stereotypeName === 'Entity' && this.name === 'User';
-					},
                 ] 
             },
 

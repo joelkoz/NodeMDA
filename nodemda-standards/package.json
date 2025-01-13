@@ -1,6 +1,6 @@
 {
   "name": "nodemda-standards",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Implement NodeMDA standards such as basic data types, Association to Array Attribute conversion, and enumerations",
   "main": "index.js",
   "scripts": {
