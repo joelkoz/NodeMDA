@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joelkoz/NodeMDA/tree/master/nodemda-REST-koa-js"
+    "url": "https://github.com/joelkoz/NodeMDA/tree/master/nodemda-standards"
   },
   "keywords": [
     "nodemda",

@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/joelkoz/NodeMDA/tree/master/nodemda-mongoose-js"
+    "url": "https://github.com/joelkoz/NodeMDA/tree/master/nodemda-js-mongoose"
   },
   "keywords": [
     "nodemda",
