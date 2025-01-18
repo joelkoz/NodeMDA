@@ -612,9 +612,14 @@ var winston = require('winston');
 	       actorArray.push(metaActors[prop]);
         } // for
         
-		return new MetaModel.Model(projectName, datatypeArray, stereotypeArray, actorArray, processedMetaClasses);
+		const model = new MetaModel.Model(projectName, datatypeArray, stereotypeArray, actorArray, processedMetaClasses);
+		umlModels.forEach(function (umlModel) {
+			checkForTags(umlModel, model);
+			checkForComment(umlModel, model);
+		});		
+		return model;
 	};
-	
+
 	
 })();
 
