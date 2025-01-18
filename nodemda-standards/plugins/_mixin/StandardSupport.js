@@ -655,8 +655,13 @@ var StandardSupport = {};
 
         // Gather all of the roles defined in the model...
 		model.defineEnumerationType('SystemRole', []);
+		const definedRoles = new Set();
 		model.actors.forEach(function (actor) {
-			model.Types.SystemRole.addOption(actor.roleName);
+			const roleName = actor.roleName;
+			if (!definedRoles.has(roleName)) {
+				model.Types.SystemRole.addOption(roleName);
+				definedRoles.add(roleName);
+			}
 		});
 
 
