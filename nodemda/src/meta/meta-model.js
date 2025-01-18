@@ -222,7 +222,7 @@ let MetaModel = {};
 		}
 		
 		get isObject() {
-	    	return (this.type.name === "Object");
+	    	return (this.getName() === "Object");
 		}
 
 		/**
@@ -245,7 +245,11 @@ let MetaModel = {};
 			this._className = className;
 			this._packageName = packageName;
 		}
-		
+
+		get name() {
+			return this.className;
+		}
+
 		get className() {
 			return this._className;
 		}
@@ -356,7 +360,7 @@ let MetaModel = {};
 		
 		
 		get typeName() {
-			return this._type.getName();
+			return this._type.name;
 		}
 
 
@@ -395,7 +399,7 @@ let MetaModel = {};
 		}
 
 		get isObject() {
-	    	return (this.type.name === "Object");
+	    	return (this.type.getName() === "Object");
 		}
 		
 		get hasDefaultValue() {
@@ -956,9 +960,10 @@ let MetaModel = {};
 	};
 
 	
-	meta.Model = class Model {
+	meta.Model = class Model extends meta.MetaElement {
 
 		constructor(projectName, datatypes, stereotypes, actors, classes) {
+			super("Model");
 			this.name = projectName;
 			this.datatypes = datatypes;
 			this.stereotypes = stereotypes;
