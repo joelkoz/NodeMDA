@@ -675,7 +675,7 @@ class FileEntry {
 			projectScripts.forEach(function(s) {
 				var script = requireScript(s);
 				if (typeof(script.validateModel) === "function") {
-					if (!script.validateModel(metaModel)) {
+					if (!script.validateModel(metaModel, validationStatus)) {
 						winston.error("Model failed validation by script " + s);
 						validationStatus.errorCount++;
 					}
@@ -697,7 +697,7 @@ class FileEntry {
 		winston.log(logLevel, "Validation completed: " + validationStatus.errorCount + " errors, " + validationStatus.warnCount + " warnings");
 
 
-		return (validationStatus.errorCount === 0);
+		return validationStatus;
 	}
 
 
@@ -731,7 +731,8 @@ class FileEntry {
 
 
 		winston.info("Validating model...");
-		if (!validateModel(metaModel, projectScripts)) {
+		let validationStatus = validateModel(metaModel, projectScripts);
+		if (validationStatus.errorCount > 0) {
 			return;
 		}
 
@@ -816,10 +817,12 @@ class FileEntry {
 		if (scriptCount === 0) {
 			winston.error("No script or template files located. Is this stack valid?");
 		}
+		else if (validationStatus.warnCount > 0) {
+			winston.warn(`Done (with ${validationStatus.warnCount} warnings). Be sure to review`);
+		}
 		else {
 		    winston.info("Done.");
 	    }
-		
 	};
 	
 })(NodeMDA);	
