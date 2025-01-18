@@ -1,0 +1,307 @@
+# NodeMDA 2.0 Overview
+
+NodeMDA is a NodeJS-based code generation engine that transforms UML Class Diagrams into source code using [Handlebars](https://handlebarsjs.com/). This document covers how NodeMDA works and how to create or customize its plugins.
+
+---
+
+## Table of Contents
+
+1. [Project Goals](#project-goals)  
+2. [Workflow](#workflow)  
+3. [Usage & Installation](#usage--installation)  
+4. [General Modeling Conventions](#general-modeling-conventions)  
+5. [Code Generation Process](#code-generation-process)  
+6. [Plugins](#plugins)  
+   - [Module Definition Object](#module-definition-object)  
+   - [plugins Directory](#plugins-directory)  
+   - [Template File Names](#template-file-names)  
+   - [Template Context](#template-context)  
+   - [Output Directive](#output-directive)  
+   - [Custom Partials](#custom-partials)  
+   - [Custom Helper Tags](#custom-helper-tags)  
+   - [Template Support Scripts](#template-support-scripts)  
+   - [NodeMDA.Model.mixin()](#nodemdamodelmixin)  
+7. [Meta Model Reference](#nodemda-meta-model-reference)  
+
+---
+
+## Project Goals
+
+1. **Extensibility** – Generate code for any language or stack using a plugin system.  
+2. **Capable Templates** – Use Handlebars for flexible, human-readable templates.  
+3. **Plugin System** – Combine multiple plugins (e.g., database, REST, UI) to produce a complete software stack.  
+4. **Convention Over Configuration** – Reduce the need for large configuration files by adopting consistent defaults.  
+5. **Runtime Mixin API** – Extend NodeMDA’s meta model dynamically, making it easier to customize.
+
+---
+
+## Workflow
+
+Typical NodeMDA usage flow:
+
+1. **Model Creation** – A UML tool (e.g., NodeUML or StarUML) produces a class diagram with stereotypes, tags, etc.  
+2. **Run NodeMDA** – The model is read and transformed into an internal meta model. Handlebars templates generate code artifacts.  
+3. **Manual Edits** – You fill in logic in generated “stubs” or tweak as needed.  
+4. **Iterate** – Return to the model, update it, regenerate code. NodeMDA can preserve files you’ve modified.
+
+---
+
+## Usage & Installation
+
+### Installation
+```bash
+# Install NodeMDA core globally
+npm install -g nodemda
+
+# Install a reader plugin (e.g., nodemda-nodeuml)
+npm install -g nodemda-nodeuml
+
+# Install one or more code-generation plugins for your desired stack
+npm install -g nodemda-stack-react-koa-mongo
+```
+
+### Example Workflow
+```bash
+# Create a new project folder
+mkdir example-project
+cd example-project
+
+# Initialize NodeMDA files
+nodemda init
+
+# (Update the UML model, define classes, stereotypes, etc.)
+
+# Generate code
+nodemda gen
+
+# After code is generated, install dependencies
+npm install
+```
+Consult the plugin’s README for how to build/run the resulting code.
+
+---
+
+## General Modeling Conventions
+
+NodeMDA recognizes six UML artifacts:
+
+1. **Classes** – The main entities to generate code from.  
+2. **Stereotypes** – Indicate the role of a class (e.g., `Entity`, `Service`).  
+3. **Associations** – Represent relationships between classes.  
+4. **Actors** – UML “users” or external systems.  
+5. **Dependencies** – Indicate that one class depends on another.  
+6. **Tags** – Key-value metadata to refine generation logic.
+
+Model your application using a UML tool, assign stereotypes, add associations, dependencies, and tags as the plugin stack dictates.
+
+---
+
+## Code Generation Process
+
+Each `nodemda gen` run:
+
+1. Loads/combines the specified plugins (templates, partials, helpers).  
+2. Uses a “reader” plugin (e.g., **nodemda-nodeuml**) to parse the UML into a NodeMDA meta model.  
+3. Loads Handlebars helpers from `plugins/_helpers`.  
+4. Loads Handlebars partials from `plugins/_partials`.  
+5. Loads template support scripts from `plugins/_mixin` and calls `initPlatform()` on each if present.  
+6. Processes each **stereotype-specific** template for every `Class` that has that stereotype.  
+7. Calls `initProjectTemplates()` on each mixin script (if present).  
+8. Processes the **non-stereotype** (project-wide) templates.  
+9. Copies any non-`.hbs` files as boilerplate to the output directory.
+
+---
+
+## Plugins
+
+A NodeMDA plugin is an npm package named `nodemda-<pluginName>` that contributes templates, mixins, helpers, partials, or an entire software stack.
+
+### Module Definition Object
+
+A plugin’s `index.js` exports an object with:
+
+- **type**: `'templates' | 'mixin' | 'stack'`  
+- **name**: Plugin name (omitting the `nodemda-` prefix).  
+- **desc**: Brief description of the plugin.  
+- **version**: NodeMDA version supported (typically `2.0`).  
+- **contributes**: Array of capability identifiers (e.g., `"REST"`, `"EntityDaoJS"`).  
+- **requires**: Array of capabilities the plugin needs from other plugins.
+
+Example:
+```js
+module.exports = {
+  type: 'templates',
+  name: 'js-rest-koa',
+  desc: 'Generates Koa-based REST endpoints',
+  version: 2.0,
+  contributes: [ "REST", "Js-REST-Koa" ],
+  requires: [ "EntityDaoJS", "NodeMDA-Standards" ]
+};
+```
+
+### Plugins Directory
+
+Inside each plugin’s package:
+
+- **`_helpers`** – `.js` files exporting a single Handlebars helper function (auto-registered).  
+- **`_mixin`** – `.js` files that typically decorate NodeMDA’s meta model or define plugin lifecycle hooks.  
+- **`_partials`** – `.hbs` partial templates (auto-registered).  
+- **`templates`** – `.hbs` files for code generation, plus boilerplate files. Non-HBS files are copied verbatim.
+
+### Template File Names
+
+Any `.hbs` file under `templates` is processed by NodeMDA. The file’s name determines how/when it’s rendered:
+
+- **`{Stereotype}`** in the filename: Process once per class with that stereotype.  
+  - Replaces `{Stereotype}` with the class name in the output file.  
+- **No Stereotype Marker**: Processed once at the end (e.g., project-level files).  
+- **`{_package_}`**: Replaced with the UML class’s package name in the output directory structure.  
+- **`{Stereotype_s}`**: Uses the plural form of the class name (based on [pluralize](https://www.npmjs.com/package/pluralize)).
+
+Example structure:
+```
+plugins/
+ └─ templates/
+     ├─ src/
+     │  └─ dataModels/
+     │     └─ {_package_}/
+     │         ├─ {Entity}.js.hbs
+     │         └─ {Entity}-schema.sql.hbs
+     ├─ package.json.hbs
+     └─ README.md.hbs
+```
+If there is a class `Person` in package `services/contacts` with stereotype `<<Entity>>`, NodeMDA generates:
+
+- `outputDir/src/dataModels/services/contacts/Person.js`
+- `outputDir/src/dataModels/services/contacts/Person-schema.sql`
+- `outputDir/package.json`
+- `outputDir/README.md`
+
+### Template Context
+
+When processing a `.hbs` file, NodeMDA passes this **context**:
+```json
+{
+  "class": /* NodeMDA.Meta.Class instance */,
+  "output": "path/to/output/dir",
+  "model": /* NodeMDA.Meta.Model instance */
+}
+```
+- **`class`** – The class being rendered.  
+- **`output`** – Root output path.  
+- **`model`** – The entire meta model, which has `name`, `datatypes`, `stereotypes`, `classes`, `actors`, etc.
+
+**Example**: A `POJO` template:
+```handlebars
+{{#with class}}
+var {{name}} = {
+  {{#each attributes}}
+  {{name}}: "",
+  {{/each}}
+};
+{{/with}}
+```
+For `<<POJO>> Person`, it becomes:
+```js
+var Person = {
+  firstName: "",
+  lastName: "",
+  birthDate: "",
+};
+```
+
+### Output Directive
+
+By default, a template’s output overwrites existing files. You can override this in the first line of actual output:
+
+```
+##output <outputMode> [<fileName>]
+```
+- **`overwrite`** – Replace existing file.  
+- **`preserve`** / **`preserve!`** – Keep the existing file if present. The exclamation ignores force-overwrite options.  
+- **`aggregate`** – Combine outputs of multiple classes into a single file.  
+- **`ignore`** – Discard output.  
+- **`property`** – Store the output in a context array property (e.g., for processing in a subsequent template).
+
+### Custom Partials
+
+Place `.hbs` partials in `plugins/_partials`. They’re auto-registered by filename (minus `.hbs`).  
+```handlebars
+{{> partialName }}
+```
+Example partial `json-schema.hbs` might be included in many templates to avoid repetition.
+
+### Custom Helper Tags
+
+Create `.js` files in `plugins/_helpers` with a single exported function. It auto-registers under the same name as the file:
+```js
+// _helpers/lowercaseFirst.js
+export function(str) {
+  if (!str) return "";
+  return str.charAt(0).toLowerCase() + str.slice(1);
+};
+```
+**Usage**:
+```handlebars
+{{lowercaseFirst class.name}} 
+```
+
+### Template Support Scripts
+
+Scripts in `plugins/_mixin` can add logic or extend the meta model via the `mixin()` API. They can also expose lifecycle hooks that NodeMDA calls at various times:
+
+- **`validateModel(metaModel)`**  
+- **`initStereotype(context, stereotype)`**  
+- **`initClass(context, metaClass)`**  
+- **`initPlatform(context)`** – Called once before class processing.  
+- **`initProjectTemplates(context)`** – Called once after class processing but before project-level templates.
+
+```js
+"use strict";
+
+var MySupport = {};
+
+(function() {
+  MySupport.initPlatform = function(context) {
+    // e.g., mixin logic here
+  };
+})();
+
+module.exports = MySupport;
+```
+
+### NodeMDA.Model.mixin()
+
+`model.mixin(spec)` adds new properties/methods to classes in the meta model. Each `spec` property is named `on<ClassType>` (e.g., `onClass`, `onAttribute`) and contains `get` or `func` arrays.
+
+```js
+model.mixin({
+  onAttribute: {
+    get: [
+      function pluralName() {
+        return pluralize(this.name);
+      }
+    ]
+  },
+  onClass: {
+    func: [
+      function setUIProperty(name, value) {
+        if (!this._uiProp) this._uiProp = {};
+        this._uiProp[name] = value;
+      }
+    ]
+  }
+});
+```
+Then in templates:
+```handlebars
+{{attribute.pluralName}}
+```
+
+---
+
+## NodeMDA Meta Model Reference
+
+NodeMDA’s internal model comprises classes like `NodeMDA.Meta.Class`, `NodeMDA.Meta.Attribute`, `NodeMDA.Meta.Operation`, `NodeMDA.Meta.Actor`, `NodeMDA.Meta.Datatype`, etc. See the engine’s source code or UML diagram for complete reference.
+
+---

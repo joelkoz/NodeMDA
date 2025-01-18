@@ -1,0 +1,25 @@
+{
+  "name": "nodemda-llm-support",
+  "version": "2.0.0",
+  "description": "NodeMDA plugin to aid in the generation of LLM prompts",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joelkoz/NodeMDA/tree/master/nodemda-llm-support"
+  },
+  "keywords": [
+    "nodemda",
+    "plugin",
+    "javascript",
+    "nodejs",
+    "REST",
+    "code generator"
+  ],
+  "dependencies": {
+  },
+  "author": "Joel Kozikowski",
+  "license": "MIT"
+}

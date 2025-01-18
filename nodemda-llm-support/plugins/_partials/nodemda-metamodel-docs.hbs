@@ -1,0 +1,165 @@
+# NodeMDA MetaModel Overview
+
+## 1. Base Class: `MetaElement`
+All model objects inherit from `MetaElement`. It provides:
+
+- **Tags**  
+  - You can attach name/value pairs (`Tag` objects) for custom metadata.
+  - `addTagValue(tagName, tagValue)` and `getTagValue(tagName)` are especially useful.
+- **Comment**  
+  - `comment` holds user documentation or notes.
+- **Visibility**  
+  - `isPublic`, `isProtected`, `isPrivate`, etc.
+- **Stereotypes**  
+  - An array of assigned stereotypes (see [Stereotype](#8-stereotype)).
+  - `stereotypeName` gets the first stereotype’s name.
+  - `isTaggedAs(tagName)` checks whether a tag exists and its value is truthy.
+
+If you are generating code based on tags, stereotypes, or visibility, these methods and properties are key.
+
+---
+
+## 2. `Class`
+When the code generator runs, each `Class` instance is passed to your Handlebars templates (in the context as `class`). Its most relevant properties/methods:
+
+- **Identification**  
+  - `name` – Name of the class.  
+  - `packageName` – Name of its containing package (useful if you need to generate directory structures).
+- **Attributes** (`attributes` array)  
+  - Each is an `Attribute` object describing a class field (name, type, etc.).
+  - Use `class.attributes` to iterate over them.
+- **Operations** (`operations` array)  
+  - Each is an `Operation` object describing methods (name, return type, parameters).
+  - Use `class.operations`.
+- **Associations** (`associations` array)  
+  - Each is an `Association`, linking this class to others via `AssociationEnd`.
+  - Access `association.myEnd` and `association.otherEnd` for details.
+- **Dependencies** (`dependencies` array)  
+  - Each is a `Dependency`, meaning the class depends on another object type.
+- **Generalizations** (`generalizations` array)  
+  - For inheritance. `parentClass` returns the direct parent.
+- **Package**  
+  - `inRootPackage` indicates if there is no package.
+  - `packageDirName` can help you build file paths.
+- **Tag-related methods**  
+  - `getTagValue()`, `hasTag()`, `isTaggedAs()`, etc., inherited from `MetaElement`.
+
+**Key helper properties** for generation:
+
+- `allVisibleAttributes`  
+  - Gathers attributes visible in this class plus its ancestors.
+- `allRequiredAttributes`  
+  - Gathers only required attributes (where `multiplicity` starts with `1`).
+- `referencedClasses`  
+  - Other classes referenced by this class (via attributes or associations).
+- `dependentClasses`  
+  - Classes the current one depends on (via `dependencies`).
+- `dependentActors`  
+  - `Actor` objects the class depends on.
+
+---
+
+## 3. `Attribute`
+Represents a field in a class. Important fields:
+
+- `name`  
+- `type` (often a `Datatype` or `ObjectDatatype`)
+- `isRequired` (based on `multiplicity`)
+- `defaultValue` (if specified via `_defaultValue` or tag)
+- `multiplicity` (e.g., `1`, `0..1`, `*`)
+
+If `type.isObject` is `true`, it references another user-defined class.
+
+---
+
+## 4. `Operation`
+Represents a method or function. Key properties:
+
+- `name`  
+- `type` – The return type (also a `Datatype`).
+- `parameters` – An array of `Parameter` objects.
+- `isStatic`
+
+Use this for generating method signatures, function calls, etc.
+
+---
+
+## 5. `Association` and `AssociationEnd`
+An `Association` connects two classes:
+
+- `myEnd` and `otherEnd` are `AssociationEnd` objects.
+- Each end can specify its own `name`, `multiplicity`, `navigable`, `aggregation`, etc.
+- `AssociationEnd.name` will auto-synthesize if not explicitly set, e.g., pluralizing the type.
+
+For code generation, you might iterate over `class.associations` and inspect how the ends reference other classes.
+
+---
+
+## 6. `Actor`
+Represents a UML Actor (often used in use-case diagrams). In code generation, you may see:
+
+- `class.dependentActors` – Lists `Actor` objects on which a `Class` depends.
+- Like other model elements, it inherits from `MetaElement`.
+
+---
+
+## 7. `Dependency`
+Denotes a class’s dependency on another type:
+
+- Accessed via `class.dependencies`.
+- Each `Dependency` references another `ObjectDatatype` through `_otherObjectDatatype`.
+
+---
+
+## 8. `Stereotype`
+Important for choosing which Handlebars template to use:
+
+- Inherits from `MetaElement`.
+- `name` indicates the stereotype text (`Entity`, `Controller`, etc.).
+- Check a class’s stereotypes for controlling which template to generate.
+
+---
+
+## 9. `Package`
+Mostly for organizational purposes:
+
+- `Package.name` is used to build directory paths (e.g., `packageDirName` in `Class`).
+- Splits package hierarchy on a delimiter (by default `"."`).
+
+---
+
+## 10. Data Types (`Datatype` and `ObjectDatatype`)
+An `Attribute` or `Operation` return type can be:
+
+- **Primitive** (e.g., `String`, `Number`, etc.) represented by a `Datatype`.
+- **Object** (e.g., a user-defined Class) represented by an `ObjectDatatype`.
+
+`ObjectDatatype` has:
+- `className`, `packageName`
+- References an actual `Class` via `metaClass`.
+
+---
+
+## 11. Tagging & Customization
+Tags (key-value pairs) are present across all model objects:
+
+- Use `getTagValue(tagName)`, `addTagValue(tagName, tagValue)`, and `isTaggedAs(tagName)` to customize generation logic.
+- Common tags: `default`, `minVal`, `maxVal`, etc.
+
+---
+
+## 12. Putting It All Together
+When NodeMDA runs code generation:
+
+1. It loads a UML model into a `Model` object (which holds all `Class`, `Datatype`, `Actor`, `Stereotype`, etc.).
+2. One by one, each `Class` is passed into your Handlebars template. Your Handlebars context typically has:
+   ```json
+   {
+     "class": /* meta.Class instance */,
+     "model": /* meta.Model instance */
+   }
+   ```
+3. You can use the `class` object to access:
+   - Attributes and operations for code scaffolding.
+   - Stereotypes to decide how to generate.
+   - Associations, dependencies, inherited members, tags, etc.

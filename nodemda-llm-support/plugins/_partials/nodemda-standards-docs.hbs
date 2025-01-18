@@ -1,0 +1,514 @@
+# NodeMDA Standards
+
+**NodeMDA Standards** is a `mixin` plugin for the [NodeMDA](https://github.com/joelkoz/NodeMDA) code generation engine. It provides:
+
+- A **standard set of data types** (e.g., `String`, `Number`, `Password`, `SystemRole`)
+- **Common mixin functions** that transform associations into attributes, simplifying code templates
+- Various **Handlebars helpers** shared across the NodeMDA ecosystem
+
+---
+
+## 1. Standard Data Types
+
+NodeMDA Standards expects attributes, parameters, and return types to use a known set of names, matching case and spacing:
+
+### Primitive-Like
+- `String`
+- `Number`
+- `Boolean`
+- `DateTime`
+
+### Higher-Order String Types
+- `Text`
+- `FullName`
+- `FirstName`
+- `LastName`
+- `Password`
+- `Phone`
+- `Email`
+- `Url`
+- `StreetAddress`
+- `City`
+- `State`
+- `PostalCode`
+- `CreditCardNumber`
+
+### Higher-Order Numeric Types
+- `Integer`
+- `Decimal`
+- `Currency`
+
+### Higher-Order Date Types
+- `Date`
+- `Time`
+
+### Common Enumerations
+- `YesNo`
+- `Sex`
+- `OnOff`
+
+### Security-Related
+- `SystemRole`
+
+---
+
+## 2. Modeling Conventions
+
+All code generation plugins that depend on **NodeMDA Standards** follow these conventions:
+
+1. **Classes & Stereotypes**  
+   - Classes must have a stereotype like `Entity`, `Service`, or `POJO`.  
+   - `Entity`: A persistent database entity.  
+   - `Service`: A service interface (e.g., for remote calls).  
+   - `POJO`: A “plain old JavaScript object” (applies to any language target).
+
+2. **Attributes & Methods**  
+   - Must specify a valid data type from the [Standard Data Types](#1-standard-data-types).  
+   - If no multiplicity is set, `0..1` is assumed (optional).  
+   - Use `1` or `1..*` for required attributes.
+
+3. **User Class**  
+   - One `User` class in the **root package** with stereotype `Entity`.  
+   - Must have at least:  
+     - `username` (`String`, multiplicity `1`)  
+     - `password` (`Password`, multiplicity `1`)  
+     - `roles` (`SystemRole`, multiplicity `0..*`, tagged with `defaultValue="['user']"`)
+
+4. **Enumerations**  
+   - Either use UML’s native “Enumeration” element, or define a `Class` with the `Enumeration` stereotype.  
+   - If using a `Class` + `Enumeration` approach, each attribute is a possible literal.
+
+5. **Visibility &amp; UI**  
+   - `public` attributes can appear in CRUD UI.  
+   - `protected` attributes are accessible via remoting but not in the default UI.  
+   - `private` attributes are not exposed in any UI or remote interface by default.
+
+6. **Tagging**  
+   - `uiTableColumn="true"` on attributes to explicitly control which columns appear in a CRUD listing.  
+   - `dbIndex="true"` to index an attribute in persistent storage.  
+   - `unique="true"` to enforce uniqueness.
+
+7. **Associations**  
+   - NodeMDA Standards often transforms navigable associations into class attributes.  
+   - An association between an `Entity` and a `POJO` implies **embedded data**.  
+   - An association between two `Entity` classes implies a **reference** relation (separate DB documents).
+
+8. **Arrays**  
+   - If the upper limit of `multiplicity` is `*`, NodeMDA interprets it as an array.
+
+---
+
+## 3. Special Handling of Associations
+
+- A navigable association is treated as if the source class has an attribute pointing to the target class.  
+- Name or navigability flags help NodeMDA decide whether to treat the association as an embedded attribute or a separate reference:
+  - `Entity` ↔ `POJO` => Embedded  
+  - `Entity` ↔ `Entity` => Document reference  
+- Many-to-many is possible but not recommended (requires custom manual updates to both sides).
+
+---
+
+## 3. Special Handling of One-to-Many Relationships
+
+NodeMDA Standards automatically transforms a **one-to-many** association between two `Entity` classes so that:
+
+1. The “many” class has a **real** foreign-key attribute referencing the “one” class.  
+   - That attribute has `isForeignKey = true`.
+   - The type is `NodeMDA.Meta.ObjectDatatype` referencing the “one” class.  
+
+2. The “one” class has a **virtual** attribute (an `Attribute` object stored in `class.virtuals`), rather than a normal attribute array.  
+   - Its `_schemaDbProp.foreignKeyField` is set to the matching attribute name in the “many” class (e.g., `myMaster`).  
+
+This design avoids storing an array field in the “one” class. When code runs, slaves can be retrieved by querying on the foreign key column in the “many” class. An example:
+
+- **Classes**: `Master` (one) and `Slave` (many).  
+- **Association**: “one master to many slaves.”  
+- After transformation, `Slave` has a real attribute `myMaster` referencing `Master`, while `Master` only gets a **virtual** `mySlaves` attribute in `class.virtuals`.
+
+---
+
+## 4. Security
+
+1. **`User` Class**  
+   - Must exist in the root package, with stereotype `Entity`.  
+   - Must have `username`, `password`, `roles`.
+
+2. **Roles**  
+   - Default roles: `AdminRole`, `UserRole`, and `GuestRole`.  
+   - Additional roles come from UML `Actor`s. NodeMDA transforms the actor name into a role name (strips “Role” suffix, lowercases first letter).
+
+3. **Permissions**  
+   - For each `Entity`, roles can be granted read/write/delete.  
+   - AdminRole always has all permissions.  
+   - A user-owned entity can only be updated by the owner (or admin).  
+   - Dependencies from an `Entity` to an `Actor` define role-based access. You can override permissions with a `permissions` tag (e.g. `r,w,d` or `read,write,delete`).
+
+4. **Visibility-Based Defaults**  
+   - If no explicit dependencies exist, NodeMDA uses `Entity` visibility to assign permissions:  
+     - `public` => Grants full R/W/D to `GuestRole`.  
+     - `protected` => Grants R/W/D to `UserRole`.  
+     - `private` => No external access, not even admin (internal only).
+
+---
+
+## 5. Controlling Code Generation (REST & CRUD)
+
+1. **UI**  
+   - By default, each `Entity` has a CRUD UI generated in the frontend.  
+   - Tag the `Entity` with `noUI="true"` to skip UI generation.
+
+2. **REST**  
+   - By default, a REST interface is generated for each `Entity`.  
+   - Setting `visibility="private"` on the `Entity` or tagging it with `noREST="true"` blocks REST endpoints for that class.  
+   - If `noREST` is `true`, `noUI` is implicitly true as well, since the UI depends on REST.
+
+---
+
+## Mixin additions to the Meta Model
+
+   - **`onModel`** 
+     - **Getters**
+       - **`entities()`** - returns all classes whose `stereotypeName` is `Entity`.
+
+   - **`onAttribute`**  
+     - **Getters**  
+       - `jsIdentifierName()` returns the attribute name as the JavaScript identifier (commented-out logic shows how to prefix `_` for private attributes).  
+       - `schemaDbProperties()` returns a JSON string of an object of database related properties:
+         - `persistence` how is this attribute stored in a persistent store? Will be `"embed"` if the field should be embedded, or `undefined` otherwise.
+         - `unique` true if this attribute is unique in any collection it is stored in
+         - `foreignKeyField` - In a **one to many** relationship, this is the name of the attribute in the **many** class that matches the `_id` of this attribute's parent.
+                [Special handling of One to Many relationships](#special-handling-of-one-to-many-relationships)
+       - `_schemaDbProp` the pure javascript version of `schemaDbProperties()`
+       - `isForeignKey` - will be true if this attribute's parent is the **many** side of a **one to many** relationship. The attribute is used to match against the `_id`
+             property of the class on the **one** side of the relationship. [Special handling of One to Many relationships](#special-handling-of-one-to-many-relationships)
+       - `isEntity()` checks if the attribute’s type is a class with stereotype `Entity`.  
+       - `hasIndex()` checks for a `dbIndex` tag.  
+       - `importedBySchema()` checks if the attribute is an object embedded or has a foreign key property.  
+       - `visibleToForm()` indicates if this attribute should be visible on any UI related input form
+       - `visibleToTable()` indicates if this attribute should be visible as a column in any UI related table
+     - **Functions**  
+       - `setSchemaDbProperty(name, value)` attaches schema metadata (e.g., `persistence: 'embed'` or `unique: true`).  
+
+   - **`onObjectDatatype`**  
+     - **Getters**  
+       - `jsClassNameWithPath()` uses `jsPathToIdentifier()` to convert the object’s path.  
+
+   - **`onClass`**  
+     - **Getters**  
+       - `jsClassNameWithPath()` converts full class path for imports.  
+       - `jsPackageName()` converts package name to a JS-friendly path.  
+       - `pluralName()` returns the class name in plural form.  
+       - `relativeParentPrefix()` computes how many directory levels to go up for import statements.  
+       - `packageDirPath()` returns the class’s package path, ensuring it ends with a slash unless in the root.  
+       - `isRoleRestricted()` checks if the class has any dependencies on actors.  
+       - `roleList()` collects roles from `dependentActors`, including any inherited from the parent class.  
+       - `stringifyRoleList()` JSON-encodes `roleList` with single quotes.  
+       - `isEntity()` checks if the stereotype is `Entity`.  
+       - `isEnumeration()` checks if the stereotype is `Enumeration` or `enumeration`.  
+       - `readPermissions()`, `writePermissions()`, `deletePermissions()`, `ownPermission()` return security settings.  
+       - `isUserOwned()` returns `true` if the class ownership is assigned to a role other than `admin`.  
+       - `genCRUD()` returns `true` if the UI code should be generated (requires `genREST` and not tagged `noUI`).  
+       - `genREST()` returns `true` if the class is not private and not tagged `noREST`.  
+       - `formAttribs()` returns an array of all attributes that are `visibleToForm`
+       - `tableAttribs()` returns an array of all attribute that are `visibleToTable`
+       - `entityAttribs()` returns an array of all attributes that have an object datatype that is an `Entity` class
+       - `tableColumnsVisible()` returns a count of the number of attributes that are `visibleToTable`
+       - `tableColumnsInvisible()` returns a count of the number of attributes that are NOT `visibleToTable`       
+     - **Functions**  
+       - `addPermission(perm, roleName)` modifies the class’s internal `permissions` structure (e.g., adding `'read'`, `'write'`, `'delete'`, or `'own'`).  
+
+   - **`onDependency`**  
+     - **Getters**  
+       - `isActor()` checks if `otherObject` is an `Actor`.  
+       - `permissions()` returns an array of parsed permissions from the `permissions` tag (defaults to `read, write, delete`).  
+
+   - **`onActor`**  
+     - **Getters**  
+       - `roleName()` produces a camelCase role name by stripping any “Role” suffix from the actor name.  
+
+   - **`onMetaElement`**  
+     - **Getters**  
+       - `jsCommentsFormatted()` splits the element’s `comment` into lines of at most 80 characters, replacing newlines with `<p>`.
+       - `singularName()` returns the singular form of the element name (uses `pluralize`).  
+       - `pluralName()` returns the element name in plural form.  
+
+---
+
+## Handlebars helper functions
+
+### 1. `isNonEmptyArray.js`
+**Purpose**  
+Checks if a value is an array with at least one element.
+
+```js
+// Example usage in a .hbs template:
+{{#if (isNonEmptyArray myArrayVar)}}
+  The array has content.
+{{else}}
+  The array is empty or not an array.
+{{/if}}
+```
+
+---
+
+### 2. `kebabCase.js`
+**Purpose**  
+Converts a string to kebab-case (lowercase words separated by `-`).
+
+```js
+// Example usage:
+{{kebabCase "MyExampleString"}} 
+// Outputs: "my-example-string"
+```
+
+---
+
+### 3. `singularOf.js`
+**Purpose**  
+Returns the singular form of a word using `pluralize`.
+
+```js
+// Example usage:
+{{singularOf "People"}}
+// Outputs: "Person"
+```
+
+---
+
+### 4. `jsStringEscape.js`
+**Purpose**  
+Escapes a string so it can be safely inserted as a valid JavaScript literal (quotes are removed).
+
+```js
+// Example usage:
+var myString = "{{jsStringEscape "Hello \"there\""}}";
+// Outputs: var myString = "Hello \"there\"";
+```
+
+---
+
+### 5. `camelToWords.js`
+**Purpose**  
+Transforms a camelCase or PascalCase string into a spaced phrase, capitalizing the first letter. Also replaces underscores with spaces.
+
+```js
+// Example usage:
+{{camelToWords "myVariableName"}}
+// Outputs: "My Variable Name"
+```
+
+---
+
+### 6. `setProperties.js`
+**Purpose**  
+Allows you to set multiple hash arguments as top-level properties on the template context for a block.
+
+```handlebars
+{{#setProperties title="Hello" count=5}}
+  Title: {{title}}, Count: {{count}}
+{{/setProperties}}
+```
+
+---
+
+### 7. `outputIfEqual.js`
+**Purpose**  
+Outputs the block if two parameters are strictly equal. Otherwise outputs the `{{else}}` block.
+
+```handlebars
+{{#outputIfEqual class.name "Person"}}
+  This is the Person class.
+{{else}}
+  This is not the Person class.
+{{/outputIfEqual}}
+```
+
+---
+
+### 8. `ifBoth.js`
+**Purpose**  
+Renders the block if both `condition1` and `condition2` are truthy. Otherwise renders the `{{else}}` block.
+
+```handlebars
+{{#ifBoth class.isEntity class.hasOperations}}
+  Entity with operations
+{{else}}
+  Not an entity with operations
+{{/ifBoth}}
+```
+
+---
+
+### 9. `uppercaseFirst.js`
+**Purpose**  
+Capitalizes the first letter of a string.
+
+```js
+{{uppercaseFirst "employee"}}
+// Outputs: "Employee"
+```
+
+---
+
+### 10. `isdefined.js`
+**Purpose**  
+Checks if a value is not `undefined`.
+
+```handlebars
+{{#if (isdefined class.name)}}
+  The class name is {{class.name}}
+{{else}}
+  This class is unnamed
+{{/if}}
+```
+
+---
+
+### 11. `renderOnce.js`
+**Purpose**  
+Prevents repeated output if a certain object is already rendered. Useful for avoiding circular references in recursive templates.
+
+```handlebars
+{{#renderOnce class}}
+  {{class.name}} details ...
+{{/renderOnce}}
+```
+
+---
+
+### 12. `concat.js`
+**Purpose**  
+Concatenates multiple arguments into a single string.
+
+```handlebars
+<p>{{concat "api/" class.name "/endpoint"}}</p>
+// Outputs: <p>api/Person/endpoint</p> for class.name = "Person"
+```
+
+---
+
+### 13. `lowercaseFirst.js`
+**Purpose**  
+Lowercases the first character of a string.
+
+```js
+{{lowercaseFirst "Employee"}}
+// Outputs: "employee"
+```
+
+---
+
+### 14. `safePreserve.js`
+**Purpose**  
+Returns `preserve!` if the two string parameters match, otherwise `preserve`. This is typically used with NodeMDA output directives.
+
+```handlebars
+##output {{safePreserve class.name "User"}}
+```
+
+---
+
+### 15. `lowercase.js`
+**Purpose**  
+Converts a string to all lowercase.
+
+```js
+{{lowercase "HelloWORLD"}}
+// Outputs: "helloworld"
+```
+
+---
+
+### 16. `pluralOf.js`
+**Purpose**  
+Returns the plural form of a word using `pluralize`.
+
+```js
+{{pluralOf "Person"}}
+// Outputs: "People"
+```
+
+---
+
+### 17. `rootNamespaceName.js`
+**Purpose**  
+Splits a dot-delimited name (e.g. `my.company.project`) and returns the first path element as a Handlebars SafeString.
+
+```handlebars
+Root namespace: {{rootNamespaceName "my.company.project"}}
+<!-- Outputs: "my" -->
+```
+
+---
+
+### 18. `eval.js`
+**Purpose**  
+If the first argument is a function, calls it with subsequent arguments. Otherwise returns an empty string.
+
+```handlebars
+{{eval someFunction arg1 arg2}}
+// If `someFunction` is a JS function, it is invoked as someFunction(arg1, arg2).
+```
+
+---
+
+### 19. `initJSNamespace.js`
+**Purpose**  
+Initializes nested JavaScript objects for a given namespace on a variable. Produces lines like `myVar.myNamespace = myVar.myNamespace || {};`.
+
+```handlebars
+{{initJSNamespace "myVar" "MyCompany.Project"}}
+<!-- 
+Outputs:
+myVar.MyCompany = myVar.MyCompany || {};
+myVar.MyCompany.Project = myVar.MyCompany.Project || {};
+-->
+```
+
+---
+
+### 20. `camelCase.js`
+**Purpose**  
+Converts any string to lowerCamelCase by splitting on spaces or periods, capitalizing each word after the first, then joining them.
+
+```js
+{{camelCase "My example phrase"}}
+// Outputs: "myExamplePhrase"
+```
+
+---
+
+### 21. `outputUnlessEqual.js`
+**Purpose**  
+Outputs the block if `param1` and `param2` are not strictly equal. Otherwise renders the `{{else}}` block.
+
+```handlebars
+{{#outputUnlessEqual class.stereotypeName "Entity"}}
+  This is not an entity.
+{{else}}
+  This is an entity.
+{{/outputUnlessEqual}}
+```
+
+---
+
+### 22. `defaultTo.js`
+**Purpose**  
+Returns the first argument if it is truthy. Otherwise returns the second argument.
+
+```handlebars
+{{defaultTo class.name "UnnamedClass"}}
+<!-- If class.name is falsy, outputs "UnnamedClass". Otherwise outputs class.name. -->
+```
+
+---
+## Summary
+
+`StandardSupport.js` supplies a consistent approach to:
+1. **Associations**: Turned into class attributes for simpler template use.  
+2. **Validation**: Ensures a root `User` class with mandatory attributes.  
+3. **Mixin** Additions: Provides a variety of getters/functions for code generation (path resolution, naming conventions, security checks, schema metadata).  
+4. **Permissions**: Applies defaults based on UML `Dependency` to `Actor`, or by class visibility.  
+5. **Enumerations**: Transforms UML classes with stereotype `Enumeration` into real enumerations, and adjusts any referencing attributes.
+
+All these operations ensure NodeMDA Standards–based plugins can rely on a uniform, enhanced meta model. 
