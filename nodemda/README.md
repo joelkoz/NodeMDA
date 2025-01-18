@@ -23,7 +23,7 @@ new plugins.
 
 1. Plugin system for code template selection
 
-1. Support combining multiple plugins that each handle a differeent area of concern to simplify building
+1. Support combining multiple plugins that each handle a different area of concern to simplify building
 new software stacks. For example, one plugin may handle generating persistent entities, another may handle
 the remote protocol (REST, SOAP, JSON RPC, etc.), a third may handle UI (web based, mobile, etc.). A single
 software stack can be defined by combining these smaller parts, allowing for reusability and ease of development 
@@ -623,7 +623,7 @@ var TemplateSupport = {};
 					  	return pluralize(this.name);
 					  },
         ],
-      }
+      },
 
       onClass: {
         func: [
