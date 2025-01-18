@@ -1,0 +1,25 @@
+{
+  "name": "nodemda-llm-app-writer",
+  "version": "2.0.0",
+  "description": "NodeMDA plugin to generate an LLM prompt to write a new application",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joelkoz/NodeMDA/tree/master/nodemda-llm-app-writer"
+  },
+  "keywords": [
+    "nodemda",
+    "plugin",
+    "javascript",
+    "nodejs",
+    "REST",
+    "code generator"
+  ],
+  "dependencies": {
+  },
+  "author": "Joel Kozikowski",
+  "license": "MIT"
+}

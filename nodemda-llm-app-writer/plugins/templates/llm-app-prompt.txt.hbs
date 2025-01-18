@@ -1,0 +1,165 @@
+##output overwrite
+You are an expert software developer / architect. After a brief interview with me, I want you to develop a full stack 
+system that I can deploy and run.
+
+Before development begins, we need to determine:
+
+1. If there are any special requirements not decernable from the data model. Consider:
+   - What is the purpose of the application
+   - Who the target audience is
+   - Are there any unique features of the application we may want to consider
+2. If there are any runtime cost considerations we should take into account
+3. What development stack we should use. Consider the ultimate scale of final deployment,
+   as well as the software stacks I am most familiar with or desire to learn/use.
+
+When discussing the development stack, offer up your recommendation based on the information you have gathered. Give
+me a one or two word sentence as to why you choose that stack.
+
+The deliverables for this project is a complete source code tree that fully implements:
+1. A backend for data storage and any application logic we agree should be placed server side
+2. A front end user interface, be it a web page, a mobile app, or a desktop application (to be determined by our interview)
+3. Any other software artifacts needed to deploy the application (docker files, deployment scripts, etc)
+
+Each of the above should be developed in order. Give me a chance to review and comment before moving on to the
+next deliverable.
+
+To get the conversation going, I have developed the following preliminary class model using UML standards.  Use this model as a starting
+point, but if you have any suggestions or refinements to this model, let me know. I am open to 
+suggestions that will improve performance or functionality:
+
+```markdown
+# Project: {{model.name}}
+{{> mdComment model indent=""}}
+
+---
+
+## Stereotypes
+{{#each referencedStereotypes as |stereotype|}}
+- **{{stereotype.name}}**: {{{stereotype.purpose}}}
+{{/each}}
+
+---
+
+## Classes
+For each class below:
+- The Stereotype appears in parenthesis after the class name
+- For each attribute/ operation parameter:
+  - the "Multiplicity" is in square brackets. If missing, assume "0..1"
+  - the "Visibility" and other special requirements are in parentheses.
+
+{{#each model.classes as |class|}}
+### {{class.name}} {{#if class.stereotypeName}}({{class.stereotypeName}}){{/if}}
+{{#if class.packageName}}
+- **Package**: {{class.packageName}}
+{{/if}}
+{{> mdComment class indent=""}}
+{{> mdTags class indent=""}}
+{{#if class.jsOriginalAttributes.length}}
+- **Attributes:**
+{{#each class.jsOriginalAttributes as |attrib|}}
+  - `{{attrib.name}}`: {{attrib.typeName}} [{{attrib._multiplicity}}] ({{attrib._visibility}}{{#if attrib.isUnique}}, unique{{/if}}{{#if attrib.isReadOnly}}, read-only{{/if}})
+     {{> mdTags attrib indent=(spc 5)}}
+     {{> mdComment attrib indent=(spc 5)}}
+{{/each}}
+
+{{/if}}
+{{#if class.operations.length}}
+- **Operations:**
+{{#each class.operations as |operation|}}
+  - `{{operation.name}}`: {{operation.returnTypeName}} ({{operation._visibility}})
+     {{> mdTags operation indent=(spc 5)}}
+     {{> mdComment operation indent=(spc 5)}}
+     {{#if operation.parameters.length}}
+     - **Parameters:**
+     {{#each operation.parameters as |param|}}
+       - `{{param.name}}`: {{param.typeName}} [{{param._multiplicity}}] ({{param._visibility}}{{#if param.isUnique}}, unique{{/if}}{{#if param.isReadOnly}}, read-only{{/if}})
+          {{> mdTags param indent=(spc 10)}}
+          {{> mdComment param indent=(spc 10)}}
+     {{/each}}
+     {{/if}}
+{{/each}}
+
+{{/if}}
+{{#if class.jsOriginalAssociations.length}}
+- **Relationships:**
+{{#each class.jsOriginalAssociations as |assoc|}}
+  - **{{#if assoc.myEnd.isOne}}One{{else}}Many{{/if}}-to-{{#if assoc.otherEnd.isOne}}One{{else}}Many{{/if}} with {{assoc.otherEnd.typeName}}**:  {{#if assoc.otherEnd.isNavigable}}attribute name: `{{assoc.otherEnd.name}}`, navigable{{else}}non-navigable{{/if}}
+{{/each}}
+
+{{/if}}
+---
+
+{{/each}}
+
+
+{{#if model.actors.length }}
+## Actors
+These represent the users of the application. Each role listed represents a `SystemRole`. One or more roles  single possible entry in the User.
+{{#each model.actors as |actor|}}
+- **{{actor.name}}** (Role: {{actor.roleName}})
+  {{> mdComment actor indent=(spc 2)}}
+{{/each}}
+
+---
+
+
+{{/if}}
+## Permissions
+{{#if hasUserOwnedEntities}}
+Each Entity is "owned" either by the system, or by a specific authenticated user. An Entity is considered "user owned" if 
+ownership is assigned to any SystemRole other than the "admin". The owner of a "user owned" Entity is the user who initially creates
+the Entity. Users can only see their own "user owned" Entities (e.g. when viewing a CRUD list). If an entity is "user owned", 
+a fourth role named "owner" is specified for each privelege.
+
+A system owned Entity does not belong to any particular user, and if not otherwise specified, can only be modified by the administrator. 
+{{/if}}
+
+{{#each model.entities as |class|}}
+### {{class.name}}
+  - **Read**: {{{class.readPermissions}}}
+  - **Write**: {{{class.writePermissions}}}
+  - **Delete**: {{{class.deletePermissions}}}
+{{#if ../hasUserOwnedEntities}}  
+  - **Ownership**: {{{class.permissions.own}}}
+{{/if}}
+
+---
+
+{{/each}}
+```
+
+
+I would like the source code organized into this general file structure:
+
+```
+   +-project-directory
+     |
+     +-backend
+     | |
+     | +-src
+     | | |
+     | | +-component-directories
+     | |   |
+     | |   +component-source-code.whatever
+     | |
+     | +-backend-deployment-config-files.whatever
+     | +-README.md
+     |
+     +-frontend
+     | |
+     | +-src
+     | | |
+     | | +-component-directories
+     | |   |
+     | |   +component-source-code.whatever
+     | |
+     | +-frontend-deployment-config-files.whatever
+     | +-README.md
+     |
+     +-project-deployment-config-files.whatever
+     +-README.md
+```
+
+Lets begin. Ask me any clarifying questions until you are 95% certain you can accomplish this task. Greet me with 
+"Let's get started developing the {{model.name}} application", then ask me your first question. Ask each question
+one at a time so we can discuss if necessary before moving on to the next.

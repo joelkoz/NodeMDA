@@ -1,0 +1,6 @@
+{{#if this.tags.length}}
+- ** Tags **:
+{{#each this.tags as |tag|}}
+{{indent}}  - `{{tag._name}}` = "{{{tag._value}}}"
+{{/each}}
+{{/if}}
