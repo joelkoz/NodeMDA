@@ -19,6 +19,20 @@ It generates a full application stack with the following features:
 - Docker files available for deployment
 
 
+## Installation
+
+Install this plugin globally so it can be seen from all of your projects.
+
+**_Command line_**
+```
+
+## The core NodeMDA system (if you have not already installed it)
+npm install -g nodemda
+npm install -g nodemda-nodeuml
+
+## Install this software stack plugin
+npm install -g nodemda-stack-react-koa-mongo
+```
 
 ## Composition
 
